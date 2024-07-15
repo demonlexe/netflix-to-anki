@@ -1,28 +1,35 @@
 {
   "name": "netflix-to-anki",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "displayName": "Netflix To Anki",
+  "version": "0.0.1",
+  "description": "Chrome extension allowing users to translate Netflix subtitles by clicking, and these clicks can be exported to Anki decks.",
+  "author": "alexiskaufman@gmail.com",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "dev": "plasmo dev",
+    "build": "plasmo build",
+    "package": "plasmo package"
   },
   "dependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "jquery": "^3.7.1",
+    "plasmo": "0.88.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
   },
   "devDependencies": {
-    "@types/react": "^18.3.3",
-    "@types/react-dom": "^18.3.0",
-    "@typescript-eslint/eslint-plugin": "^7.13.1",
-    "@typescript-eslint/parser": "^7.13.1",
-    "@vitejs/plugin-react": "^4.3.1",
-    "eslint": "^8.57.0",
-    "eslint-plugin-react-hooks": "^4.6.2",
-    "eslint-plugin-react-refresh": "^0.4.7",
-    "typescript": "^5.2.2",
-    "vite": "^5.3.1"
+    "@ianvs/prettier-plugin-sort-imports": "4.1.1",
+    "@types/chrome": "0.0.258",
+    "@types/node": "20.11.5",
+    "@types/react": "18.2.48",
+    "@types/react-dom": "18.2.18",
+    "prettier": "3.2.4",
+    "typescript": "5.3.3"
+  },
+  "permissions": [
+    "scripting"
+  ],
+  "manifest": {
+    "host_permissions": [
+      "https://www.netflix.com/watch/*"
+    ]
   }
 }
