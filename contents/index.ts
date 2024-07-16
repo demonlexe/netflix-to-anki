@@ -46,9 +46,12 @@ window.addEventListener("load", () => {
               body: { phrase: currentText }
             })
             console.log("Result: ", openResult)
+            const liveElement = $(`span:contains("${currentText}")`)
+              .find("span")
+              .last()
             // change the text color to yellow, change the text content to the one that was translated.
-            $(e.target).css("color", "yellow")
-            $(e.target).text(openResult.translatedPhrase)
+            $(liveElement).css("color", "yellow")
+            $(liveElement).text(openResult.translatedPhrase)
             localTranslations[currentText] = openResult.translatedPhrase
           }
           const onDoubleClick = async (e: Event) => {
