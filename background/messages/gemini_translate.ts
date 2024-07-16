@@ -1,12 +1,20 @@
 import type { PlasmoMessaging } from "@plasmohq/messaging"
 
-export type RequestBody = {
+export type GeminiRequestBody = {
   phrase: string
 }
 
-export type RequestResponse = string
+export type SupportedLocale = "es" | "en"
 
-async function getLocaleFromModel(model: any, phrase: string) {
+export type GeminiRequestResponse = {
+  translatedPhrase: string
+  locale: SupportedLocale
+}
+
+async function getLocaleFromModel(
+  model: any,
+  phrase: string
+): Promise<SupportedLocale> {
   const promptForLocale =
     "What language is the following phrase in? Respond with 'es' or 'en'."
   const localeResult = await model.generateContent([promptForLocale, phrase])
@@ -15,8 +23,8 @@ async function getLocaleFromModel(model: any, phrase: string) {
 }
 
 const handler: PlasmoMessaging.MessageHandler<
-  RequestBody,
-  RequestResponse
+  GeminiRequestBody,
+  GeminiRequestResponse
 > = async (req, res) => {
   const { phrase } = req.body
 
@@ -31,8 +39,12 @@ const handler: PlasmoMessaging.MessageHandler<
       : "Please translate the following phrase to spanish. Respond with just the translated text. If there are times or numbers, please write them out. If there are multiple possible translations, please provide only one."
 
   const result = await model.generateContent([prompt, phrase])
-  console.log(result.response.text())
-  res.send(result.response.text())
+  const response: GeminiRequestResponse = {
+    translatedPhrase: result.response?.text()?.trim(),
+    locale
+  }
+  console.log("Sending response...", response)
+  res.send(response)
 }
 
 export default handler
