@@ -13,6 +13,19 @@ import { waitForElement } from "~utils/index"
 export const config: PlasmoCSConfig = {
   matches: ["https://www.netflix.com/watch/*"]
 }
+const script = document.createElement("script")
+script.setAttribute("type", "text/javascript")
+script.setAttribute("src", chrome.runtime.getURL("inject.js"))
+
+document.documentElement.appendChild(script)
+
+// content.js
+window.addEventListener("message", (event) => {
+  if (event.source !== window) return
+  if (event.data.type && event.data.type === "NETWORK_REQUEST") {
+    chrome.runtime.sendMessage(event.data)
+  }
+})
 
 const localTranslations = {}
 const reverseTranslations = {}
