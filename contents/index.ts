@@ -3,7 +3,7 @@ import type { PlasmoCSConfig } from "plasmo"
 
 import { sendToBackground } from "@plasmohq/messaging"
 
-import { observeSection } from "~utils"
+import { observeSection, single_double_click } from "~utils"
 import { waitForElement } from "~utils/index"
 
 export const config: PlasmoCSConfig = {
@@ -30,15 +30,24 @@ window.addEventListener("load", () => {
       if (mutation?.addedNodes?.length > 0) {
         // loop all added nodes and log if they are clicked.
         for (const node of mutation.addedNodes) {
-          node.addEventListener("click", async (e) => {
-            console.log("CLICKED TARGET", e.target, $(e.target).text())
-            e.stopPropagation()
-            const openResult = await sendToBackground({
-              name: "spanishdict",
-              body: { phrase: $(e.target).text() }
-            })
-            console.log("RESULT: ", openResult)
-          })
+          single_double_click(
+            $(node),
+            async (e: Event) => {
+              const openResult = await sendToBackground({
+                name: "spanishdict",
+                body: { phrase: $(e.target).text() }
+              })
+              console.log("SINGLE CLICK RESULT: ", openResult)
+            },
+            async (e: Event) => {
+              const openResult = await sendToBackground({
+                name: "spanishdict",
+                body: { phrase: $(timedText).text() }
+              })
+              console.log("DBL CLICK RESULT: ", openResult)
+            },
+            300
+          )
         }
         $(timedText).css("pointer-events", "auto")
       }

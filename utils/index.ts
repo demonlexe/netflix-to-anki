@@ -71,3 +71,29 @@ export function removeNoPointerEvents(
   $(element).css("zindex", 1000)
   $(element).css("z-index", 1000)
 }
+
+export function single_double_click(
+  element: JQuery<Node>,
+  single_click_callback,
+  double_click_callback,
+  timeout
+) {
+  return element.each(function () {
+    var clicks = 0,
+      self = element
+    $(element).on("click", function (event) {
+      clicks++
+      event.stopPropagation()
+      if (clicks == 1) {
+        setTimeout(function () {
+          if (clicks == 1) {
+            single_click_callback.call(self, event)
+          } else {
+            double_click_callback.call(self, event)
+          }
+          clicks = 0
+        }, timeout || 300)
+      }
+    })
+  })
+}
