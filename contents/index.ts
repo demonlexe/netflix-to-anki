@@ -12,6 +12,7 @@ export const config: PlasmoCSConfig = {
 }
 
 const localTranslations = {}
+const reverseTranslations = {}
 
 window.addEventListener("load", () => {
   document.body.style.background = "pink"
@@ -35,7 +36,12 @@ window.addEventListener("load", () => {
         for (const node of mutation.addedNodes) {
           const onSingleClick = async (e: Event) => {
             const currentText = $(e.target).text().trim()
-            if (localTranslations[currentText]) {
+            if (isYellow($(e.target)) && reverseTranslations[currentText]) {
+              // Untranslate the text.
+              $(e.target).css("color", "yellow")
+              $(e.target).text(reverseTranslations[currentText])
+              return
+            } else if (localTranslations[currentText]) {
               // check for existing cached translation here
               $(e.target).text(localTranslations[currentText])
               $(e.target).css("color", "yellow")
@@ -53,6 +59,7 @@ window.addEventListener("load", () => {
             $(liveElement).css("color", "yellow")
             $(liveElement).text(openResult.translatedPhrase)
             localTranslations[currentText] = openResult.translatedPhrase
+            reverseTranslations[openResult.translatedPhrase] = currentText
           }
           const onDoubleClick = async (e: Event) => {
             const currentText = $(timedText).text()
@@ -62,6 +69,7 @@ window.addEventListener("load", () => {
             })
             console.log("Result: ", openResult)
             localTranslations[currentText] = openResult.translatedPhrase
+            reverseTranslations[openResult.translatedPhrase] = currentText
           }
           single_double_click($(node), onSingleClick, onDoubleClick, 300)
           const deepestSpan = $(node).find("span").last()
