@@ -36,6 +36,9 @@ window.addEventListener("load", () => {
               body: { phrase: $(e.target).text() }
             })
             console.log("SINGLE CLICK RESULT: ", openResult)
+            // change the text color to yellow, change the text content to the one that was translated.
+            $(e.target).css("color", "yellow")
+            $(e.target).text(openResult)
           }
           const onDoubleClick = async (e: Event) => {
             const openResult = await sendToBackground({
