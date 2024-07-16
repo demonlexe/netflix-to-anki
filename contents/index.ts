@@ -61,8 +61,11 @@ window.addEventListener("load", () => {
             localTranslations[currentText] = openResult.translatedPhrase
           }
           single_double_click($(node), onSingleClick, onDoubleClick, 300)
-          if (localTranslations[$(node).text().trim()]) {
-            const deepestSpan = $(node).find("span").last()
+          const deepestSpan = $(node).find("span").last()
+          if (
+            localTranslations[$(node).text().trim()] &&
+            deepestSpan.css("color") !== "yellow"
+          ) {
             deepestSpan.text(localTranslations[$(node).text().trim()])
             deepestSpan.css("color", "yellow")
           }
