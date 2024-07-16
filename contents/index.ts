@@ -30,24 +30,21 @@ window.addEventListener("load", () => {
       if (mutation?.addedNodes?.length > 0) {
         // loop all added nodes and log if they are clicked.
         for (const node of mutation.addedNodes) {
-          single_double_click(
-            $(node),
-            async (e: Event) => {
-              const openResult = await sendToBackground({
-                name: "spanishdict",
-                body: { phrase: $(e.target).text() }
-              })
-              console.log("SINGLE CLICK RESULT: ", openResult)
-            },
-            async (e: Event) => {
-              const openResult = await sendToBackground({
-                name: "spanishdict",
-                body: { phrase: $(timedText).text() }
-              })
-              console.log("DBL CLICK RESULT: ", openResult)
-            },
-            300
-          )
+          const onSingleClick = async (e: Event) => {
+            const openResult = await sendToBackground({
+              name: "gemini_translate",
+              body: { phrase: $(e.target).text() }
+            })
+            console.log("SINGLE CLICK RESULT: ", openResult)
+          }
+          const onDoubleClick = async (e: Event) => {
+            const openResult = await sendToBackground({
+              name: "gemini_translate",
+              body: { phrase: $(timedText).text() }
+            })
+            console.log("DBL CLICK RESULT: ", openResult)
+          }
+          single_double_click($(node), onSingleClick, onDoubleClick, 300)
         }
         $(timedText).css("pointer-events", "auto")
       }

@@ -1,5 +1,3 @@
-import { parseFromString } from "dom-parser"
-
 import type { PlasmoMessaging } from "@plasmohq/messaging"
 
 export type RequestBody = {
