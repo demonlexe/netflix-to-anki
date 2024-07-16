@@ -212,6 +212,11 @@
   dependencies:
     cross-spawn "^7.0.3"
 
+"@google/generative-ai@^0.15.0":
+  version "0.15.0"
+  resolved "https://registry.npmjs.org/@google/generative-ai/-/generative-ai-0.15.0.tgz"
+  integrity sha512-zs37judcTYFJf1U7tnuqnh7gdzF6dcWj9pNRxjA5JTONRoiQ0htrRdbefRFiewOIfXwhun5t9hbd2ray7812eQ==
+
 "@ianvs/prettier-plugin-sort-imports@4.1.1":
   version "4.1.1"
   resolved "https://registry.npmjs.org/@ianvs/prettier-plugin-sort-imports/-/prettier-plugin-sort-imports-4.1.1.tgz"
@@ -1182,6 +1187,13 @@
   resolved "https://registry.npmjs.org/@plasmohq/init/-/init-0.7.0.tgz"
   integrity sha512-P75g48dqOGneJ+n0AcqnLE/TYflcaPc3B7h6EopnCBBYUDnCNBMwYmKAkaf5pnhsEB0ybPS6TU1C2DTGfqaW7A==
 
+"@plasmohq/messaging@^0.6.2":
+  version "0.6.2"
+  resolved "https://registry.npmjs.org/@plasmohq/messaging/-/messaging-0.6.2.tgz"
+  integrity sha512-CGfcvfVE0wsN/Y/i/jV0nwjkwh2gBCEujZFhLoxJ12N0ScoP3JVEIvUxJSFsAD4ylBQ8IjD2FyjQozwiSxWc4Q==
+  dependencies:
+    nanoid "5.0.3"
+
 "@plasmohq/parcel-bundler@0.5.5":
   version "0.5.5"
   resolved "https://registry.npmjs.org/@plasmohq/parcel-bundler/-/parcel-bundler-0.5.5.tgz"
@@ -1613,6 +1625,11 @@
   dependencies:
     "@types/filesystem" "*"
     "@types/har-format" "*"
+
+"@types/dom-parser@^0.1.4":
+  version "0.1.4"
+  resolved "https://registry.npmjs.org/@types/dom-parser/-/dom-parser-0.1.4.tgz"
+  integrity sha512-MpSkXYGIy3R6akcAY2oNDikt2jl/YntUQR/jSltQ2hyImTXG/BwoC/DjZqHjw8JeQccesyL+EVCpZiEdgQ2gDQ==
 
 "@types/estree@*", "@types/estree@^1.0.0", "@types/estree@^1.0.1":
   version "1.0.5"
@@ -2411,6 +2428,11 @@ dir-glob@^3.0.1:
   integrity sha512-WkrWp9GR4KXfKGYzOLmTuGVi1UWFfws377n9cc55/tb6DuqyF6pcQ5AbiHEshaDpY9v6oaSr2XCDidGmMwdzIA==
   dependencies:
     path-type "^4.0.0"
+
+dom-parser@^1.1.5:
+  version "1.1.5"
+  resolved "https://registry.npmjs.org/dom-parser/-/dom-parser-1.1.5.tgz"
+  integrity sha512-lCiFG48ZUzGXjKN0qhSkxD/i3ndyV6I37zQ3W2VFYLjF1ob8A+QgSsM7Ps2UT0d3LpJxLMmMHiJJ34z5hkKLiA==
 
 dom-serializer@^1.0.1:
   version "1.4.1"
@@ -3517,6 +3539,11 @@ nanoid@^3.3.7:
   resolved "https://registry.npmjs.org/nanoid/-/nanoid-3.3.7.tgz"
   integrity sha512-eSRppjcPIatRIMC1U6UngP8XFcz8MQWGQdt1MTBQ7NaAmvXDfvNxbvWV3x2y6CdEUciCSsDHDQZbhYaB8QEo2g==
 
+nanoid@5.0.3:
+  version "5.0.3"
+  resolved "https://registry.npmjs.org/nanoid/-/nanoid-5.0.3.tgz"
+  integrity sha512-I7X2b22cxA4LIHXPSqbBCEQSL+1wv8TuoefejsX4HFWyC6jc5JG7CEaxOltiKjc1M+YCS2YkrZZcj4+dytw9GA==
+
 napi-build-utils@^1.0.1:
   version "1.0.2"
   resolved "https://registry.npmjs.org/napi-build-utils/-/napi-build-utils-1.0.2.tgz"
@@ -3927,7 +3954,7 @@ react-refresh@0.14.0:
   resolved "https://registry.npmjs.org/react-refresh/-/react-refresh-0.14.0.tgz"
   integrity sha512-wViHqhAd8OHeLS/IRMJjTSDHF3U9eWi62F/MledQGPdJGDhodXJ9PBLNGr6WWL7qlH12Mt3TyTpbS+hGXMjCzQ==
 
-react@^18.2.0, react@18.2.0:
+"react@^16.8.6 || ^17 || ^18", react@^18.2.0, react@18.2.0:
   version "18.2.0"
   resolved "https://registry.npmjs.org/react/-/react-18.2.0.tgz"
   integrity sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ==

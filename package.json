@@ -10,6 +10,9 @@
     "package": "plasmo package"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.15.0",
+    "@plasmohq/messaging": "^0.6.2",
+    "dom-parser": "^1.1.5",
     "jquery": "^3.7.1",
     "plasmo": "0.88.0",
     "react": "18.2.0",
@@ -18,6 +21,7 @@
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "4.1.1",
     "@types/chrome": "0.0.258",
+    "@types/dom-parser": "^0.1.4",
     "@types/node": "20.11.5",
     "@types/react": "18.2.48",
     "@types/react-dom": "18.2.18",
@@ -29,7 +33,9 @@
   ],
   "manifest": {
     "host_permissions": [
-      "https://www.netflix.com/watch/*"
+      "https://www.netflix.com/watch/*",
+      "https://www.spanishdict.com/translate/*",
+      "https://traductor1.spanishdict.com/*"
     ]
   }
 }
