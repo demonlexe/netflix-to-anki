@@ -29,6 +29,11 @@ function updateTranslations(
   reverseTranslations[openResult.translatedPhrases[currentText]] = currentText
 }
 
+function changeText(elem: JQuery<EventTarget | HTMLElement>, newText: string) {
+  $(elem).text(newText)
+  $(elem).css("color", "yellow")
+}
+
 window.addEventListener("load", () => {
   document.body.style.background = "pink"
   waitForElement(".player-timedtext").then((timedText) => {
@@ -53,13 +58,11 @@ window.addEventListener("load", () => {
             const currentText = $(e.target).text().trim()
             if (isYellow($(e.target)) && reverseTranslations[currentText]) {
               // Untranslate the text.
-              $(e.target).css("color", "yellow")
-              $(e.target).text(reverseTranslations[currentText])
+              changeText($(e.target), reverseTranslations[currentText])
               return
             } else if (localTranslations[currentText]) {
               // check for existing cached translation here
-              $(e.target).text(localTranslations[currentText])
-              $(e.target).css("color", "yellow")
+              changeText($(e.target), localTranslations[currentText])
               return
             }
             const openResult: GeminiRequestResponse = await sendToBackground({
