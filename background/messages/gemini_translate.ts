@@ -11,6 +11,17 @@ export type GeminiRequestResponse = {
   locale: SupportedLocale
 }
 
+const TranslationRequirements = (language: string) =>
+  [
+    `The main objective is to translate the following phrase to ${language}.`,
+    "If there are times or numbers, please write them out.",
+    "Answer with only a valid JSON object in plaintext with the translated phrases mapped to the exact original phrases. ",
+    "Do not include ANY formatting such as '```json'",
+    "Most importantly, do not include any additional information or text in your response."
+  ].map((line, index) => {
+    return `${index + 1}. ${line}`
+  })
+
 async function getLocaleFromModel(
   model: any,
   phrases: string[]
@@ -38,9 +49,10 @@ const handler: PlasmoMessaging.MessageHandler<
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
   const locale = await getLocaleFromModel(model, phrases)
   const prompt =
+    // flatten the requirements with numbers, like 1., 2., etc.
     locale === "es"
-      ? 'Please translate the following phrase to english. If there are times or numbers, please write them out. Answer with only a valid JSON object in plaintext with the translated phrases mapped to the exact original phrases. Do not include formatting such as "```json"'
-      : 'Please translate the following phrase to spanish. If there are times or numbers, please write them out. Answer with only a valid JSON object in plaintext with the translated phrases mapped to the exact original phrases. Do not include formatting such as "```json"'
+      ? TranslationRequirements("english").join("\n")
+      : TranslationRequirements("spanish").join("\n")
 
   const result = await model.generateContent([prompt, JSON.stringify(phrases)])
   console.log("Result: ", result.response?.text())
