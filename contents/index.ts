@@ -3,7 +3,10 @@ import type { PlasmoCSConfig } from "plasmo"
 
 import { sendToBackground } from "@plasmohq/messaging"
 
-import type { GeminiRequestResponse } from "~background/messages/gemini_translate"
+import type {
+  GeminiRequestBody,
+  GeminiRequestResponse
+} from "~background/messages/gemini_translate"
 import { isYellow, observeSection, single_double_click } from "~utils"
 import { waitForElement } from "~utils/index"
 
@@ -13,6 +16,18 @@ export const config: PlasmoCSConfig = {
 
 const localTranslations = {}
 const reverseTranslations = {}
+
+function updateTranslations(
+  currentText: string,
+  openResult: GeminiRequestResponse
+) {
+  const liveElement = $(`span:contains("${currentText}")`).find("span").last()
+  // change the text color to yellow, change the text content to the one that was translated.
+  $(liveElement).css("color", "yellow")
+  $(liveElement).text(openResult.translatedPhrases[currentText])
+  localTranslations[currentText] = openResult.translatedPhrases[currentText]
+  reverseTranslations[openResult.translatedPhrases[currentText]] = currentText
+}
 
 window.addEventListener("load", () => {
   document.body.style.background = "pink"
@@ -49,27 +64,25 @@ window.addEventListener("load", () => {
             }
             const openResult: GeminiRequestResponse = await sendToBackground({
               name: "gemini_translate",
-              body: { phrase: currentText }
+              body: { phrases: [currentText] } as GeminiRequestBody
             })
             console.log("Result: ", openResult)
-            const liveElement = $(`span:contains("${currentText}")`)
-              .find("span")
-              .last()
-            // change the text color to yellow, change the text content to the one that was translated.
-            $(liveElement).css("color", "yellow")
-            $(liveElement).text(openResult.translatedPhrase)
-            localTranslations[currentText] = openResult.translatedPhrase
-            reverseTranslations[openResult.translatedPhrase] = currentText
+            updateTranslations(currentText, openResult)
           }
           const onDoubleClick = async (e: Event) => {
-            const currentText = $(timedText).text()
+            // get array of all texts stored in .player-timedtext-text-container
+            const allTexts: string[] = []
+            $(".player-timedtext-text-container").each((_, el) => {
+              allTexts.push($(el).text().trim())
+            })
             const openResult: GeminiRequestResponse = await sendToBackground({
               name: "gemini_translate",
-              body: { phrase: $(timedText).text() }
+              body: { phrases: allTexts } as GeminiRequestBody
             })
             console.log("Result: ", openResult)
-            localTranslations[currentText] = openResult.translatedPhrase
-            reverseTranslations[openResult.translatedPhrase] = currentText
+            allTexts.forEach((currentText) =>
+              updateTranslations(currentText, openResult)
+            )
           }
           single_double_click($(node), onSingleClick, onDoubleClick, 300)
           const deepestSpan = $(node).find("span").last()
