@@ -4,7 +4,7 @@ import type { PlasmoCSConfig } from "plasmo"
 import { sendToBackground } from "@plasmohq/messaging"
 
 import type { GeminiRequestResponse } from "~background/messages/gemini_translate"
-import { observeSection, single_double_click } from "~utils"
+import { isYellow, observeSection, single_double_click } from "~utils"
 import { waitForElement } from "~utils/index"
 
 export const config: PlasmoCSConfig = {
@@ -35,8 +35,8 @@ window.addEventListener("load", () => {
         for (const node of mutation.addedNodes) {
           const onSingleClick = async (e: Event) => {
             const currentText = $(e.target).text().trim()
-            // check for existing cached translation here
             if (localTranslations[currentText]) {
+              // check for existing cached translation here
               $(e.target).text(localTranslations[currentText])
               $(e.target).css("color", "yellow")
               return
@@ -64,7 +64,7 @@ window.addEventListener("load", () => {
           const deepestSpan = $(node).find("span").last()
           if (
             localTranslations[$(node).text().trim()] &&
-            deepestSpan.css("color") !== "yellow"
+            !isYellow(deepestSpan)
           ) {
             deepestSpan.text(localTranslations[$(node).text().trim()])
             deepestSpan.css("color", "yellow")

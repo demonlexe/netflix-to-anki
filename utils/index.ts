@@ -97,3 +97,10 @@ export function single_double_click(
     })
   })
 }
+
+export function isYellow(elem: JQuery<EventTarget | HTMLElement>) {
+  return (
+    $(elem).css("color") === "yellow" ||
+    $(elem).css("color") === "rgb(255, 255, 0)"
+  )
+}
