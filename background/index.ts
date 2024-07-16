@@ -4,6 +4,8 @@ import { parseString } from "xml2js"
 
 import { startHub } from "@plasmohq/messaging/pub-sub"
 
+import geminiTranslateBatch from "./messages/gemini_translate_batch"
+
 console.log(`Netflix To Anki - Starting Hub`)
 startHub()
 
@@ -21,7 +23,7 @@ const getXMLTextContent = (text: XMLText) => {
   ).trim()
 }
 
-// background.js
+// catch captions
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === "NETWORK_REQUEST") {
     if (
@@ -29,11 +31,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       message.url.includes("nflxvideo.net") &&
       message.response?.length > 0
     ) {
-      // it's subtitles
-      console.log("Network Request:", message.method, message.url)
-      parseString(message.response, function (err, result) {
+      parseString(message.response, async function (err, result) {
         const allText: XMLText[] = result.tt.body?.[0]?.div?.[0]?.p
-        console.log("xml2js allText", allText)
         const grouping = {}
         allText.forEach((text: XMLText) => {
           const textContent = getXMLTextContent(text)
@@ -43,7 +42,39 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             grouping[text.$.begin] = [textContent]
           }
         })
-        console.log("Grouping: ", grouping)
+        const allSentencesSet = new Set<string>()
+        for (const key in grouping) {
+          const sentences = grouping[key]
+          sentences.forEach((sentence: string) => {
+            allSentencesSet.add(sentence)
+          })
+        }
+        const allSentencesArray: string[] = Array.from(allSentencesSet)
+        // loop through all sentences, sending to backend in groups of 50, then collect them here in a massive object.
+        const collectedSentences = {}
+        const allPromises = []
+        for (let i = 0; i < 100; i += 50) {
+          allPromises.push(
+            geminiTranslateBatch(
+              {
+                name: "gemini_translate_batch",
+                body: { phrases: allSentencesArray.slice(i, i + 50) }
+              },
+              {
+                send: (response) => {
+                  if (response.translatedPhrases) {
+                    for (const key in response.translatedPhrases) {
+                      collectedSentences[key] = response.translatedPhrases[key]
+                    }
+                  }
+                }
+              }
+            )
+          )
+        }
+        await Promise.all(allPromises).then(() => {
+          console.log("All sentences translated: ", collectedSentences)
+        })
       })
       // Perform translation or other processing here
     }
