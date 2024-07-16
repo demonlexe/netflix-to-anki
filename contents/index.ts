@@ -7,12 +7,19 @@ import type {
   GeminiRequestBody,
   GeminiRequestResponse
 } from "~background/messages/gemini_translate"
+import type {
+  GeminiBatchRequestBody,
+  GeminiBatchRequestResponse
+} from "~background/messages/gemini_translate_batch"
 import { isYellow, observeSection, single_double_click } from "~utils"
 import { waitForElement } from "~utils/index"
 
 export const config: PlasmoCSConfig = {
   matches: ["https://www.netflix.com/watch/*"]
 }
+
+let batchTranslatedSentences = {}
+
 const script = document.createElement("script")
 script.setAttribute("type", "text/javascript")
 script.setAttribute("src", chrome.runtime.getURL("inject.js"))
@@ -20,10 +27,16 @@ script.setAttribute("src", chrome.runtime.getURL("inject.js"))
 document.documentElement.appendChild(script)
 
 // content.js
-window.addEventListener("message", (event) => {
+window.addEventListener("message", async (event) => {
   if (event.source !== window) return
   if (event.data.type && event.data.type === "NETWORK_REQUEST") {
-    chrome.runtime.sendMessage(event.data)
+    const openResult: GeminiBatchRequestResponse = await sendToBackground({
+      name: "gemini_translate_batch",
+      body: { message: event.data } as GeminiBatchRequestBody
+    })
+    if (!openResult.error) {
+      console.log("OPEN RESULT: ", openResult)
+    }
   }
 })
 
