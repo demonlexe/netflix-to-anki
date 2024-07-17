@@ -1,7 +1,5 @@
 import $ from "jquery"
 
-import { SHOULD_PAUSE_WHEN_CLICK } from "~utils/constants"
-
 export function observeSection(
   section: HTMLElement,
   doOnMutation: (mutation: MutationRecord) => void
@@ -76,34 +74,48 @@ export function removeNoPointerEvents(
 
 export function single_double_click(
   element: JQuery<Node>,
-  single_click_callback,
-  double_click_callback,
-  timeout
+  single_click_callback: (element: Element) => void,
+  right_click_callback: () => void,
+  timeout: number
 ) {
   return element.each(function () {
-    var clicks = 0,
-      self = element
     $(element).on("click", function (event) {
-      clicks++
-      if (clicks == 1) {
-        setTimeout(function () {
-          if (clicks == 1) {
-            single_click_callback.call(self, event)
-          } else {
-            if (SHOULD_PAUSE_WHEN_CLICK) {
-              event.stopPropagation()
-            }
-            double_click_callback.call(self, event)
-          }
-          clicks = 0
-        }, timeout || 300)
-      } else {
-        if (SHOULD_PAUSE_WHEN_CLICK) {
-          event.stopPropagation()
-        }
+      const insideDiv = insideWhichDiv(event)
+      if (insideDiv) {
+        single_click_callback(insideDiv)
+        checkStopPropagation(event)
       }
     })
+    $(element).on("contextmenu", function (event) {
+      const insideDiv = insideWhichDiv(event)
+      if (insideDiv) {
+        right_click_callback()
+        if (!isVideoPaused()) {
+          $("video").trigger("pause")
+        }
+        checkStopPropagation(event)
+      }
+      return false
+    })
   })
+}
+
+export function insideWhichDiv(
+  event: JQuery.ClickEvent | JQuery.ContextMenuEvent
+) {
+  const mouseX = event.clientX
+  const mouseY = event.clientY
+
+  const divElements = document.querySelectorAll(
+    ".player-timedtext-text-container"
+  )
+  for (const divElement of divElements) {
+    const isInside = isMouseInsideDiv(mouseX, mouseY, divElement)
+    if (isInside) {
+      return divElement
+    }
+  }
+  return null
 }
 
 export function isYellow(elem: JQuery<EventTarget | HTMLElement>) {
@@ -111,4 +123,34 @@ export function isYellow(elem: JQuery<EventTarget | HTMLElement>) {
     $(elem).css("color") === "yellow" ||
     $(elem).css("color") === "rgb(255, 255, 0)"
   )
+}
+
+export function isMouseInsideDiv(mouseX, mouseY, divElement) {
+  const rect = divElement.getBoundingClientRect()
+
+  // Check if the mouse coordinates are within the bounds of the div's rectangle
+  if (
+    mouseX >= rect.left &&
+    mouseX <= rect.right &&
+    mouseY >= rect.top &&
+    mouseY <= rect.bottom
+  ) {
+    return true
+  } else {
+    return false
+  }
+}
+
+export function isVideoPaused() {
+  const video = $("video")
+  var videoElement = video.get(0) as HTMLVideoElement
+
+  return videoElement.paused
+}
+
+export function checkStopPropagation(event) {
+  if (isVideoPaused()) {
+    event.stopPropagation()
+    return true
+  }
 }
