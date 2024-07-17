@@ -22,13 +22,13 @@ const Settings = () => {
 
     const updateLocalStorage = async (newKey: string, newLang: string) => {
         await localStorage.set("API_KEY", newKey)
-        await localStorage.set("LANGUAGE", newLang)
+        await localStorage.set("TARGET_LANGUAGE", newLang)
     }
 
     useEffect(() => {
         localStorage.get("API_KEY").then((apiKey) => setApiKey(apiKey))
         localStorage
-            .get("LANGUAGE")
+            .get("TARGET_LANGUAGE")
             .then((lang) => setLanguage(lang ?? navigator.language))
     }, [])
 
@@ -43,7 +43,7 @@ const Settings = () => {
                 onChange={(e) => setApiKey(e.target.value)}
                 value={apiKey}
             />
-            <label htmlFor="target-lang-input">Target Language</label>
+            <label htmlFor="target-lang-input">I'm Learning To Speak</label>
             <input
                 id="target-lang-input"
                 onChange={(e) => setLanguage(e.target.value)}

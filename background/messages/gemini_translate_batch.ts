@@ -51,6 +51,7 @@ const handler: PlasmoMessaging.MessageHandler<
 > = async (req, res) => {
     const { message } = req.body
     const API_KEY = await localStorage.get("API_KEY")
+    const TARGET_LANGUAGE = await localStorage.get("TARGET_LANGUAGE")
     const genAI = new GoogleGenerativeAI(
         process.env.PLASMO_PUBLIC_GEMINI_TOKEN ?? API_KEY
     )
@@ -106,28 +107,37 @@ const handler: PlasmoMessaging.MessageHandler<
                 allSentencesArray.length > BATCH_SIZE / 2
                     ? allSentencesArray.slice(0, BATCH_SIZE / 2)
                     : alreadyTranslatedSentences.slice(0, BATCH_SIZE / 2)
-            const locale = await getCurrentLanguageFromModel(
+            const sentencesLocale = await getCurrentLanguageFromModel(
                 model,
-                dummyArrayForLocale
+                dummyArrayForLocale,
+                TARGET_LANGUAGE
             )
+
             const allPromises = []
-            for (let i = 0; i < allSentencesArray.length; i += BATCH_SIZE) {
-                //REVERT LATER
-                allPromises.push(
-                    geminiTranslateBatch(
-                        model,
-                        allSentencesArray.slice(i, i + BATCH_SIZE),
-                        locale,
-                        (response) => {
-                            if (response.translatedPhrases) {
-                                for (const key in response.translatedPhrases) {
-                                    collectedSentences[key] =
-                                        response.translatedPhrases[key]
+            if (sentencesLocale.match(TARGET_LANGUAGE)) {
+                // map sentences to themselves.
+                allSentencesArray.forEach((sentence) => {
+                    collectedSentences[sentence] = sentence
+                })
+            } else {
+                for (let i = 0; i < allSentencesArray.length; i += BATCH_SIZE) {
+                    //REVERT LATER
+                    allPromises.push(
+                        geminiTranslateBatch(
+                            model,
+                            allSentencesArray.slice(i, i + BATCH_SIZE),
+                            TARGET_LANGUAGE,
+                            (response) => {
+                                if (response.translatedPhrases) {
+                                    for (const key in response.translatedPhrases) {
+                                        collectedSentences[key] =
+                                            response.translatedPhrases[key]
+                                    }
                                 }
                             }
-                        }
+                        )
                     )
-                )
+                }
             }
             await Promise.all(allPromises).then(() => {
                 console.log("All sentences translated: ", collectedSentences)
@@ -136,8 +146,7 @@ const handler: PlasmoMessaging.MessageHandler<
                     collectedSentences
                 )
                 res.send({
-                    translatedPhrases: collectedSentences,
-                    locale
+                    translatedPhrases: collectedSentences
                 })
             })
         })
@@ -172,8 +181,7 @@ async function geminiTranslateBatch(
         console.log("No Error. Batch Result: ", result.response?.text())
         const resultAsJson: object = JSON.parse(result.response?.text()?.trim())
         response = {
-            translatedPhrases: resultAsJson,
-            locale
+            translatedPhrases: resultAsJson
         }
         console.log(
             `Sending response of length ${Object.entries(resultAsJson).length}`,

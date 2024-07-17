@@ -29,6 +29,7 @@ const handler: PlasmoMessaging.MessageHandler<
     GeminiSingleRequestResponse
 > = async (req, res) => {
     const API_KEY = await localStorage.get("API_KEY")
+    const TARGET_LANGUAGE = await localStorage.get("TARGET_LANGUAGE")
     const genAI = new GoogleGenerativeAI(
         process.env.PLASMO_PUBLIC_GEMINI_TOKEN ?? API_KEY
     )
@@ -37,8 +38,12 @@ const handler: PlasmoMessaging.MessageHandler<
     console.log("Request received: ", req.body)
     const { phrases } = req.body
 
-    const locale = await getCurrentLanguageFromModel(model, phrases)
-    const prompt = TranslationRequirements(locale).join("\n")
+    const sentencesLocale = await getCurrentLanguageFromModel(
+        model,
+        phrases,
+        TARGET_LANGUAGE
+    )
+    const prompt = TranslationRequirements(TARGET_LANGUAGE).join("\n")
 
     const result = await model.generateContent([
         prompt,
@@ -47,8 +52,7 @@ const handler: PlasmoMessaging.MessageHandler<
     console.log("Result: ", result.response?.text())
     const resultAsJson = JSON.parse(result.response?.text()?.trim())
     const response: GeminiSingleRequestResponse = {
-        translatedPhrases: resultAsJson,
-        locale
+        translatedPhrases: resultAsJson
     }
     console.log("Sending response...", response)
     res.send(response)
