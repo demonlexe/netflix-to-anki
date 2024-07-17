@@ -18,11 +18,14 @@ import {
 } from "~utils"
 import { waitForElement } from "~utils/index"
 import initData from "~utils/initData"
+import updateNeedToStudy from "~utils/updateNeedToStudy"
 
 export const config: PlasmoCSConfig = {
     matches: ["https://www.netflix.com/watch/*"]
 }
+
 initData()
+
 const localTranslations = {}
 const reverseTranslations = {}
 let batchTranslatedSentences = {}
@@ -65,6 +68,7 @@ function updateTranslations(currentText: string, translatedText: string) {
     changeText(liveElement, translatedText)
     localTranslations[currentText] = translatedText
     reverseTranslations[translatedText] = currentText
+    updateNeedToStudy(currentText, translatedText)
 }
 
 function changeText(

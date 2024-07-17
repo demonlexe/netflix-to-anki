@@ -78,6 +78,15 @@ const Settings = () => {
                       ? "SUCCESS!"
                       : "Update"}
             </button>
+            <h5>
+                Don't have an API Key? Generate one at{" "}
+                <a
+                    href="https://ai.google.dev/gemini-api/docs/api-key"
+                    target="_blank"
+                    rel="noreferrer">
+                    Gemini API
+                </a>
+            </h5>
         </div>
     )
 }
