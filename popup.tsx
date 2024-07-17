@@ -1,4 +1,5 @@
 import DownloadAnkiDeck from "~components/DownloadAnkiDeck"
+import ResetAnkiDeck from "~components/ResetAnkiDeck"
 import Settings from "~components/Settings"
 
 function IndexPopup() {
@@ -10,6 +11,7 @@ function IndexPopup() {
             <h2>netflix-to-anki</h2>
             <Settings />
             <DownloadAnkiDeck />
+            <ResetAnkiDeck />
         </div>
     )
 }
