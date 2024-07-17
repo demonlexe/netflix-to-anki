@@ -1,3 +1,3 @@
 export type GeminiSingleRequestBody = {
-  phrases: string[]
+    phrases: string[]
 }

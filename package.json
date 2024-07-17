@@ -1,60 +1,61 @@
 {
-  "name": "netflix-to-anki",
-  "displayName": "Netflix To Anki",
-  "version": "0.0.1",
-  "description": "Chrome extension allowing users to translate Netflix subtitles by clicking, and these clicks can be exported to Anki decks.",
-  "author": "alexiskaufman@gmail.com",
-  "scripts": {
-    "dev": "plasmo dev",
-    "build": "plasmo build",
-    "package": "plasmo package"
-  },
-  "dependencies": {
-    "@google/generative-ai": "^0.15.0",
-    "@plasmohq/messaging": "^0.6.2",
-    "@plasmohq/storage": "^1.11.0",
-    "jquery": "^3.7.1",
-    "plasmo": "0.88.0",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "xml2js": "^0.6.2"
-  },
-  "devDependencies": {
-    "@ianvs/prettier-plugin-sort-imports": "4.1.1",
-    "@types/chrome": "0.0.258",
-    "@types/node": "20.11.5",
-    "@types/react": "18.2.48",
-    "@types/react-dom": "18.2.18",
-    "prettier": "3.2.4",
-    "typescript": "5.3.3"
-  },
-  "permissions": [
-    "scripting",
-    "webRequest",
-    "webRequestBlocking",
-    "background"
-  ],
-  "manifest": {
-    "host_permissions": [
-      "https://www.netflix.com/watch/*",
-      "https://www.spanishdict.com/translate/*",
-      "https://traductor1.spanishdict.com/*"
-    ],
+    "name": "netflix-to-anki",
+    "displayName": "Netflix To Anki",
+    "version": "0.0.1",
+    "description": "Chrome extension allowing users to translate Netflix subtitles by clicking, and these clicks can be exported to Anki decks.",
+    "author": "alexiskaufman@gmail.com",
+    "scripts": {
+        "dev": "plasmo dev",
+        "build": "plasmo build",
+        "package": "plasmo package",
+        "format": "prettier --loglevel warn --write \"./**/*.{tsx,ts,jsx,js}\""
+    },
+    "dependencies": {
+        "@google/generative-ai": "^0.15.0",
+        "@plasmohq/messaging": "^0.6.2",
+        "@plasmohq/storage": "^1.11.0",
+        "jquery": "^3.7.1",
+        "plasmo": "0.88.0",
+        "react": "18.2.0",
+        "react-dom": "18.2.0",
+        "xml2js": "^0.6.2"
+    },
+    "devDependencies": {
+        "@ianvs/prettier-plugin-sort-imports": "4.1.1",
+        "@types/chrome": "0.0.258",
+        "@types/node": "20.11.5",
+        "@types/react": "18.2.48",
+        "@types/react-dom": "18.2.18",
+        "prettier": "3.2.4",
+        "typescript": "5.3.3"
+    },
     "permissions": [
-      "scripting",
-      "webRequest",
-      "webRequestBlocking",
-      "background"
+        "scripting",
+        "webRequest",
+        "webRequestBlocking",
+        "background"
     ],
-    "web_accessible_resources": [
-      {
-        "resources": [
-          "~inject.js"
+    "manifest": {
+        "host_permissions": [
+            "https://www.netflix.com/watch/*",
+            "https://www.spanishdict.com/translate/*",
+            "https://traductor1.spanishdict.com/*"
         ],
-        "matches": [
-          "<all_urls>"
+        "permissions": [
+            "scripting",
+            "webRequest",
+            "webRequestBlocking",
+            "background"
+        ],
+        "web_accessible_resources": [
+            {
+                "resources": [
+                    "~inject.js"
+                ],
+                "matches": [
+                    "<all_urls>"
+                ]
+            }
         ]
-      }
-    ]
-  }
+    }
 }
