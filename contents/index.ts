@@ -2,7 +2,6 @@ import $ from "jquery"
 import type { PlasmoCSConfig } from "plasmo"
 
 import { sendToBackground } from "@plasmohq/messaging"
-import { Storage } from "@plasmohq/storage"
 
 import type {
     GeminiBatchRequestBody,
@@ -10,6 +9,7 @@ import type {
     GeminiSingleRequestBody,
     GeminiSingleRequestResponse
 } from "~background/types"
+import { getData } from "~localData"
 import {
     isYellow,
     observeSection,
@@ -17,10 +17,14 @@ import {
     single_double_click
 } from "~utils"
 import { waitForElement } from "~utils/index"
+import initData from "~utils/initData"
+import updateNeedToStudy from "~utils/updateNeedToStudy"
 
 export const config: PlasmoCSConfig = {
     matches: ["https://www.netflix.com/watch/*"]
 }
+
+initData()
 
 const localTranslations = {}
 const reverseTranslations = {}
@@ -33,10 +37,7 @@ script.setAttribute("src", chrome.runtime.getURL("inject.js"))
 document.documentElement.appendChild(script)
 
 async function initBatchTranslatedSentences() {
-    const localStorage = new Storage({
-        area: "local"
-    })
-    const translations = await localStorage.get("netflix-to-anki-translations")
+    const translations = await getData("NETFLIX_TO_ANKI_TRANSLATIONS")
     if (translations && Object.keys(translations).length > 0)
         batchTranslatedSentences = translations
 
@@ -67,6 +68,7 @@ function updateTranslations(currentText: string, translatedText: string) {
     changeText(liveElement, translatedText)
     localTranslations[currentText] = translatedText
     reverseTranslations[translatedText] = currentText
+    updateNeedToStudy(currentText, translatedText)
 }
 
 function changeText(

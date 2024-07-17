@@ -2,7 +2,6 @@ import { GoogleGenerativeAI } from "@google/generative-ai"
 import { parseString } from "xml2js"
 
 import type { PlasmoMessaging } from "@plasmohq/messaging"
-import { Storage } from "@plasmohq/storage"
 
 import type {
     GeminiBatchRequestBody,
@@ -10,11 +9,8 @@ import type {
     SupportedLocale
 } from "~background/types"
 import { getCurrentLanguageFromModel } from "~background/utils"
+import { getData, setData } from "~localData"
 import { BATCH_SIZE } from "~utils/constants"
-
-const localStorage = new Storage({
-    area: "local"
-})
 
 type XMLText = {
     $: any
@@ -51,9 +47,9 @@ const handler: PlasmoMessaging.MessageHandler<
 > = async (req, res) => {
     const { message } = req.body
     const [API_KEY, TARGET_LANGUAGE, NATIVE_LANGUAGE] = await Promise.all([
-        localStorage.get("API_KEY"),
-        localStorage.get("TARGET_LANGUAGE"),
-        localStorage.get("NATIVE_LANGUAGE")
+        getData("API_KEY"),
+        getData("TARGET_LANGUAGE"),
+        getData("NATIVE_LANGUAGE")
     ])
     const genAI = new GoogleGenerativeAI(
         process.env.PLASMO_PUBLIC_GEMINI_TOKEN ?? API_KEY
@@ -67,14 +63,12 @@ const handler: PlasmoMessaging.MessageHandler<
         message.response?.length > 0
     ) {
         console.log("Request received: ", req.body)
-        const localStorageTranslations = await localStorage.get(
-            "netflix-to-anki-translations"
-        )
+        const storedTranslations = await getData("NETFLIX_TO_ANKI_TRANSLATIONS")
         const alreadyTranslatedSentences =
-            localStorageTranslations &&
-            typeof localStorageTranslations === "object" &&
-            Object.keys(localStorageTranslations).length > 1
-                ? Object.keys(localStorageTranslations)
+            storedTranslations &&
+            typeof storedTranslations === "object" &&
+            Object.keys(storedTranslations).length > 1
+                ? Object.keys(storedTranslations)
                 : null
         parseString(message.response, async function (err, result) {
             const collectedSentences = {}
@@ -99,7 +93,7 @@ const handler: PlasmoMessaging.MessageHandler<
                         allSentencesSet.add(sentence)
                     } else {
                         collectedSentences[sentence] =
-                            localStorageTranslations[sentence]
+                            storedTranslations[sentence]
                     }
                 })
             }
@@ -141,10 +135,7 @@ const handler: PlasmoMessaging.MessageHandler<
             }
             await Promise.all(allPromises).then(() => {
                 console.log("All sentences translated: ", collectedSentences)
-                localStorage.set(
-                    "netflix-to-anki-translations",
-                    collectedSentences
-                )
+                setData("NETFLIX_TO_ANKI_TRANSLATIONS", collectedSentences)
                 res.send({
                     translatedPhrases: collectedSentences
                 })

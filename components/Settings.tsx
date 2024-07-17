@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react"
 
 import { sendToBackground } from "@plasmohq/messaging"
-import { Storage } from "@plasmohq/storage"
+
+import { getData, setData } from "~localData"
 
 enum API_KEY_STATUS {
     INVALID = "INVALID",
@@ -16,21 +17,21 @@ const Settings = () => {
     const [apiKeyStatus, setApiKeyStatus] = useState<API_KEY_STATUS>(
         API_KEY_STATUS.NOT_TESTED
     )
-    const localStorage = new Storage({
-        area: "local"
-    })
 
-    const updateLocalStorage = async (newKey: string, newLang: string) => {
-        await localStorage.set("API_KEY", newKey)
-        await localStorage.set("TARGET_LANGUAGE", newLang)
+    const updateApiKeyAndLang = async (newKey: string, newLang: string) => {
+        await setData("API_KEY", newKey)
+        await setData("TARGET_LANGUAGE", newLang)
     }
 
     useEffect(() => {
-        localStorage.get("API_KEY").then((apiKey) => setApiKey(apiKey))
-        localStorage
-            .get("TARGET_LANGUAGE")
-            .then((lang) => setLanguage(lang ?? navigator.language))
-        localStorage.set("NATIVE_LANGUAGE", navigator.language)
+        // Set Data
+        setData("NATIVE_LANGUAGE", navigator.language)
+
+        // Get Data
+        getData("API_KEY").then((apiKey) => setApiKey(apiKey))
+        getData("TARGET_LANGUAGE").then((lang) =>
+            setLanguage(lang ?? navigator.language)
+        )
     }, [])
 
     return (
@@ -52,8 +53,8 @@ const Settings = () => {
             />
             <button
                 onClick={async () => {
-                    const oldApiKey = await localStorage.get("API_KEY")
-                    await updateLocalStorage(apiKey, language)
+                    const oldApiKey = await getData("API_KEY")
+                    await updateApiKeyAndLang(apiKey, language)
                     const testResult = await sendToBackground({
                         name: "test_gemini_key",
                         body: {}
@@ -65,7 +66,7 @@ const Settings = () => {
                         }, 2000)
                     } else {
                         setApiKeyStatus(API_KEY_STATUS.INVALID)
-                        await localStorage.set("API_KEY", oldApiKey)
+                        await setData("API_KEY", oldApiKey)
                         setTimeout(() => {
                             setApiKeyStatus(API_KEY_STATUS.NOT_TESTED)
                         }, 2000)
@@ -77,6 +78,15 @@ const Settings = () => {
                       ? "SUCCESS!"
                       : "Update"}
             </button>
+            <h5>
+                Don't have an API Key? Generate one at{" "}
+                <a
+                    href="https://ai.google.dev/gemini-api/docs/api-key"
+                    target="_blank"
+                    rel="noreferrer">
+                    Gemini API
+                </a>
+            </h5>
         </div>
     )
 }
