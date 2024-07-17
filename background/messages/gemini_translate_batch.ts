@@ -10,6 +10,10 @@ import type {
 } from "~background/types"
 import { BATCH_SIZE } from "~utils/constants"
 
+const localStorage = new Storage({
+  area: "local"
+})
+
 const TranslationRequirements = (language: string) =>
   [
     `The main objective is to translate the following phrase to ${language}.`,
@@ -58,10 +62,6 @@ const handler: PlasmoMessaging.MessageHandler<
         : text._ ?? ""
     ).trim()
   }
-
-  const localStorage = new Storage({
-    area: "local"
-  })
 
   if (
     message.url.includes("?o") &&
@@ -143,7 +143,9 @@ const handler: PlasmoMessaging.MessageHandler<
 
 const { GoogleGenerativeAI } = require("@google/generative-ai")
 
-const genAI = new GoogleGenerativeAI(process.env.PLASMO_PUBLIC_GEMINI_TOKEN)
+const genAI = new GoogleGenerativeAI(
+  process.env.PLASMO_PUBLIC_GEMINI_TOKEN ?? (await localStorage.get("API_KEY"))
+)
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
 
 async function geminiTranslateBatch(
