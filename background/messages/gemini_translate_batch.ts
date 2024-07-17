@@ -3,25 +3,12 @@ import { parseString } from "xml2js"
 import type { PlasmoMessaging } from "@plasmohq/messaging"
 import { Storage } from "@plasmohq/storage"
 
-export type GeminiBatchRequestBody = {
-  message: {
-    url: string
-    response: any
-  }
-}
-
-export type SupportedLocale = "es" | "en"
-
-export type GeminiBatchRequestResponse = {
-  translatedPhrases?: object
-  locale?: SupportedLocale
-  error?: string
-}
-
-export type TranslationResponse = {
-  translatedPhrases: object
-  locale: SupportedLocale
-}
+import type {
+  BatchTranslationResponse,
+  GeminiBatchRequestBody,
+  GeminiBatchRequestResponse,
+  SupportedLocale
+} from "~background/types"
 
 const TranslationRequirements = (language: string) =>
   [
@@ -138,7 +125,7 @@ const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
 
 async function geminiTranslateBatch(
   phrases: string[],
-  res: (response: TranslationResponse) => void
+  res: (response: BatchTranslationResponse) => void
 ) {
   const locale = await getLocaleFromModel(model, phrases)
   const prompt =
@@ -159,7 +146,7 @@ async function geminiTranslateBatch(
   ])
   console.log("Result: ", result.response?.text())
   const resultAsJson: object = JSON.parse(result.response?.text()?.trim())
-  const response: TranslationResponse = {
+  const response: BatchTranslationResponse = {
     translatedPhrases: resultAsJson,
     locale
   }

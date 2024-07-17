@@ -1,15 +1,12 @@
+import { GoogleGenerativeAI } from "@google/generative-ai"
+
 import type { PlasmoMessaging } from "@plasmohq/messaging"
 
-export type GeminiRequestBody = {
-  phrases: string[]
-}
-
-export type SupportedLocale = "es" | "en"
-
-export type GeminiRequestResponse = {
-  translatedPhrases: Map<string, string>
-  locale: SupportedLocale
-}
+import type {
+  GeminiSingleRequestBody,
+  GeminiSingleRequestResponse,
+  SupportedLocale
+} from "~background/types"
 
 const TranslationRequirements = (language: string) =>
   [
@@ -36,17 +33,16 @@ async function getLocaleFromModel(
   return regex.test(localeResult.response.text()) ? "es" : "en"
 }
 
+const genAI = new GoogleGenerativeAI(process.env.PLASMO_PUBLIC_GEMINI_TOKEN)
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+
 const handler: PlasmoMessaging.MessageHandler<
-  GeminiRequestBody,
-  GeminiRequestResponse
+  GeminiSingleRequestBody,
+  GeminiSingleRequestResponse
 > = async (req, res) => {
   console.log("Request received: ", req.body)
   const { phrases } = req.body
 
-  const { GoogleGenerativeAI } = require("@google/generative-ai")
-
-  const genAI = new GoogleGenerativeAI(process.env.PLASMO_PUBLIC_GEMINI_TOKEN)
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
   const locale = await getLocaleFromModel(model, phrases)
   const prompt =
     // flatten the requirements with numbers, like 1., 2., etc.
@@ -57,7 +53,7 @@ const handler: PlasmoMessaging.MessageHandler<
   const result = await model.generateContent([prompt, JSON.stringify(phrases)])
   console.log("Result: ", result.response?.text())
   const resultAsJson = JSON.parse(result.response?.text()?.trim())
-  const response: GeminiRequestResponse = {
+  const response: GeminiSingleRequestResponse = {
     translatedPhrases: resultAsJson,
     locale
   }

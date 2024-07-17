@@ -4,13 +4,11 @@ import type { PlasmoCSConfig } from "plasmo"
 import { sendToBackground } from "@plasmohq/messaging"
 
 import type {
-  GeminiRequestBody,
-  GeminiRequestResponse
-} from "~background/messages/gemini_translate"
-import type {
   GeminiBatchRequestBody,
-  GeminiBatchRequestResponse
-} from "~background/messages/gemini_translate_batch"
+  GeminiBatchRequestResponse,
+  GeminiSingleRequestBody,
+  GeminiSingleRequestResponse
+} from "~background/types"
 import { isYellow, observeSection, single_double_click } from "~utils"
 import { waitForElement } from "~utils/index"
 
@@ -36,6 +34,7 @@ window.addEventListener("message", async (event) => {
     })
     if (!openResult.error) {
       console.log("OPEN RESULT: ", openResult)
+      batchTranslatedSentences = openResult.translatedPhrases
     }
   }
 })
@@ -45,7 +44,7 @@ const reverseTranslations = {}
 
 function updateTranslations(
   currentText: string,
-  openResult: GeminiRequestResponse
+  openResult: GeminiSingleRequestResponse
 ) {
   const liveElement = $(`span:contains("${currentText}")`).find("span").last()
   // change the text color to yellow, change the text content to the one that was translated.
@@ -86,15 +85,20 @@ window.addEventListener("load", () => {
               // Untranslate the text.
               changeText($(e.target), reverseTranslations[currentText])
               return
+            } else if (batchTranslatedSentences[currentText]) {
+              // check for existing cached translation here
+              changeText($(e.target), batchTranslatedSentences[currentText])
+              return
             } else if (localTranslations[currentText]) {
               // check for existing cached translation here
               changeText($(e.target), localTranslations[currentText])
               return
             }
-            const openResult: GeminiRequestResponse = await sendToBackground({
-              name: "gemini_translate",
-              body: { phrases: [currentText] } as GeminiRequestBody
-            })
+            const openResult: GeminiSingleRequestResponse =
+              await sendToBackground({
+                name: "gemini_translate",
+                body: { phrases: [currentText] } as GeminiSingleRequestBody
+              })
             console.log("Result: ", openResult)
             updateTranslations(currentText, openResult)
           }
@@ -104,10 +108,11 @@ window.addEventListener("load", () => {
             $(".player-timedtext-text-container").each((_, el) => {
               allTexts.push($(el).text().trim())
             })
-            const openResult: GeminiRequestResponse = await sendToBackground({
-              name: "gemini_translate",
-              body: { phrases: allTexts } as GeminiRequestBody
-            })
+            const openResult: GeminiSingleRequestResponse =
+              await sendToBackground({
+                name: "gemini_translate",
+                body: { phrases: allTexts } as GeminiSingleRequestBody
+              })
             console.log("Result: ", openResult)
             allTexts.forEach((currentText) =>
               updateTranslations(currentText, openResult)
