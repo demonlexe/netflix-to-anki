@@ -2,11 +2,15 @@
 import { Storage } from "@plasmohq/storage"
 
 export type LocalData = {
-    TARGET_LANGUAGE: string
     NATIVE_LANGUAGE: string
-    API_KEY: string
     NETFLIX_TO_ANKI_TRANSLATIONS: object
-    NEED_TO_STUDY: Map<string, string>
+    NEED_TO_STUDY: object
+} & UserSettings
+
+export type UserSettings = {
+    TARGET_LANGUAGE: string
+    API_KEY: string
+    ANKI_CONFIG: "BOTH" | "PROMPT_NATIVE" | "PROMPT_TARGET"
 }
 
 const storage = new Storage()
