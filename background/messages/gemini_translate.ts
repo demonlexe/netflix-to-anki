@@ -38,15 +38,16 @@ async function getLocaleFromModel(
   return regex.test(localeResult.response.text()) ? "es" : "en"
 }
 
-const genAI = new GoogleGenerativeAI(
-  process.env.PLASMO_PUBLIC_GEMINI_TOKEN ?? (await localStorage.get("API_KEY"))
-)
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
-
 const handler: PlasmoMessaging.MessageHandler<
   GeminiSingleRequestBody,
   GeminiSingleRequestResponse
 > = async (req, res) => {
+  const API_KEY = await localStorage.get("API_KEY")
+  const genAI = new GoogleGenerativeAI(
+    process.env.PLASMO_PUBLIC_GEMINI_TOKEN ?? API_KEY
+  )
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+
   console.log("Request received: ", req.body)
   const { phrases } = req.body
 
