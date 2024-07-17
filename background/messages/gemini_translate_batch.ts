@@ -9,6 +9,7 @@ import type {
   GeminiBatchRequestResponse,
   SupportedLocale
 } from "~background/types"
+import { BATCH_SIZE } from "~utils/constants"
 
 const TranslationRequirements = (language: string) =>
   [
@@ -91,11 +92,11 @@ const handler: PlasmoMessaging.MessageHandler<
       // loop through all sentences, sending to backend in groups of 50, then collect them here in a massive object.
       const collectedSentences = {}
       const allPromises = []
-      for (let i = 0; i < 100; i += 50) {
+      for (let i = 0; i < 500; i += BATCH_SIZE) {
         //REVERT LATER
         allPromises.push(
           geminiTranslateBatch(
-            allSentencesArray.slice(i, i + 50),
+            allSentencesArray.slice(i, i + BATCH_SIZE),
             (response) => {
               if (response.translatedPhrases) {
                 for (const key in response.translatedPhrases) {
