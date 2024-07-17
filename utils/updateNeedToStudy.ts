@@ -6,26 +6,12 @@ export default async function updateNeedToStudy(
 ) {
     textOne = textOne.trim()
     textTwo = textTwo.trim()
-    let [needToStudy, ankiConfig] = await Promise.all([
-        getData("NEED_TO_STUDY"),
-        getData("ANKI_CONFIG")
-    ])
+    let [needToStudy] = await Promise.all([getData("NEED_TO_STUDY")])
     if (!needToStudy) {
         needToStudy = {}
     }
-    switch (ankiConfig) {
-        case "BOTH":
-            needToStudy[textOne] = textTwo
-            needToStudy[textTwo] = textOne
-            break
-        case "PROMPT_NATIVE":
-            needToStudy[textOne] = textTwo
-            break
-        case "PROMPT_TARGET":
-            needToStudy[textTwo] = textOne
-            break
-    }
 
+    needToStudy[textOne] = textTwo
     await setData("NEED_TO_STUDY", needToStudy)
     console.log("NEW need to study: ", needToStudy)
 }
