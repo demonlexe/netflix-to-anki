@@ -75,8 +75,7 @@ export function removeNoPointerEvents(
 export function single_double_click(
     element: JQuery<Node>,
     single_click_callback: (element: Element) => void,
-    right_click_callback: () => void,
-    timeout: number
+    right_click_callback: () => void
 ) {
     return element.each(function () {
         $(element).on("click", function (event) {
@@ -97,8 +96,9 @@ export function single_double_click(
                 }
                 right_click_callback()
                 checkStopPropagation(event)
+                return false
             }
-            return false
+            return true
         })
     })
 }

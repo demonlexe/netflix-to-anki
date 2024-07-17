@@ -1,1 +1,1 @@
-export type SupportedLocale = "es" | "en"
+export type SupportedLocale = string | "en-US" | "es-CO"

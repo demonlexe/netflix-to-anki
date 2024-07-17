@@ -9,6 +9,7 @@ import type {
     GeminiBatchRequestResponse,
     SupportedLocale
 } from "~background/types"
+import { getCurrentLanguageFromModel } from "~background/utils"
 import { BATCH_SIZE } from "~utils/constants"
 
 const localStorage = new Storage({
@@ -43,20 +44,6 @@ const TranslationRequirements = (language: string) =>
     ].map((line, index) => {
         return `${index + 1}. ${line}`
     })
-
-async function getLocaleFromModel(
-    model: any,
-    phrases: string[]
-): Promise<SupportedLocale> {
-    const promptForLocale =
-        "What language is the following phrases in? Respond with 'es' for Spanish or 'en' for English."
-    const localeResult = await model.generateContent([
-        promptForLocale,
-        JSON.stringify(phrases)
-    ])
-    const regex = new RegExp("es", "gi")
-    return regex.test(localeResult.response.text()) ? "es" : "en"
-}
 
 const handler: PlasmoMessaging.MessageHandler<
     GeminiBatchRequestBody,
@@ -119,7 +106,10 @@ const handler: PlasmoMessaging.MessageHandler<
                 allSentencesArray.length > BATCH_SIZE / 2
                     ? allSentencesArray.slice(0, BATCH_SIZE / 2)
                     : alreadyTranslatedSentences.slice(0, BATCH_SIZE / 2)
-            const locale = await getLocaleFromModel(model, dummyArrayForLocale)
+            const locale = await getCurrentLanguageFromModel(
+                model,
+                dummyArrayForLocale
+            )
             const allPromises = []
             for (let i = 0; i < allSentencesArray.length; i += BATCH_SIZE) {
                 //REVERT LATER
@@ -147,7 +137,7 @@ const handler: PlasmoMessaging.MessageHandler<
                 )
                 res.send({
                     translatedPhrases: collectedSentences,
-                    locale: "es"
+                    locale
                 })
             })
         })
@@ -164,11 +154,7 @@ async function geminiTranslateBatch(
     responseCallback: (response: GeminiBatchRequestResponse) => void
 ) {
     let response: GeminiBatchRequestResponse = null
-    const prompt =
-        // flatten the requirements with numbers, like 1., 2., etc.
-        locale === "es"
-            ? TranslationRequirements("english").join("\n")
-            : TranslationRequirements("spanish").join("\n")
+    const prompt = TranslationRequirements(locale).join("\n")
 
     const phrasesNumbered = {}
     phrases.forEach((phrase, index) => {

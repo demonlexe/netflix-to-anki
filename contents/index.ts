@@ -11,7 +11,6 @@ import type {
     GeminiSingleRequestResponse
 } from "~background/types"
 import {
-    isMouseInsideDiv,
     isYellow,
     observeSection,
     removeElementSiblings,
@@ -127,7 +126,7 @@ const onRightClick = async () => {
 
 window.addEventListener("load", () => {
     waitForElement(".player-timedtext").then((timedText) => {
-        single_double_click($(".watch-video"), onSingleClick, onRightClick, 300)
+        single_double_click($(".watch-video"), onSingleClick, onRightClick)
 
         const doOnMutation = (mutation: MutationRecord) => {
             if (mutation?.addedNodes?.length > 0) {

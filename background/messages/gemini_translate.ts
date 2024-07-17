@@ -5,9 +5,9 @@ import { Storage } from "@plasmohq/storage"
 
 import type {
     GeminiSingleRequestBody,
-    GeminiSingleRequestResponse,
-    SupportedLocale
+    GeminiSingleRequestResponse
 } from "~background/types"
+import { getCurrentLanguageFromModel } from "~background/utils"
 
 const localStorage = new Storage({
     area: "local"
@@ -24,20 +24,6 @@ const TranslationRequirements = (language: string) =>
         return `${index + 1}. ${line}`
     })
 
-async function getLocaleFromModel(
-    model: any,
-    phrases: string[]
-): Promise<SupportedLocale> {
-    const promptForLocale =
-        "What language is the following phrases in? Respond with 'es' for Spanish or 'en' for English."
-    const localeResult = await model.generateContent([
-        promptForLocale,
-        JSON.stringify(phrases)
-    ])
-    const regex = new RegExp("es", "gi")
-    return regex.test(localeResult.response.text()) ? "es" : "en"
-}
-
 const handler: PlasmoMessaging.MessageHandler<
     GeminiSingleRequestBody,
     GeminiSingleRequestResponse
@@ -51,12 +37,8 @@ const handler: PlasmoMessaging.MessageHandler<
     console.log("Request received: ", req.body)
     const { phrases } = req.body
 
-    const locale = await getLocaleFromModel(model, phrases)
-    const prompt =
-        // flatten the requirements with numbers, like 1., 2., etc.
-        locale === "es"
-            ? TranslationRequirements("english").join("\n")
-            : TranslationRequirements("spanish").join("\n")
+    const locale = await getCurrentLanguageFromModel(model, phrases)
+    const prompt = TranslationRequirements(locale).join("\n")
 
     const result = await model.generateContent([
         prompt,
