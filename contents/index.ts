@@ -17,6 +17,8 @@ export const config: PlasmoCSConfig = {
   matches: ["https://www.netflix.com/watch/*"]
 }
 
+const localTranslations = {}
+const reverseTranslations = {}
 let batchTranslatedSentences = {}
 
 const script = document.createElement("script")
@@ -51,19 +53,11 @@ window.addEventListener("message", async (event) => {
   }
 })
 
-const localTranslations = {}
-const reverseTranslations = {}
-
-function updateTranslations(
-  currentText: string,
-  openResult: GeminiSingleRequestResponse
-) {
+function updateTranslations(currentText: string, translatedText: string) {
   const liveElement = $(`span:contains("${currentText}")`).find("span").last()
-  // change the text color to yellow, change the text content to the one that was translated.
-  $(liveElement).css("color", "yellow")
-  $(liveElement).text(openResult.translatedPhrases[currentText])
-  localTranslations[currentText] = openResult.translatedPhrases[currentText]
-  reverseTranslations[openResult.translatedPhrases[currentText]] = currentText
+  changeText(liveElement, translatedText)
+  localTranslations[currentText] = translatedText
+  reverseTranslations[translatedText] = currentText
 }
 
 function changeText(elem: JQuery<EventTarget | HTMLElement>, newText: string) {
@@ -97,13 +91,16 @@ window.addEventListener("load", () => {
               // Untranslate the text.
               changeText($(e.target), reverseTranslations[currentText])
               return
-            } else if (batchTranslatedSentences[currentText]) {
-              // check for existing cached translation here
-              changeText($(e.target), batchTranslatedSentences[currentText])
-              return
             } else if (localTranslations[currentText]) {
               // check for existing cached translation here
               changeText($(e.target), localTranslations[currentText])
+              return
+            } else if (batchTranslatedSentences[currentText]) {
+              // check for existing cached translation here
+              updateTranslations(
+                currentText,
+                batchTranslatedSentences[currentText]
+              )
               return
             }
             const openResult: GeminiSingleRequestResponse =
@@ -111,8 +108,11 @@ window.addEventListener("load", () => {
                 name: "gemini_translate",
                 body: { phrases: [currentText] } as GeminiSingleRequestBody
               })
-            console.log("Result: ", openResult)
-            updateTranslations(currentText, openResult)
+            console.log("Single Click API Result: ", openResult)
+            updateTranslations(
+              currentText,
+              openResult.translatedPhrases[currentText]
+            )
           }
           const onDoubleClick = async (e: Event) => {
             // get array of all texts stored in .player-timedtext-text-container
@@ -125,9 +125,12 @@ window.addEventListener("load", () => {
                 name: "gemini_translate",
                 body: { phrases: allTexts } as GeminiSingleRequestBody
               })
-            console.log("Result: ", openResult)
+            console.log("Double Click API Result: ", openResult)
             allTexts.forEach((currentText) =>
-              updateTranslations(currentText, openResult)
+              updateTranslations(
+                currentText,
+                openResult.translatedPhrases[currentText]
+              )
             )
           }
           single_double_click($(node), onSingleClick, onDoubleClick, 300)
