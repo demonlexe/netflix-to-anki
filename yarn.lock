@@ -1422,6 +1422,13 @@
     semver "7.5.4"
     vue "3.3.4"
 
+"@plasmohq/storage@^1.11.0":
+  version "1.11.0"
+  resolved "https://registry.npmjs.org/@plasmohq/storage/-/storage-1.11.0.tgz"
+  integrity sha512-JLu8cCjn+yzbaIK2Gw+NDuDJgiTle3nj1HbMC/irnnUTc7lnJSiCEN/EsUcWcwNtv9BJM2r8DAk1stsQ8dCKug==
+  dependencies:
+    pify "6.1.0"
+
 "@pnpm/config.env-replace@^1.1.0":
   version "1.1.0"
   resolved "https://registry.npmjs.org/@pnpm/config.env-replace/-/config.env-replace-1.1.0.tgz"
@@ -1625,11 +1632,6 @@
   dependencies:
     "@types/filesystem" "*"
     "@types/har-format" "*"
-
-"@types/dom-parser@^0.1.4":
-  version "0.1.4"
-  resolved "https://registry.npmjs.org/@types/dom-parser/-/dom-parser-0.1.4.tgz"
-  integrity sha512-MpSkXYGIy3R6akcAY2oNDikt2jl/YntUQR/jSltQ2hyImTXG/BwoC/DjZqHjw8JeQccesyL+EVCpZiEdgQ2gDQ==
 
 "@types/estree@*", "@types/estree@^1.0.0", "@types/estree@^1.0.1":
   version "1.0.5"
@@ -2428,11 +2430,6 @@ dir-glob@^3.0.1:
   integrity sha512-WkrWp9GR4KXfKGYzOLmTuGVi1UWFfws377n9cc55/tb6DuqyF6pcQ5AbiHEshaDpY9v6oaSr2XCDidGmMwdzIA==
   dependencies:
     path-type "^4.0.0"
-
-dom-parser@^1.1.5:
-  version "1.1.5"
-  resolved "https://registry.npmjs.org/dom-parser/-/dom-parser-1.1.5.tgz"
-  integrity sha512-lCiFG48ZUzGXjKN0qhSkxD/i3ndyV6I37zQ3W2VFYLjF1ob8A+QgSsM7Ps2UT0d3LpJxLMmMHiJJ34z5hkKLiA==
 
 dom-serializer@^1.0.1:
   version "1.4.1"
@@ -3763,6 +3760,11 @@ pify@^4.0.1:
   resolved "https://registry.npmjs.org/pify/-/pify-4.0.1.tgz"
   integrity sha512-uB80kBFb/tfd68bVleG9T5GGsGPjJrLAUpR5PZIrhBnIaRTQRjqdJSsIKkOP6OAIFbj7GOrcudc5pNjZ+geV2g==
 
+pify@6.1.0:
+  version "6.1.0"
+  resolved "https://registry.npmjs.org/pify/-/pify-6.1.0.tgz"
+  integrity sha512-KocF8ve28eFjjuBKKGvzOBGzG8ew2OqOOSxTTZhirkzH7h3BI1vyzqlR0qbfcDBve1Yzo3FVlWUAtCRrbVN8Fw==
+
 pirates@^4.0.1:
   version "4.0.6"
   resolved "https://registry.npmjs.org/pirates/-/pirates-4.0.6.tgz"
@@ -4081,7 +4083,7 @@ sass@^1.38.0:
     immutable "^4.0.0"
     source-map-js ">=0.6.2 <2.0.0"
 
-sax@^1.2.4:
+sax@^1.2.4, sax@>=0.6.0:
   version "1.4.1"
   resolved "https://registry.npmjs.org/sax/-/sax-1.4.1.tgz"
   integrity sha512-+aWOz7yVScEGoKNd4PA10LZ8sk0A/z5+nXQG5giUO5rprX9jgYsTdov9qCchZiPIZezbZH+jRut8nPodFAX4Jg==
@@ -4690,6 +4692,19 @@ wrappy@1:
   version "1.0.2"
   resolved "https://registry.npmjs.org/wrappy/-/wrappy-1.0.2.tgz"
   integrity sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==
+
+xml2js@^0.6.2:
+  version "0.6.2"
+  resolved "https://registry.npmjs.org/xml2js/-/xml2js-0.6.2.tgz"
+  integrity sha512-T4rieHaC1EXcES0Kxxj4JWgaUQHDk+qwHcYOCFHfiwKz7tOVPLq7Hjq9dM1WCMhylqMEfP7hMcOIChvotiZegA==
+  dependencies:
+    sax ">=0.6.0"
+    xmlbuilder "~11.0.0"
+
+xmlbuilder@~11.0.0:
+  version "11.0.1"
+  resolved "https://registry.npmjs.org/xmlbuilder/-/xmlbuilder-11.0.1.tgz"
+  integrity sha512-fDlsI/kFEx7gLvbecc0/ohLG50fugQp8ryHzMTuW9vSa1GJ0XYWKnhsUx7oie3G98+r56aTQIUB4kht42R3JvA==
 
 xxhash-wasm@^0.4.2:
   version "0.4.2"

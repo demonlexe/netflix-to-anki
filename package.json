@@ -12,10 +12,12 @@
   "dependencies": {
     "@google/generative-ai": "^0.15.0",
     "@plasmohq/messaging": "^0.6.2",
+    "@plasmohq/storage": "^1.11.0",
     "jquery": "^3.7.1",
     "plasmo": "0.88.0",
     "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "react-dom": "18.2.0",
+    "xml2js": "^0.6.2"
   },
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "4.1.1",
@@ -27,13 +29,32 @@
     "typescript": "5.3.3"
   },
   "permissions": [
-    "scripting"
+    "scripting",
+    "webRequest",
+    "webRequestBlocking",
+    "background"
   ],
   "manifest": {
     "host_permissions": [
       "https://www.netflix.com/watch/*",
       "https://www.spanishdict.com/translate/*",
       "https://traductor1.spanishdict.com/*"
+    ],
+    "permissions": [
+      "scripting",
+      "webRequest",
+      "webRequestBlocking",
+      "background"
+    ],
+    "web_accessible_resources": [
+      {
+        "resources": [
+          "~inject.js"
+        ],
+        "matches": [
+          "<all_urls>"
+        ]
+      }
     ]
   }
 }
