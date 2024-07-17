@@ -39,6 +39,8 @@ async function initBatchTranslatedSentences() {
   const translations = await localStorage.get("netflix-to-anki-translations")
   if (translations && Object.keys(translations).length > 0)
     batchTranslatedSentences = translations
+
+  console.log("Pulled down translations: ", batchTranslatedSentences)
 }
 
 initBatchTranslatedSentences()
@@ -59,6 +61,8 @@ window.addEventListener("message", async (event) => {
 })
 
 function updateTranslations(currentText: string, translatedText: string) {
+  currentText = currentText.trim()
+  translatedText = translatedText.trim()
   const liveElement = $(`span:contains("${currentText}")`).find("span").last()
   changeText(liveElement, translatedText)
   localTranslations[currentText] = translatedText
@@ -66,19 +70,21 @@ function updateTranslations(currentText: string, translatedText: string) {
 }
 
 function changeText(elem: JQuery<EventTarget | HTMLElement>, newText: string) {
+  newText = newText.trim()
   $(elem).text(newText)
   $(elem).css("color", "yellow")
 }
 
 const onSingleClick = async (elem: Element) => {
   const currentText = $(elem).text().trim()
-  if (isYellow($(elem)) && reverseTranslations[currentText]) {
+  const liveElement = $(`span:contains("${currentText}")`).find("span").last()
+  if (isYellow($(liveElement)) && reverseTranslations[currentText]) {
     // Untranslate the text.
-    changeText($(elem), reverseTranslations[currentText])
+    changeText($(liveElement), reverseTranslations[currentText])
     return
   } else if (localTranslations[currentText]) {
     // check for existing cached translation here
-    changeText($(elem), localTranslations[currentText])
+    changeText($(liveElement), localTranslations[currentText])
     return
   } else if (batchTranslatedSentences[currentText]) {
     // check for existing cached translation here

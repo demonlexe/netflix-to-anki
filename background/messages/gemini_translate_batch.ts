@@ -107,12 +107,18 @@ const handler: PlasmoMessaging.MessageHandler<
       const allSentencesArray: string[] = Array.from(allSentencesSet)
       // loop through all sentences, sending to backend in groups of 50, then collect them here in a massive object.
 
+      const dummyArrayForLocale =
+        allSentencesArray.length > BATCH_SIZE / 2
+          ? allSentencesArray.slice(0, BATCH_SIZE / 2)
+          : alreadyTranslatedSentences.slice(0, BATCH_SIZE / 2)
+      const locale = await getLocaleFromModel(model, dummyArrayForLocale)
       const allPromises = []
       for (let i = 0; i < allSentencesArray.length; i += BATCH_SIZE) {
         //REVERT LATER
         allPromises.push(
           geminiTranslateBatch(
             allSentencesArray.slice(i, i + BATCH_SIZE),
+            locale,
             (response) => {
               if (response.translatedPhrases) {
                 for (const key in response.translatedPhrases) {
@@ -142,9 +148,9 @@ const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
 
 async function geminiTranslateBatch(
   phrases: string[],
+  locale: SupportedLocale,
   responseCallback: (response: GeminiBatchRequestResponse) => void
 ) {
-  const locale = await getLocaleFromModel(model, phrases)
   let response: GeminiBatchRequestResponse = null
   const prompt =
     // flatten the requirements with numbers, like 1., 2., etc.
@@ -156,7 +162,6 @@ async function geminiTranslateBatch(
   phrases.forEach((phrase, index) => {
     phrasesNumbered[index] = phrase
   })
-
   console.log("input to the model: ", [prompt, JSON.stringify(phrasesNumbered)])
   try {
     const result = await model.generateContent([

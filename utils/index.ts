@@ -122,10 +122,22 @@ export function insideWhichDiv(
 }
 
 export function isYellow(elem: JQuery<EventTarget | HTMLElement>) {
-  return (
-    $(elem).css("color") === "yellow" ||
-    $(elem).css("color") === "rgb(255, 255, 0)"
-  )
+  // if element has children, check those too for isYellow
+  const childIsYellow = () => {
+    let b = false
+    $(elem)
+      .children()
+      .each((_, child) => {
+        if (isYellow($(child))) {
+          b = true
+        }
+      })
+    return b
+  }
+  return $(elem).children().length > 0 && childIsYellow()
+    ? true
+    : $(elem).css("color") === "yellow" ||
+        $(elem).css("color") === "rgb(255, 255, 0)"
 }
 
 export function isMouseInsideDiv(mouseX, mouseY, divElement) {
