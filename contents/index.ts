@@ -2,6 +2,7 @@ import $ from "jquery"
 import type { PlasmoCSConfig } from "plasmo"
 
 import { sendToBackground } from "@plasmohq/messaging"
+import { Storage } from "@plasmohq/storage"
 
 import type {
   GeminiBatchRequestBody,
@@ -23,6 +24,17 @@ script.setAttribute("type", "text/javascript")
 script.setAttribute("src", chrome.runtime.getURL("inject.js"))
 
 document.documentElement.appendChild(script)
+
+async function initBatchTranslatedSentences() {
+  const localStorage = new Storage({
+    area: "local"
+  })
+  const translations = await localStorage.get("netflix-to-anki-translations")
+  if (translations && Object.keys(translations).length > 0)
+    batchTranslatedSentences = translations
+}
+
+initBatchTranslatedSentences()
 
 // content.js
 window.addEventListener("message", async (event) => {
