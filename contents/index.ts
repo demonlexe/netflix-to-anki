@@ -70,10 +70,14 @@ function updateTranslations(currentText: string, translatedText: string) {
   reverseTranslations[translatedText] = currentText
 }
 
-function changeText(elem: JQuery<EventTarget | HTMLElement>, newText: string) {
+function changeText(
+  elem: JQuery<EventTarget | HTMLElement>,
+  newText: string,
+  color: string = "yellow"
+) {
   newText = newText.trim()
   $(elem).text(newText)
-  $(elem).css("color", "yellow")
+  $(elem).css("color", color)
   removeElementSiblings(elem[0] as HTMLElement)
 }
 
@@ -82,7 +86,8 @@ const onSingleClick = async (elem: Element) => {
   const liveElement = $(`span:contains("${currentText}")`).find("span").last()
   if (isYellow($(liveElement)) && reverseTranslations[currentText]) {
     // Untranslate the text.
-    changeText($(liveElement), reverseTranslations[currentText])
+    changeText($(liveElement), reverseTranslations[currentText], "white")
+    localTranslations[reverseTranslations[currentText]] = null
     return
   } else if (localTranslations[currentText]) {
     // check for existing cached translation here
