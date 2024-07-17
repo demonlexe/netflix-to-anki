@@ -2,7 +2,6 @@ import $ from "jquery"
 import type { PlasmoCSConfig } from "plasmo"
 
 import { sendToBackground } from "@plasmohq/messaging"
-import { Storage } from "@plasmohq/storage"
 
 import type {
     GeminiBatchRequestBody,
@@ -18,11 +17,12 @@ import {
     single_double_click
 } from "~utils"
 import { waitForElement } from "~utils/index"
+import initData from "~utils/initData"
 
 export const config: PlasmoCSConfig = {
     matches: ["https://www.netflix.com/watch/*"]
 }
-
+initData()
 const localTranslations = {}
 const reverseTranslations = {}
 let batchTranslatedSentences = {}

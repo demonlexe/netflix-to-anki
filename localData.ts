@@ -6,6 +6,7 @@ export type LocalData = {
     NATIVE_LANGUAGE: string
     API_KEY: string
     NETFLIX_TO_ANKI_TRANSLATIONS: object
+    NEED_TO_STUDY: Map<string, string>
 }
 
 const storage = new Storage()
