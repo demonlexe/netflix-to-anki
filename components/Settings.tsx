@@ -30,6 +30,7 @@ const Settings = () => {
         localStorage
             .get("TARGET_LANGUAGE")
             .then((lang) => setLanguage(lang ?? navigator.language))
+        localStorage.set("NATIVE_LANGUAGE", navigator.language)
     }, [])
 
     return (
