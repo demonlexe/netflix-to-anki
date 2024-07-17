@@ -141,24 +141,30 @@ async function geminiTranslateBatch(
   })
 
   console.log("input to the model: ", [prompt, JSON.stringify(phrasesNumbered)])
-  const result = await model.generateContent([
-    prompt,
-    JSON.stringify(phrasesNumbered)
-  ])
-  if (result.error || !result.response) {
-    response = { error: result.error }
-  } else {
-    console.log("No Error. Batch Result: ", result.response?.text())
-    const resultAsJson: object = JSON.parse(result.response?.text()?.trim())
-    response = {
-      translatedPhrases: resultAsJson,
-      locale
+  try {
+    const result = await model.generateContent([
+      prompt,
+      JSON.stringify(phrasesNumbered)
+    ])
+    if (result.error || !result.response) {
+      response = { error: result.error }
+    } else {
+      console.log("No Error. Batch Result: ", result.response?.text())
+      const resultAsJson: object = JSON.parse(result.response?.text()?.trim())
+      response = {
+        translatedPhrases: resultAsJson,
+        locale
+      }
+      console.log(
+        `Sending response of length ${Object.entries(resultAsJson).length}`,
+        response
+      )
     }
-    console.log(
-      `Sending response of length ${Object.entries(resultAsJson).length}`,
-      response
-    )
+  } catch (e) {
+    console.error("Error translating batch: ", e)
+    response = { error: e.message }
   }
+
   console.log("Sending Response to Gemini Translate Batch: ", response)
   responseCallback(response)
 }
