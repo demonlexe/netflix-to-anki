@@ -63,7 +63,7 @@ const handler: PlasmoMessaging.MessageHandler<
         message.response?.length > 0
     ) {
         console.log("Request received: ", req.body)
-        const storedTranslations = await getData("netflix-to-anki-translations")
+        const storedTranslations = await getData("NETFLIX_TO_ANKI_TRANSLATIONS")
         const alreadyTranslatedSentences =
             storedTranslations &&
             typeof storedTranslations === "object" &&
@@ -135,7 +135,7 @@ const handler: PlasmoMessaging.MessageHandler<
             }
             await Promise.all(allPromises).then(() => {
                 console.log("All sentences translated: ", collectedSentences)
-                setData("netflix-to-anki-translations", collectedSentences)
+                setData("NETFLIX_TO_ANKI_TRANSLATIONS", collectedSentences)
                 res.send({
                     translatedPhrases: collectedSentences
                 })

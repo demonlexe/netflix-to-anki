@@ -5,7 +5,7 @@ export type LocalData = {
     TARGET_LANGUAGE: string
     NATIVE_LANGUAGE: string
     API_KEY: string
-    "netflix-to-anki-translations": object
+    NETFLIX_TO_ANKI_TRANSLATIONS: object
 }
 
 const storage = new Storage()

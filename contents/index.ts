@@ -34,7 +34,7 @@ script.setAttribute("src", chrome.runtime.getURL("inject.js"))
 document.documentElement.appendChild(script)
 
 async function initBatchTranslatedSentences() {
-    const translations = await getData("netflix-to-anki-translations")
+    const translations = await getData("NETFLIX_TO_ANKI_TRANSLATIONS")
     if (translations && Object.keys(translations).length > 0)
         batchTranslatedSentences = translations
 
