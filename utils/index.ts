@@ -169,3 +169,11 @@ export function checkStopPropagation(event) {
     return true
   }
 }
+
+export function getLiveElement(currentText: string) {
+  return $(`span:contains("${currentText}")`).find("span").last()
+}
+
+export function removeElementSiblings(element: HTMLElement) {
+  $(element).siblings().remove()
+}

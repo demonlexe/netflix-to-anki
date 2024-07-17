@@ -14,6 +14,7 @@ import {
   isMouseInsideDiv,
   isYellow,
   observeSection,
+  removeElementSiblings,
   single_double_click
 } from "~utils"
 import { waitForElement } from "~utils/index"
@@ -73,6 +74,7 @@ function changeText(elem: JQuery<EventTarget | HTMLElement>, newText: string) {
   newText = newText.trim()
   $(elem).text(newText)
   $(elem).css("color", "yellow")
+  removeElementSiblings(elem[0] as HTMLElement)
 }
 
 const onSingleClick = async (elem: Element) => {
@@ -128,8 +130,7 @@ window.addEventListener("load", () => {
             localTranslations[$(node).text().trim()] &&
             !isYellow(deepestSpan)
           ) {
-            deepestSpan.text(localTranslations[$(node).text().trim()])
-            deepestSpan.css("color", "yellow")
+            changeText(deepestSpan, localTranslations[$(node).text().trim()])
           }
         }
         $(timedText).css("pointer-events", "auto")
