@@ -1,12 +1,17 @@
 import { GoogleGenerativeAI } from "@google/generative-ai"
 
 import type { PlasmoMessaging } from "@plasmohq/messaging"
+import { Storage } from "@plasmohq/storage"
 
 import type {
   GeminiSingleRequestBody,
   GeminiSingleRequestResponse,
   SupportedLocale
 } from "~background/types"
+
+const localStorage = new Storage({
+  area: "local"
+})
 
 const TranslationRequirements = (language: string) =>
   [
@@ -33,13 +38,16 @@ async function getLocaleFromModel(
   return regex.test(localeResult.response.text()) ? "es" : "en"
 }
 
-const genAI = new GoogleGenerativeAI(process.env.PLASMO_PUBLIC_GEMINI_TOKEN)
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
-
 const handler: PlasmoMessaging.MessageHandler<
   GeminiSingleRequestBody,
   GeminiSingleRequestResponse
 > = async (req, res) => {
+  const API_KEY = await localStorage.get("API_KEY")
+  const genAI = new GoogleGenerativeAI(
+    process.env.PLASMO_PUBLIC_GEMINI_TOKEN ?? API_KEY
+  )
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+
   console.log("Request received: ", req.body)
   const { phrases } = req.body
 

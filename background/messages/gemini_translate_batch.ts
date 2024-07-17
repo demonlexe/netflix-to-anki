@@ -1,3 +1,4 @@
+import { GoogleGenerativeAI } from "@google/generative-ai"
 import { parseString } from "xml2js"
 
 import type { PlasmoMessaging } from "@plasmohq/messaging"
@@ -9,6 +10,24 @@ import type {
   SupportedLocale
 } from "~background/types"
 import { BATCH_SIZE } from "~utils/constants"
+
+const localStorage = new Storage({
+  area: "local"
+})
+
+type XMLText = {
+  $: any
+  _?: string
+  span?: XMLText
+}
+
+const getXMLTextContent = (text: XMLText) => {
+  return (
+    text.span && text.span[0]
+      ? (text._ ?? "") + " " + getXMLTextContent(text.span[0])
+      : text._ ?? ""
+  ).trim()
+}
 
 const TranslationRequirements = (language: string) =>
   [
@@ -44,24 +63,12 @@ const handler: PlasmoMessaging.MessageHandler<
   GeminiBatchRequestResponse
 > = async (req, res) => {
   const { message } = req.body
+  const API_KEY = await localStorage.get("API_KEY")
+  const genAI = new GoogleGenerativeAI(
+    process.env.PLASMO_PUBLIC_GEMINI_TOKEN ?? API_KEY
+  )
 
-  type XMLText = {
-    $: any
-    _?: string
-    span?: XMLText
-  }
-
-  const getXMLTextContent = (text: XMLText) => {
-    return (
-      text.span && text.span[0]
-        ? (text._ ?? "") + " " + getXMLTextContent(text.span[0])
-        : text._ ?? ""
-    ).trim()
-  }
-
-  const localStorage = new Storage({
-    area: "local"
-  })
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
 
   if (
     message.url.includes("?o") &&
@@ -117,6 +124,7 @@ const handler: PlasmoMessaging.MessageHandler<
         //REVERT LATER
         allPromises.push(
           geminiTranslateBatch(
+            model,
             allSentencesArray.slice(i, i + BATCH_SIZE),
             locale,
             (response) => {
@@ -141,12 +149,8 @@ const handler: PlasmoMessaging.MessageHandler<
   }
 }
 
-const { GoogleGenerativeAI } = require("@google/generative-ai")
-
-const genAI = new GoogleGenerativeAI(process.env.PLASMO_PUBLIC_GEMINI_TOKEN)
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
-
 async function geminiTranslateBatch(
+  model: any,
   phrases: string[],
   locale: SupportedLocale,
   responseCallback: (response: GeminiBatchRequestResponse) => void
@@ -168,20 +172,16 @@ async function geminiTranslateBatch(
       prompt,
       JSON.stringify(phrasesNumbered)
     ])
-    if (result.error || !result.response) {
-      response = { error: result.error }
-    } else {
-      console.log("No Error. Batch Result: ", result.response?.text())
-      const resultAsJson: object = JSON.parse(result.response?.text()?.trim())
-      response = {
-        translatedPhrases: resultAsJson,
-        locale
-      }
-      console.log(
-        `Sending response of length ${Object.entries(resultAsJson).length}`,
-        response
-      )
+    console.log("No Error. Batch Result: ", result.response?.text())
+    const resultAsJson: object = JSON.parse(result.response?.text()?.trim())
+    response = {
+      translatedPhrases: resultAsJson,
+      locale
     }
+    console.log(
+      `Sending response of length ${Object.entries(resultAsJson).length}`,
+      response
+    )
   } catch (e) {
     console.error("Error translating batch: ", e)
     response = { error: e.message }
