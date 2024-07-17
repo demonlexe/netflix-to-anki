@@ -89,10 +89,10 @@ export function single_double_click(
     $(element).on("contextmenu", function (event) {
       const insideDiv = insideWhichDiv(event)
       if (insideDiv) {
-        right_click_callback()
         if (!isVideoPaused()) {
           $("video").trigger("pause")
         }
+        right_click_callback()
         checkStopPropagation(event)
       }
       return false
