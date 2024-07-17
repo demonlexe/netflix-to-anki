@@ -6,7 +6,8 @@ import { Storage } from "@plasmohq/storage"
 enum API_KEY_STATUS {
   INVALID = "INVALID",
   VALID = "VALID",
-  NOT_TESTED = "NOT_TESTED"
+  NOT_TESTED = "NOT_TESTED",
+  SUCCESS = "SUCCESS"
 }
 
 const Settings = () => {
@@ -31,30 +32,34 @@ const Settings = () => {
         onChange={(e) => setData(e.target.value)}
         value={data}
       />
+      {apiKeyStatus === API_KEY_STATUS.INVALID && (
+        <h4>INVALID - Check your API Key</h4>
+      )}
       <button
         onClick={async () => {
           const oldApiKey = await localStorage.get("API_KEY")
-          try {
-            console.log("data: ", data)
-            localStorage.set("API_KEY", data)
-            const testResult = await sendToBackground({
-              name: "test_gemini_key",
-              body: {}
-            })
-            console.log("testResult: ", testResult)
-            if (testResult && !testResult.error) {
+          await localStorage.set("API_KEY", data)
+          const testResult = await sendToBackground({
+            name: "test_gemini_key",
+            body: {}
+          })
+          if (testResult && !testResult.error) {
+            setApiKeyStatus(API_KEY_STATUS.SUCCESS)
+            setTimeout(() => {
               setApiKeyStatus(API_KEY_STATUS.VALID)
-            }
-          } catch (e) {
-            console.error(e)
+            }, 2000)
+          } else {
             setApiKeyStatus(API_KEY_STATUS.INVALID)
-            localStorage.set("API_KEY", oldApiKey)
+            await localStorage.set("API_KEY", oldApiKey)
+            setTimeout(() => {
+              setApiKeyStatus(API_KEY_STATUS.NOT_TESTED)
+            }, 2000)
           }
         }}>
         {apiKeyStatus === API_KEY_STATUS.NOT_TESTED
           ? "Apply"
-          : apiKeyStatus === API_KEY_STATUS.INVALID
-            ? "INVALID"
+          : apiKeyStatus === API_KEY_STATUS.SUCCESS
+            ? "SUCCESS!"
             : "Update"}
       </button>
     </div>
