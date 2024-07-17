@@ -1,5 +1,7 @@
 import $ from "jquery"
 
+import { SHOULD_PAUSE_WHEN_CLICK } from "~utils/constants"
+
 export function observeSection(
   section: HTMLElement,
   doOnMutation: (mutation: MutationRecord) => void
@@ -83,16 +85,22 @@ export function single_double_click(
       self = element
     $(element).on("click", function (event) {
       clicks++
-      event.stopPropagation()
       if (clicks == 1) {
         setTimeout(function () {
           if (clicks == 1) {
             single_click_callback.call(self, event)
           } else {
+            if (SHOULD_PAUSE_WHEN_CLICK) {
+              event.stopPropagation()
+            }
             double_click_callback.call(self, event)
           }
           clicks = 0
         }, timeout || 300)
+      } else {
+        if (SHOULD_PAUSE_WHEN_CLICK) {
+          event.stopPropagation()
+        }
       }
     })
   })
