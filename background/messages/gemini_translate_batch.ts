@@ -69,7 +69,17 @@ const handler: PlasmoMessaging.MessageHandler<
     message.response?.length > 0
   ) {
     console.log("Request received: ", req.body)
+    const localStorageTranslations = await localStorage.get(
+      "netflix-to-anki-translations"
+    )
+    const alreadyTranslatedSentences =
+      localStorageTranslations &&
+      typeof localStorageTranslations === "object" &&
+      Object.keys(localStorageTranslations).length > 1
+        ? Object.keys(localStorageTranslations)
+        : null
     parseString(message.response, async function (err, result) {
+      const collectedSentences = {}
       const allText: XMLText[] = result.tt.body?.[0]?.div?.[0]?.p
       const grouping = {}
       allText.forEach((text: XMLText) => {
@@ -84,12 +94,19 @@ const handler: PlasmoMessaging.MessageHandler<
       for (const key in grouping) {
         const sentences = grouping[key]
         sentences.forEach((sentence: string) => {
-          allSentencesSet.add(sentence)
+          if (
+            !alreadyTranslatedSentences ||
+            !alreadyTranslatedSentences.includes(sentence)
+          ) {
+            allSentencesSet.add(sentence)
+          } else {
+            collectedSentences[sentence] = localStorageTranslations[sentence]
+          }
         })
       }
       const allSentencesArray: string[] = Array.from(allSentencesSet)
       // loop through all sentences, sending to backend in groups of 50, then collect them here in a massive object.
-      const collectedSentences = {}
+
       const allPromises = []
       for (let i = 0; i < allSentencesArray.length; i += BATCH_SIZE) {
         //REVERT LATER
