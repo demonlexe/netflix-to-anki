@@ -10,6 +10,7 @@ import type {
     GeminiSingleRequestBody,
     GeminiSingleRequestResponse
 } from "~background/types"
+import { getData } from "~localData"
 import {
     isYellow,
     observeSection,
@@ -33,10 +34,7 @@ script.setAttribute("src", chrome.runtime.getURL("inject.js"))
 document.documentElement.appendChild(script)
 
 async function initBatchTranslatedSentences() {
-    const localStorage = new Storage({
-        area: "local"
-    })
-    const translations = await localStorage.get("netflix-to-anki-translations")
+    const translations = await getData("netflix-to-anki-translations")
     if (translations && Object.keys(translations).length > 0)
         batchTranslatedSentences = translations
 
