@@ -1,6 +1,5 @@
 export * from "./GeminiSingleRequestResponse"
 export * from "./SupportedLocale"
 export * from "./GeminiSingleRequestBody"
-export * from "./BatchTranslationResponse"
 export * from "./GeminiBatchRequestResponse"
 export * from "./GeminiBatchRequestBody"

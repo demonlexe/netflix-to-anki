@@ -4,7 +4,6 @@ import type { PlasmoMessaging } from "@plasmohq/messaging"
 import { Storage } from "@plasmohq/storage"
 
 import type {
-  BatchTranslationResponse,
   GeminiBatchRequestBody,
   GeminiBatchRequestResponse,
   SupportedLocale
@@ -92,7 +91,7 @@ const handler: PlasmoMessaging.MessageHandler<
       // loop through all sentences, sending to backend in groups of 50, then collect them here in a massive object.
       const collectedSentences = {}
       const allPromises = []
-      for (let i = 0; i < 500; i += BATCH_SIZE) {
+      for (let i = 0; i < allSentencesArray.length; i += BATCH_SIZE) {
         //REVERT LATER
         allPromises.push(
           geminiTranslateBatch(
@@ -126,9 +125,10 @@ const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
 
 async function geminiTranslateBatch(
   phrases: string[],
-  res: (response: BatchTranslationResponse) => void
+  responseCallback: (response: GeminiBatchRequestResponse) => void
 ) {
   const locale = await getLocaleFromModel(model, phrases)
+  let response: GeminiBatchRequestResponse = null
   const prompt =
     // flatten the requirements with numbers, like 1., 2., etc.
     locale === "es"
@@ -145,17 +145,22 @@ async function geminiTranslateBatch(
     prompt,
     JSON.stringify(phrasesNumbered)
   ])
-  console.log("Result: ", result.response?.text())
-  const resultAsJson: object = JSON.parse(result.response?.text()?.trim())
-  const response: BatchTranslationResponse = {
-    translatedPhrases: resultAsJson,
-    locale
+  if (result.error || !result.response) {
+    response = { error: result.error }
+  } else {
+    console.log("No Error. Batch Result: ", result.response?.text())
+    const resultAsJson: object = JSON.parse(result.response?.text()?.trim())
+    response = {
+      translatedPhrases: resultAsJson,
+      locale
+    }
+    console.log(
+      `Sending response of length ${Object.entries(resultAsJson).length}`,
+      response
+    )
   }
-  console.log(
-    `Sending response of length ${Object.entries(resultAsJson).length}`,
-    response
-  )
-  res(response)
+  console.log("Sending Response to Gemini Translate Batch: ", response)
+  responseCallback(response)
 }
 
 export default handler

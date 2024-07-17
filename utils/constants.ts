@@ -1,1 +1,1 @@
-export const BATCH_SIZE = 200
+export const BATCH_SIZE = 175
