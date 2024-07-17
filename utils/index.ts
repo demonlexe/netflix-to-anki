@@ -82,6 +82,9 @@ export function single_double_click(
     $(element).on("click", function (event) {
       const insideDiv = insideWhichDiv(event)
       if (insideDiv) {
+        if (!isVideoPaused()) {
+          $("video").trigger("pause")
+        }
         single_click_callback(insideDiv)
         checkStopPropagation(event)
       }
