@@ -103,12 +103,7 @@ function checkForExistingTranslation(phrase: string) {
     return null
 }
 
-// Given the element, translate the text and update the cache.
-// Return "true" if it should play the video.
-const onLeftClick = async (elem: Element) => {
-    const currentText = $(elem).text()?.trim()
-    if (!currentText || currentText.length === 0) return false
-
+const translateOnePhraseLocal = (currentText: string) => {
     const liveElement = $(`span:contains("${currentText}")`).find("span").last()
     const existingTranslation = checkForExistingTranslation(currentText)
     if (isYellow($(liveElement)) && reverseTranslations[currentText]) {
@@ -121,6 +116,17 @@ const onLeftClick = async (elem: Element) => {
         updateNeedToStudy(currentText, existingTranslation)
         return false
     }
+    return null
+}
+
+// Given the element, translate the text and update the cache.
+// Return "true" if it should play the video.
+const onLeftClick = async (elem: Element) => {
+    const currentText = $(elem).text()?.trim()
+    if (!currentText || currentText.length === 0) return false
+    const tryTranslateLocal = translateOnePhraseLocal(currentText)
+    if (tryTranslateLocal !== null) return tryTranslateLocal
+
     const openResult: GeminiSingleRequestResponse = await sendToBackground({
         name: "gemini_translate",
         body: { phrases: [currentText] } as GeminiSingleRequestBody
@@ -142,12 +148,9 @@ const onRightClick = async () => {
 
     // if there is no need to do the grouped translation, return early
     if (allTexts.length === 0) return false
-    if (allTexts.length === 1 && checkForExistingTranslation(allTexts[0])) {
-        const currentText = allTexts[0]
-        const existingTranslation = checkForExistingTranslation(currentText)
-        updateTranslations(currentText, existingTranslation)
-        updateNeedToStudy(currentText, existingTranslation)
-        return false
+    if (allTexts.length === 1) {
+        const tryTranslateLocal = translateOnePhraseLocal(allTexts[0])
+        if (tryTranslateLocal !== null) return tryTranslateLocal
     }
 
     const openResult: GeminiSingleRequestResponse = await sendToBackground({
