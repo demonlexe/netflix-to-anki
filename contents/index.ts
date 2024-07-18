@@ -26,9 +26,17 @@ export const config: PlasmoCSConfig = {
 
 initData()
 
-const localTranslations = {}
-const reverseTranslations = {}
-let batchTranslatedSentences = {}
+declare global {
+    interface Window {
+        localTranslations: Record<string, string>
+        reverseTranslations: Record<string, string>
+        batchTranslatedSentences: Record<string, string>
+    }
+}
+
+window.localTranslations = {}
+window.reverseTranslations = {}
+window.batchTranslatedSentences = {}
 
 const script = document.createElement("script")
 script.setAttribute("type", "text/javascript")
@@ -39,7 +47,7 @@ document.documentElement.appendChild(script)
 async function initBatchTranslatedSentences() {
     const translations = await getAllCachedTranslations()
     if (translations && Object.keys(translations).length > 0)
-        batchTranslatedSentences = translations
+        window.batchTranslatedSentences = translations
 
     console.log("Pulled down translations: ", translations)
 }
@@ -56,7 +64,7 @@ window.addEventListener("message", async (event) => {
         })
         if (!openResult.error) {
             console.log("OPEN RESULT: ", openResult)
-            batchTranslatedSentences = openResult.translatedPhrases
+            window.batchTranslatedSentences = openResult.translatedPhrases
         }
     }
 })
@@ -74,8 +82,8 @@ function updateTranslations(currentText: string, translatedText: string) {
     changeText(liveElement, translatedText)
 
     // update the cache
-    localTranslations[currentText] = translatedText
-    reverseTranslations[translatedText] = currentText
+    window.localTranslations[currentText] = translatedText
+    window.reverseTranslations[translatedText] = currentText
 }
 
 function changeText(
@@ -95,10 +103,10 @@ function checkForExistingTranslation(phrase: string) {
     phrase = phrase?.trim()
     if (!phrase || phrase.length === 0) return null
 
-    if (localTranslations[phrase]) {
-        return localTranslations[phrase]
-    } else if (batchTranslatedSentences[phrase]) {
-        return batchTranslatedSentences[phrase]
+    if (window.localTranslations[phrase]) {
+        return window.localTranslations[phrase]
+    } else if (window.batchTranslatedSentences[phrase]) {
+        return window.batchTranslatedSentences[phrase]
     }
     return null
 }
@@ -106,10 +114,14 @@ function checkForExistingTranslation(phrase: string) {
 const translateOnePhraseLocal = (currentText: string) => {
     const liveElement = $(`span:contains("${currentText}")`).find("span").last()
     const existingTranslation = checkForExistingTranslation(currentText)
-    if (isYellow($(liveElement)) && reverseTranslations[currentText]) {
+    if (isYellow($(liveElement)) && window.reverseTranslations[currentText]) {
         // Untranslate the text.
-        changeText($(liveElement), reverseTranslations[currentText], "white")
-        localTranslations[reverseTranslations[currentText]] = null
+        changeText(
+            $(liveElement),
+            window.reverseTranslations[currentText],
+            "white"
+        )
+        window.localTranslations[window.reverseTranslations[currentText]] = null
         return true
     } else if (existingTranslation) {
         updateTranslations(currentText, existingTranslation)
@@ -181,12 +193,12 @@ const watchTimedText = (timedText: HTMLElement) => {
             for (const node of mutation.addedNodes) {
                 const deepestSpan = $(node).find("span").last()
                 if (
-                    localTranslations[$(node).text()?.trim()] &&
+                    window.localTranslations[$(node).text()?.trim()] &&
                     !isYellow(deepestSpan)
                 ) {
                     changeText(
                         deepestSpan,
-                        localTranslations[$(node).text()?.trim()]
+                        window.localTranslations[$(node).text()?.trim()]
                     )
                 }
             }
