@@ -15,6 +15,7 @@ export type UserSettings = {
     TARGET_LANGUAGE: string
     API_KEY: string
     ANKI_CONFIG: "BOTH" | "PROMPT_NATIVE" | "PROMPT_TARGET"
+    AUTO_TRANSLATE_WHILE_PLAYING: boolean
 }
 
 const storage = new Storage()
