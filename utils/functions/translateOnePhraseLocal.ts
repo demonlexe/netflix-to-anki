@@ -8,6 +8,7 @@ import checkForExistingTranslation from "./checkForExistingTranslation"
 import updateNeedToStudy from "./updateNeedToStudy"
 import updateTranslations from "./updateTranslations"
 
+// returns boolean, if yes, it means we should play the video.
 export default function translateOnePhraseLocal(currentText: string) {
     const liveElement = $(`span:contains("${currentText}")`).find("span").last()
     const existingTranslation = checkForExistingTranslation(currentText)
@@ -18,11 +19,11 @@ export default function translateOnePhraseLocal(currentText: string) {
         changeText($(liveElement), existingReverseTranslation, "white")
         window.localTranslations[existingReverseTranslation] = null
         window.batchTranslatedSentences[existingReverseTranslation] = null
-        return true
+        return window.AUTO_TRANSLATE_WHILE_PLAYING ? false : true
     } else if (existingTranslation) {
         updateTranslations(currentText, existingTranslation)
         updateNeedToStudy(currentText, existingTranslation)
-        return false
+        return window.AUTO_TRANSLATE_WHILE_PLAYING ? true : false
     }
     return null
 }

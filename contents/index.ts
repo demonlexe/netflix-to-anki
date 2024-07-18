@@ -33,6 +33,7 @@ declare global {
         reverseTranslations: Record<string, string>
         batchTranslatedSentences: Record<string, string>
         reverseBatchTranslatedSentences: Record<string, string>
+        AUTO_TRANSLATE_WHILE_PLAYING: boolean
     }
 }
 
@@ -40,6 +41,8 @@ window.localTranslations = {}
 window.reverseTranslations = {}
 window.batchTranslatedSentences = {}
 window.reverseBatchTranslatedSentences = {}
+window.AUTO_TRANSLATE_WHILE_PLAYING =
+    USER_SETTINGS_DEFAULTS["AUTO_TRANSLATE_WHILE_PLAYING"]
 
 const script = document.createElement("script")
 script.setAttribute("type", "text/javascript")
@@ -137,10 +140,10 @@ const onRightClick = async () => {
 const watchTimedText = async (timedText: HTMLElement) => {
     // init setting to default, refetch every 10 seconds
     // TODO: Use a messenger to update this setting instead.
-    let autoTranslateEnabled =
-        USER_SETTINGS_DEFAULTS["AUTO_TRANSLATE_WHILE_PLAYING"]
     const fetchSetting = async () => {
-        autoTranslateEnabled = await getData("AUTO_TRANSLATE_WHILE_PLAYING")
+        window.AUTO_TRANSLATE_WHILE_PLAYING = await getData(
+            "AUTO_TRANSLATE_WHILE_PLAYING"
+        )
         setTimeout(fetchSetting, 10000)
     }
     fetchSetting()
@@ -164,7 +167,7 @@ const watchTimedText = async (timedText: HTMLElement) => {
                         window.localTranslations[currentText]
                     )
                 } else if (
-                    autoTranslateEnabled &&
+                    window.AUTO_TRANSLATE_WHILE_PLAYING &&
                     existingTranslation &&
                     !isYellow(deepestSpan)
                 ) {
