@@ -1,6 +1,6 @@
 export type GeminiBatchRequestResponse =
     | {
-          translatedPhrases: object
+          translatedPhrases: Record<string, string>
           error?: never
       }
     | {

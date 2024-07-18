@@ -1,4 +1,4 @@
-import { getData } from "./localData"
+import { getData } from "../localData"
 
 export default async function getAllCachedTranslations() {
     // all sentences is a map of sentences to other sentences.

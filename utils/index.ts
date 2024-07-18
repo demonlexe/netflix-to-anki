@@ -72,10 +72,10 @@ export function removeNoPointerEvents(
     $(element).css("z-index", 1000)
 }
 
-export function single_double_click(
+export function left_right_click(
     element: JQuery<Node>,
-    single_click_callback: (element: Element) => void,
-    right_click_callback: () => void
+    left_click_callback: (element: Element) => Promise<boolean>,
+    right_click_callback: () => Promise<boolean>
 ) {
     return element.each(function () {
         $(element).on("click", function (event) {
@@ -84,8 +84,12 @@ export function single_double_click(
                 if (!isVideoPaused()) {
                     $("video").trigger("pause")
                 }
-                single_click_callback(insideDiv)
                 checkStopPropagation(event)
+                left_click_callback(insideDiv).then((shouldPlay) => {
+                    if (shouldPlay) {
+                        $("video").trigger("play")
+                    }
+                })
             }
         })
         $(element).on("contextmenu", function (event) {
@@ -94,8 +98,12 @@ export function single_double_click(
                 if (!isVideoPaused()) {
                     $("video").trigger("pause")
                 }
-                right_click_callback()
                 checkStopPropagation(event)
+                right_click_callback().then((shouldPlay) => {
+                    if (shouldPlay) {
+                        $("video").trigger("play")
+                    }
+                })
                 return false
             }
             return true

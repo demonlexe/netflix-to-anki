@@ -3,7 +3,7 @@ import { useEffect, useState } from "react"
 import DownloadAnkiDeck from "~components/DownloadAnkiDeck"
 import ResetAnkiDeck from "~components/ResetAnkiDeck"
 import Settings from "~components/Settings"
-import getNeedToStudyLength from "~utils/getNeedToStudyLength"
+import getNeedToStudyLength from "~utils/functions/getNeedToStudyLength"
 
 function IndexPopup() {
     const [numberToStudy, setNumberToStudy] = useState<number>()

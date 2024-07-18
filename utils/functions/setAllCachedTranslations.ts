@@ -1,4 +1,4 @@
-import { setData } from "./localData"
+import { setData } from "../localData"
 
 export default async function setAllCachedTranslations(allSentences: object) {
     // all sentences is a map of sentences to other sentences.

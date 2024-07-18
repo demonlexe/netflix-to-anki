@@ -1,4 +1,4 @@
-import createAnkiDeck from "~utils/createAnkiDeck"
+import createAnkiDeck from "~utils/functions/createAnkiDeck"
 import { download } from "~utils/index"
 
 type DownloadAnkiDeckProps = {
