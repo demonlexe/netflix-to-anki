@@ -8,7 +8,12 @@ enum ConfirmStatus {
     RESET = -1
 }
 
-export default function ResetAnkiDeck() {
+type ResetAnkiDeckProps = {
+    onReset: () => void
+}
+
+export default function ResetAnkiDeck(props: ResetAnkiDeckProps) {
+    const { onReset } = props
     const [confirm, setConfirm] = useState(ConfirmStatus.NOT_CLICKED)
     return (
         <>
@@ -31,6 +36,7 @@ export default function ResetAnkiDeck() {
                                         : currentConfirm
                                 )
                             }, 3000)
+                            onReset()
                         })
                         return
                     }
