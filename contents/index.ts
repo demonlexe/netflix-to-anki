@@ -68,7 +68,6 @@ function updateTranslations(currentText: string, translatedText: string) {
     changeText(liveElement, translatedText)
     localTranslations[currentText] = translatedText
     reverseTranslations[translatedText] = currentText
-    updateNeedToStudy(currentText, translatedText)
 }
 
 function changeText(
@@ -97,6 +96,7 @@ const onSingleClick = async (elem: Element) => {
     } else if (batchTranslatedSentences[currentText]) {
         // check for existing cached translation here
         updateTranslations(currentText, batchTranslatedSentences[currentText])
+        updateNeedToStudy(currentText, batchTranslatedSentences[currentText])
         return
     }
     const openResult: GeminiSingleRequestResponse = await sendToBackground({
@@ -105,6 +105,7 @@ const onSingleClick = async (elem: Element) => {
     })
     console.log("Single Click API Result: ", openResult)
     updateTranslations(currentText, openResult.translatedPhrases[currentText])
+    updateNeedToStudy(currentText, openResult.translatedPhrases[currentText])
 }
 
 const onRightClick = async () => {
@@ -117,13 +118,18 @@ const onRightClick = async () => {
         name: "gemini_translate",
         body: { phrases: allTexts } as GeminiSingleRequestBody
     })
-    console.log("Double Click API Result: ", openResult)
-    allTexts.forEach((currentText) =>
+    console.log("Right Click API Result: ", openResult)
+    const translatedTexts: string[] = []
+    allTexts.forEach((currentText) => {
         updateTranslations(
             currentText,
             openResult.translatedPhrases[currentText]
         )
-    )
+        translatedTexts.push(openResult.translatedPhrases[currentText])
+    })
+    const text1 = allTexts.join(" ").replace(/\s+/g, " ") // remove extra spaces
+    const text2 = translatedTexts.join(" ").replace(/\s+/g, " ") // remove extra spaces
+    updateNeedToStudy(text1, text2)
 }
 
 const watchTimedText = (timedText: HTMLElement) => {
