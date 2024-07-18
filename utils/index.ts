@@ -72,7 +72,7 @@ export function removeNoPointerEvents(
     $(element).css("z-index", 1000)
 }
 
-export function single_double_click(
+export function left_right_click(
     element: JQuery<Node>,
     single_click_callback: (element: Element) => void,
     right_click_callback: () => void

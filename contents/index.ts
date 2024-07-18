@@ -11,9 +11,9 @@ import type {
 } from "~background/types"
 import {
     isYellow,
+    left_right_click,
     observeSection,
-    removeElementSiblings,
-    single_double_click
+    removeElementSiblings
 } from "~utils"
 import getAllCachedTranslations from "~utils/getAllCachedTranslations"
 import { waitForElement } from "~utils/index"
@@ -81,22 +81,31 @@ function changeText(
     removeElementSiblings(elem[0] as HTMLElement)
 }
 
-const onSingleClick = async (elem: Element) => {
+function checkForExistingTranslation(phrase: string) {
+    // pre-processing
+    phrase = phrase?.trim()
+    if (!phrase || phrase.length === 0) return null
+
+    if (localTranslations[phrase]) {
+        return localTranslations[phrase]
+    } else if (batchTranslatedSentences[phrase]) {
+        return batchTranslatedSentences[phrase]
+    }
+    return null
+}
+
+const onLeftClick = async (elem: Element) => {
     const currentText = $(elem).text().trim()
     const liveElement = $(`span:contains("${currentText}")`).find("span").last()
+    const existingTranslation = checkForExistingTranslation(currentText)
     if (isYellow($(liveElement)) && reverseTranslations[currentText]) {
         // Untranslate the text.
         changeText($(liveElement), reverseTranslations[currentText], "white")
         localTranslations[reverseTranslations[currentText]] = null
         return
-    } else if (localTranslations[currentText]) {
-        // check for existing cached translation here
-        changeText($(liveElement), localTranslations[currentText])
-        return
-    } else if (batchTranslatedSentences[currentText]) {
-        // check for existing cached translation here
-        updateTranslations(currentText, batchTranslatedSentences[currentText])
-        updateNeedToStudy(currentText, batchTranslatedSentences[currentText])
+    } else if (existingTranslation) {
+        updateTranslations(currentText, existingTranslation)
+        updateNeedToStudy(currentText, existingTranslation)
         return
     }
     const openResult: GeminiSingleRequestResponse = await sendToBackground({
@@ -114,6 +123,17 @@ const onRightClick = async () => {
     $(".player-timedtext-text-container").each((_, el) => {
         allTexts.push($(el).text().trim())
     })
+
+    // if there is no need to do the grouped translation, return early
+    if (allTexts.length === 0) return
+    if (allTexts.length === 1 && checkForExistingTranslation(allTexts[0])) {
+        const currentText = allTexts[0]
+        const existingTranslation = checkForExistingTranslation(currentText)
+        updateTranslations(currentText, existingTranslation)
+        updateNeedToStudy(currentText, existingTranslation)
+        return
+    }
+
     const openResult: GeminiSingleRequestResponse = await sendToBackground({
         name: "gemini_translate",
         body: { phrases: allTexts } as GeminiSingleRequestBody
@@ -133,7 +153,7 @@ const onRightClick = async () => {
 }
 
 const watchTimedText = (timedText: HTMLElement) => {
-    single_double_click($(".watch-video"), onSingleClick, onRightClick)
+    left_right_click($(".watch-video"), onLeftClick, onRightClick)
 
     const doOnMutation = (mutation: MutationRecord) => {
         if (mutation?.addedNodes?.length > 0) {
