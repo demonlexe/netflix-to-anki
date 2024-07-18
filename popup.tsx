@@ -19,7 +19,11 @@ function IndexPopup() {
     return (
         <div
             style={{
-                padding: 16
+                display: "flex",
+                flexDirection: "column",
+                padding: "16px",
+                gap: "4px",
+                width: "300px"
             }}>
             <h2>netflix-to-anki</h2>
             <Settings />
