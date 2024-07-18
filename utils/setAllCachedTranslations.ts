@@ -26,7 +26,6 @@ export default async function setAllCachedTranslations(allSentences: object) {
         }
     }
 
-    console.log("WILL SET CACHES: ", cache1, cache2, cache3, cache4, cache5)
     await Promise.all([
         setData("NETFLIX_TO_ANKI_TRANSLATIONS_CACHE_1", cache1),
         setData("NETFLIX_TO_ANKI_TRANSLATIONS_CACHE_2", cache2),
