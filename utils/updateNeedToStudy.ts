@@ -1,4 +1,4 @@
-import { getData, setData } from "~localData"
+import { getData, setData } from "~utils/localData"
 
 export default async function updateNeedToStudy(
     textOne: string,

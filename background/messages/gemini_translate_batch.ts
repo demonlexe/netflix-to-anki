@@ -9,8 +9,10 @@ import type {
     SupportedLocale
 } from "~background/types"
 import { getCurrentLanguageFromModel } from "~background/utils"
-import { getData, setData } from "~localData"
 import { BATCH_SIZE } from "~utils/constants"
+import getAllCachedTranslations from "~utils/getAllCachedTranslations"
+import { getData } from "~utils/localData"
+import setAllCachedTranslations from "~utils/setAllCachedTranslations"
 
 type XMLText = {
     $: any
@@ -63,7 +65,7 @@ const handler: PlasmoMessaging.MessageHandler<
         message.response?.length > 0
     ) {
         console.log("Request received: ", req.body)
-        const storedTranslations = await getData("NETFLIX_TO_ANKI_TRANSLATIONS")
+        const storedTranslations = await getAllCachedTranslations()
         const alreadyTranslatedSentences =
             storedTranslations &&
             typeof storedTranslations === "object" &&
@@ -135,7 +137,11 @@ const handler: PlasmoMessaging.MessageHandler<
             }
             await Promise.all(allPromises).then(() => {
                 console.log("All sentences translated: ", collectedSentences)
-                setData("NETFLIX_TO_ANKI_TRANSLATIONS", collectedSentences)
+                try {
+                    setAllCachedTranslations(collectedSentences)
+                } catch (e) {
+                    console.error("Error setting translations: ", e)
+                }
                 res.send({
                     translatedPhrases: collectedSentences
                 })

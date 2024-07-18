@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 
-import { setData } from "~localData"
+import { setData } from "~utils/localData"
 
 enum ConfirmStatus {
     NOT_CLICKED = 0,

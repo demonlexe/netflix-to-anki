@@ -9,13 +9,13 @@ import type {
     GeminiSingleRequestBody,
     GeminiSingleRequestResponse
 } from "~background/types"
-import { getData } from "~localData"
 import {
     isYellow,
     observeSection,
     removeElementSiblings,
     single_double_click
 } from "~utils"
+import getAllCachedTranslations from "~utils/getAllCachedTranslations"
 import { waitForElement } from "~utils/index"
 import initData from "~utils/initData"
 import updateNeedToStudy from "~utils/updateNeedToStudy"
@@ -37,11 +37,11 @@ script.setAttribute("src", chrome.runtime.getURL("inject.js"))
 document.documentElement.appendChild(script)
 
 async function initBatchTranslatedSentences() {
-    const translations = await getData("NETFLIX_TO_ANKI_TRANSLATIONS")
+    const translations = await getAllCachedTranslations()
     if (translations && Object.keys(translations).length > 0)
         batchTranslatedSentences = translations
 
-    console.log("Pulled down translations: ", batchTranslatedSentences)
+    console.log("Pulled down translations: ", translations)
 }
 
 initBatchTranslatedSentences()
@@ -126,28 +126,45 @@ const onRightClick = async () => {
     )
 }
 
-window.addEventListener("load", () => {
-    waitForElement(".player-timedtext").then((timedText) => {
-        single_double_click($(".watch-video"), onSingleClick, onRightClick)
+const watchTimedText = (timedText: HTMLElement) => {
+    single_double_click($(".watch-video"), onSingleClick, onRightClick)
 
-        const doOnMutation = (mutation: MutationRecord) => {
-            if (mutation?.addedNodes?.length > 0) {
-                // loop all added nodes and log if they are clicked.
-                for (const node of mutation.addedNodes) {
-                    const deepestSpan = $(node).find("span").last()
-                    if (
-                        localTranslations[$(node).text().trim()] &&
-                        !isYellow(deepestSpan)
-                    ) {
-                        changeText(
-                            deepestSpan,
-                            localTranslations[$(node).text().trim()]
-                        )
-                    }
+    const doOnMutation = (mutation: MutationRecord) => {
+        if (mutation?.addedNodes?.length > 0) {
+            // loop all added nodes and log if they are clicked.
+            for (const node of mutation.addedNodes) {
+                const deepestSpan = $(node).find("span").last()
+                if (
+                    localTranslations[$(node).text().trim()] &&
+                    !isYellow(deepestSpan)
+                ) {
+                    changeText(
+                        deepestSpan,
+                        localTranslations[$(node).text().trim()]
+                    )
                 }
-                $(timedText).css("pointer-events", "auto")
+            }
+            $(timedText).css("pointer-events", "auto")
+        }
+    }
+    observeSection(timedText, doOnMutation)
+}
+
+window.addEventListener("load", () => {
+    waitForElement("#appMountPoint").then(async (mountedElem) => {
+        const doOnMountMutate = (mutation: MutationRecord) => {
+            if (mutation.addedNodes.length > 0) {
+                mutation.addedNodes.forEach(async (node) => {
+                    // if the node is .player-timedtext
+                    if ($(node).hasClass("player-timedtext")) {
+                        const nodeAsElem = await waitForElement(node)
+                        watchTimedText(nodeAsElem)
+                    }
+                })
             }
         }
-        observeSection(timedText, doOnMutation)
+        observeSection(mountedElem, doOnMountMutate)
+        const firstTimedText = await waitForElement(".player-timedtext")
+        watchTimedText(firstTimedText)
     })
 })

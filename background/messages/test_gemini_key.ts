@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai"
 
 import type { PlasmoMessaging } from "@plasmohq/messaging"
 
-import { getData } from "~localData"
+import { getData } from "~utils/localData"
 
 const handler: PlasmoMessaging.MessageHandler<any, any> = async (req, res) => {
     console.log("Request received: ", req.body)
