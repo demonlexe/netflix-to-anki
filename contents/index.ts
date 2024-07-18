@@ -11,12 +11,14 @@ import type {
 } from "~background/types"
 import { isYellow, left_right_click, observeSection } from "~utils"
 import changeText from "~utils/functions/changeText"
+import checkForExistingTranslation from "~utils/functions/checkForExistingTranslation"
 import getAllCachedTranslations from "~utils/functions/getAllCachedTranslations"
 import initData from "~utils/functions/initData"
 import translateOnePhraseLocal from "~utils/functions/translateOnePhraseLocal"
 import updateNeedToStudy from "~utils/functions/updateNeedToStudy"
 import updateTranslations from "~utils/functions/updateTranslations"
 import { waitForElement } from "~utils/index"
+import { getData } from "~utils/localData"
 
 export const config: PlasmoCSConfig = {
     matches: ["https://www.netflix.com/watch/*"]
@@ -120,7 +122,8 @@ const onRightClick = async () => {
     return false
 }
 
-const watchTimedText = (timedText: HTMLElement) => {
+const watchTimedText = async (timedText: HTMLElement) => {
+    const autoTranslateEnabled = await getData("AUTO_TRANSLATE_WHILE_PLAYING")
     left_right_click($(".watch-video"), onLeftClick, onRightClick)
 
     const doOnMutation = (mutation: MutationRecord) => {
@@ -128,14 +131,23 @@ const watchTimedText = (timedText: HTMLElement) => {
             // loop all added nodes and log if they are clicked.
             for (const node of mutation.addedNodes) {
                 const deepestSpan = $(node).find("span").last()
+                const currentText = $(node).text()?.trim()
+                const existingTranslation =
+                    checkForExistingTranslation(currentText)
                 if (
-                    window.localTranslations[$(node).text()?.trim()] &&
+                    window.localTranslations[currentText] &&
                     !isYellow(deepestSpan)
                 ) {
                     changeText(
                         deepestSpan,
-                        window.localTranslations[$(node).text()?.trim()]
+                        window.localTranslations[currentText]
                     )
+                } else if (
+                    autoTranslateEnabled &&
+                    existingTranslation &&
+                    !isYellow(deepestSpan)
+                ) {
+                    changeText(deepestSpan, existingTranslation)
                 }
             }
             $(timedText).css("pointer-events", "auto")
