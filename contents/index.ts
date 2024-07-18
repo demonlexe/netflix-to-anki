@@ -10,6 +10,7 @@ import type {
     GeminiSingleRequestResponse
 } from "~background/types"
 import { isYellow, left_right_click, observeSection } from "~utils"
+import { USER_SETTINGS_DEFAULTS } from "~utils/constants"
 import changeText from "~utils/functions/changeText"
 import checkForExistingTranslation from "~utils/functions/checkForExistingTranslation"
 import getAllCachedTranslations from "~utils/functions/getAllCachedTranslations"
@@ -123,7 +124,16 @@ const onRightClick = async () => {
 }
 
 const watchTimedText = async (timedText: HTMLElement) => {
-    const autoTranslateEnabled = await getData("AUTO_TRANSLATE_WHILE_PLAYING")
+    // init setting to default, refetch every 10 seconds
+    // TODO: Use a messenger to update this setting instead.
+    let autoTranslateEnabled =
+        USER_SETTINGS_DEFAULTS["AUTO_TRANSLATE_WHILE_PLAYING"]
+    const fetchSetting = async () => {
+        autoTranslateEnabled = await getData("AUTO_TRANSLATE_WHILE_PLAYING")
+        setTimeout(fetchSetting, 10000)
+    }
+    fetchSetting()
+
     left_right_click($(".watch-video"), onLeftClick, onRightClick)
 
     const doOnMutation = (mutation: MutationRecord) => {
