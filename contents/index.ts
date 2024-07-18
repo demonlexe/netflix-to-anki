@@ -19,7 +19,7 @@ import translateOnePhraseLocal from "~utils/functions/translateOnePhraseLocal"
 import updateNeedToStudy from "~utils/functions/updateNeedToStudy"
 import updateTranslations from "~utils/functions/updateTranslations"
 import { waitForElement } from "~utils/index"
-import { getData } from "~utils/localData"
+import { getData, type UserSettings } from "~utils/localData"
 
 export const config: PlasmoCSConfig = {
     matches: ["https://www.netflix.com/watch/*"]
@@ -33,7 +33,7 @@ declare global {
         reverseTranslations: Record<string, string>
         batchTranslatedSentences: Record<string, string>
         reverseBatchTranslatedSentences: Record<string, string>
-        AUTO_TRANSLATE_WHILE_PLAYING: boolean
+        polledSettings: UserSettings
     }
 }
 
@@ -41,8 +41,7 @@ window.localTranslations = {}
 window.reverseTranslations = {}
 window.batchTranslatedSentences = {}
 window.reverseBatchTranslatedSentences = {}
-window.AUTO_TRANSLATE_WHILE_PLAYING =
-    USER_SETTINGS_DEFAULTS["AUTO_TRANSLATE_WHILE_PLAYING"]
+window.polledSettings = USER_SETTINGS_DEFAULTS
 
 const script = document.createElement("script")
 script.setAttribute("type", "text/javascript")
@@ -137,17 +136,16 @@ const onRightClick = async () => {
     return false
 }
 
-const watchTimedText = async (timedText: HTMLElement) => {
-    // init setting to default, refetch every 10 seconds
-    // TODO: Use a messenger to update this setting instead.
-    const fetchSetting = async () => {
-        window.AUTO_TRANSLATE_WHILE_PLAYING = await getData(
-            "AUTO_TRANSLATE_WHILE_PLAYING"
-        )
-        setTimeout(fetchSetting, 10000)
-    }
-    fetchSetting()
+// refetch settings every 8 seconds
+const pollSettings = async () => {
+    Object.keys(USER_SETTINGS_DEFAULTS).forEach(async (key) => {
+        window.polledSettings[key] = await getData(key as keyof UserSettings)
+    })
+    setTimeout(pollSettings, 8000)
+}
 
+const watchTimedText = async (timedText: HTMLElement) => {
+    pollSettings()
     left_right_click($(".watch-video"), onLeftClick, onRightClick)
 
     const doOnMutation = (mutation: MutationRecord) => {
@@ -167,7 +165,7 @@ const watchTimedText = async (timedText: HTMLElement) => {
                         window.localTranslations[currentText]
                     )
                 } else if (
-                    window.AUTO_TRANSLATE_WHILE_PLAYING &&
+                    window.polledSettings.AUTO_TRANSLATE_WHILE_PLAYING &&
                     existingTranslation &&
                     !isYellow(deepestSpan)
                 ) {
