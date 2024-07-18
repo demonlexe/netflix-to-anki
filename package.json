@@ -33,7 +33,8 @@
         "scripting",
         "webRequest",
         "webRequestBlocking",
-        "background"
+        "background",
+        "unlimitedStorage"
     ],
     "manifest": {
         "host_permissions": [
@@ -45,7 +46,8 @@
             "scripting",
             "webRequest",
             "webRequestBlocking",
-            "background"
+            "background",
+            "unlimitedStorage"
         ],
         "web_accessible_resources": [
             {

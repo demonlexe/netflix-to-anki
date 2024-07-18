@@ -7,7 +7,7 @@ import type {
     GeminiSingleRequestResponse
 } from "~background/types"
 import { getCurrentLanguageFromModel } from "~background/utils"
-import { getData } from "~localData"
+import { getData } from "~utils/localData"
 
 const TranslationRequirements = (language: string) =>
     [

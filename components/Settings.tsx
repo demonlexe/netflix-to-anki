@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 
 import { sendToBackground } from "@plasmohq/messaging"
 
-import { getData, setData } from "~localData"
+import { getData, setData } from "~utils/localData"
 
 enum API_KEY_STATUS {
     INVALID = "INVALID",

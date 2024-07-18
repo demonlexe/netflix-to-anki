@@ -1,4 +1,4 @@
-import { getData, setData, type UserSettings } from "~localData"
+import { getData, setData, type UserSettings } from "~utils/localData"
 
 export const UserSettingsDefaults: UserSettings = {
     TARGET_LANGUAGE: "en-US",

@@ -1,4 +1,4 @@
-import { getData, setData } from "~localData"
+import { getData, setData } from "~utils/localData"
 
 export default async function createAnkiDeck(): Promise<File> {
     const [NEED_TO_STUDY, ANKI_CONFIG] = await Promise.all([

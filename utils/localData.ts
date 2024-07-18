@@ -3,7 +3,11 @@ import { Storage } from "@plasmohq/storage"
 
 export type LocalData = {
     NATIVE_LANGUAGE: string
-    NETFLIX_TO_ANKI_TRANSLATIONS: object
+    NETFLIX_TO_ANKI_TRANSLATIONS_CACHE_1: object
+    NETFLIX_TO_ANKI_TRANSLATIONS_CACHE_2: object
+    NETFLIX_TO_ANKI_TRANSLATIONS_CACHE_3: object
+    NETFLIX_TO_ANKI_TRANSLATIONS_CACHE_4: object
+    NETFLIX_TO_ANKI_TRANSLATIONS_CACHE_5: object
     NEED_TO_STUDY: object
 } & UserSettings
 
@@ -20,7 +24,7 @@ const localStorage = new Storage({
 
 export function getData<Key extends keyof LocalData, Value = LocalData[Key]>(
     key: Key,
-    mode?: string
+    mode: "local" | "sync" = "local"
 ) {
     if (!key && key === null) {
         return null
@@ -56,7 +60,7 @@ export function getData<Key extends keyof LocalData, Value = LocalData[Key]>(
 export function setData<Key extends keyof LocalData, Value = LocalData[Key]>(
     key: Key,
     value: Value,
-    mode?: string
+    mode: "local" | "sync" = "local"
 ) {
     if ((!key && key === null) || (!value && value === null)) {
         return new Promise((resolve, reject) => {
