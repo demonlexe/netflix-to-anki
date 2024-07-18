@@ -63,8 +63,11 @@ window.addEventListener("message", async (event) => {
 
 function updateTranslations(currentText: string, translatedText: string) {
     // pre-processing
-    currentText = currentText.trim()
-    translatedText = translatedText.trim()
+    currentText = currentText?.trim()
+    translatedText = translatedText?.trim()
+
+    if (!currentText || currentText.length === 0) return
+    if (!translatedText || translatedText.length === 0) return
 
     // update the displayed text
     const liveElement = $(`span:contains("${currentText}")`).find("span").last()
@@ -80,7 +83,8 @@ function changeText(
     newText: string,
     color: string = "yellow"
 ) {
-    newText = newText.trim()
+    newText = newText?.trim()
+    if (!newText || newText.length === 0) return
     $(elem).text(newText)
     $(elem).css("color", color)
     removeElementSiblings(elem[0] as HTMLElement)
@@ -99,19 +103,23 @@ function checkForExistingTranslation(phrase: string) {
     return null
 }
 
+// Given the element, translate the text and update the cache.
+// Return "true" if it should play the video.
 const onLeftClick = async (elem: Element) => {
-    const currentText = $(elem).text().trim()
+    const currentText = $(elem).text()?.trim()
+    if (!currentText || currentText.length === 0) return false
+
     const liveElement = $(`span:contains("${currentText}")`).find("span").last()
     const existingTranslation = checkForExistingTranslation(currentText)
     if (isYellow($(liveElement)) && reverseTranslations[currentText]) {
         // Untranslate the text.
         changeText($(liveElement), reverseTranslations[currentText], "white")
         localTranslations[reverseTranslations[currentText]] = null
-        return
+        return true
     } else if (existingTranslation) {
         updateTranslations(currentText, existingTranslation)
         updateNeedToStudy(currentText, existingTranslation)
-        return
+        return false
     }
     const openResult: GeminiSingleRequestResponse = await sendToBackground({
         name: "gemini_translate",
@@ -120,23 +128,26 @@ const onLeftClick = async (elem: Element) => {
     console.log("Single Click API Result: ", openResult)
     updateTranslations(currentText, openResult.translatedPhrases[currentText])
     updateNeedToStudy(currentText, openResult.translatedPhrases[currentText])
+    return false
 }
 
+// Translate all the text currently on the screen and update the cache.
+// Return "true" if it should play the video.
 const onRightClick = async () => {
     // get array of all texts stored in .player-timedtext-text-container
     const allTexts: string[] = []
     $(".player-timedtext-text-container").each((_, el) => {
-        allTexts.push($(el).text().trim())
+        allTexts.push($(el).text()?.trim())
     })
 
     // if there is no need to do the grouped translation, return early
-    if (allTexts.length === 0) return
+    if (allTexts.length === 0) return false
     if (allTexts.length === 1 && checkForExistingTranslation(allTexts[0])) {
         const currentText = allTexts[0]
         const existingTranslation = checkForExistingTranslation(currentText)
         updateTranslations(currentText, existingTranslation)
         updateNeedToStudy(currentText, existingTranslation)
-        return
+        return false
     }
 
     const openResult: GeminiSingleRequestResponse = await sendToBackground({
@@ -155,6 +166,7 @@ const onRightClick = async () => {
     const text1 = allTexts.join(" ").replace(/\s+/g, " ") // remove extra spaces
     const text2 = translatedTexts.join(" ").replace(/\s+/g, " ") // remove extra spaces
     updateNeedToStudy(text1, text2)
+    return false
 }
 
 const watchTimedText = (timedText: HTMLElement) => {
@@ -166,12 +178,12 @@ const watchTimedText = (timedText: HTMLElement) => {
             for (const node of mutation.addedNodes) {
                 const deepestSpan = $(node).find("span").last()
                 if (
-                    localTranslations[$(node).text().trim()] &&
+                    localTranslations[$(node).text()?.trim()] &&
                     !isYellow(deepestSpan)
                 ) {
                     changeText(
                         deepestSpan,
-                        localTranslations[$(node).text().trim()]
+                        localTranslations[$(node).text()?.trim()]
                     )
                 }
             }
