@@ -9,16 +9,14 @@ import type {
     GeminiSingleRequestBody,
     GeminiSingleRequestResponse
 } from "~background/types"
-import {
-    isYellow,
-    left_right_click,
-    observeSection,
-    removeElementSiblings
-} from "~utils"
-import getAllCachedTranslations from "~utils/getAllCachedTranslations"
+import { isYellow, left_right_click, observeSection } from "~utils"
+import changeText from "~utils/functions/changeText"
+import getAllCachedTranslations from "~utils/functions/getAllCachedTranslations"
+import initData from "~utils/functions/initData"
+import translateOnePhraseLocal from "~utils/functions/translateOnePhraseLocal"
+import updateNeedToStudy from "~utils/functions/updateNeedToStudy"
+import updateTranslations from "~utils/functions/updateTranslations"
 import { waitForElement } from "~utils/index"
-import initData from "~utils/initData"
-import updateNeedToStudy from "~utils/updateNeedToStudy"
 
 export const config: PlasmoCSConfig = {
     matches: ["https://www.netflix.com/watch/*"]
@@ -68,68 +66,6 @@ window.addEventListener("message", async (event) => {
         }
     }
 })
-
-function updateTranslations(currentText: string, translatedText: string) {
-    // pre-processing
-    currentText = currentText?.trim()
-    translatedText = translatedText?.trim()
-
-    if (!currentText || currentText.length === 0) return
-    if (!translatedText || translatedText.length === 0) return
-
-    // update the displayed text
-    const liveElement = $(`span:contains("${currentText}")`).find("span").last()
-    changeText(liveElement, translatedText)
-
-    // update the cache
-    window.localTranslations[currentText] = translatedText
-    window.reverseTranslations[translatedText] = currentText
-}
-
-function changeText(
-    elem: JQuery<EventTarget | HTMLElement>,
-    newText: string,
-    color: string = "yellow"
-) {
-    newText = newText?.trim()
-    if (!newText || newText.length === 0) return
-    $(elem).text(newText)
-    $(elem).css("color", color)
-    removeElementSiblings(elem[0] as HTMLElement)
-}
-
-function checkForExistingTranslation(phrase: string) {
-    // pre-processing
-    phrase = phrase?.trim()
-    if (!phrase || phrase.length === 0) return null
-
-    if (window.localTranslations[phrase]) {
-        return window.localTranslations[phrase]
-    } else if (window.batchTranslatedSentences[phrase]) {
-        return window.batchTranslatedSentences[phrase]
-    }
-    return null
-}
-
-const translateOnePhraseLocal = (currentText: string) => {
-    const liveElement = $(`span:contains("${currentText}")`).find("span").last()
-    const existingTranslation = checkForExistingTranslation(currentText)
-    if (isYellow($(liveElement)) && window.reverseTranslations[currentText]) {
-        // Untranslate the text.
-        changeText(
-            $(liveElement),
-            window.reverseTranslations[currentText],
-            "white"
-        )
-        window.localTranslations[window.reverseTranslations[currentText]] = null
-        return true
-    } else if (existingTranslation) {
-        updateTranslations(currentText, existingTranslation)
-        updateNeedToStudy(currentText, existingTranslation)
-        return false
-    }
-    return null
-}
 
 // Given the element, translate the text and update the cache.
 // Return "true" if it should play the video.

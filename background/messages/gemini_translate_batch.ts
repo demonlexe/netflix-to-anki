@@ -10,9 +10,9 @@ import type {
 } from "~background/types"
 import { getCurrentLanguageFromModel } from "~background/utils"
 import { BATCH_SIZE } from "~utils/constants"
-import getAllCachedTranslations from "~utils/getAllCachedTranslations"
+import getAllCachedTranslations from "~utils/functions/getAllCachedTranslations"
+import setAllCachedTranslations from "~utils/functions/setAllCachedTranslations"
 import { getData } from "~utils/localData"
-import setAllCachedTranslations from "~utils/setAllCachedTranslations"
 
 type XMLText = {
     $: any
@@ -176,7 +176,9 @@ async function geminiTranslateBatch(
             JSON.stringify(phrasesNumbered)
         ])
         console.log("No Error. Batch Result: ", result.response?.text())
-        const resultAsJson: object = JSON.parse(result.response?.text()?.trim())
+        const resultAsJson: Record<string, string> = JSON.parse(
+            result.response?.text()?.trim()
+        )
         response = {
             translatedPhrases: resultAsJson
         }
