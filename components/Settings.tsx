@@ -51,7 +51,7 @@ const Settings = () => {
                 }}>
                 <div>
                     <label htmlFor="should-auto-translate">
-                        Auto Translate
+                        Auto Translate While Watching
                     </label>
                     <input
                         id="should-auto-translate"

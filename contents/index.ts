@@ -32,12 +32,14 @@ declare global {
         localTranslations: Record<string, string>
         reverseTranslations: Record<string, string>
         batchTranslatedSentences: Record<string, string>
+        reverseBatchTranslatedSentences: Record<string, string>
     }
 }
 
 window.localTranslations = {}
 window.reverseTranslations = {}
 window.batchTranslatedSentences = {}
+window.reverseBatchTranslatedSentences = {}
 
 const script = document.createElement("script")
 script.setAttribute("type", "text/javascript")
@@ -47,8 +49,12 @@ document.documentElement.appendChild(script)
 
 async function initBatchTranslatedSentences() {
     const translations = await getAllCachedTranslations()
-    if (translations && Object.keys(translations).length > 0)
+    if (translations && Object.keys(translations).length > 0) {
         window.batchTranslatedSentences = translations
+        for (const key in translations) {
+            window.reverseBatchTranslatedSentences[translations[key]] = key
+        }
+    }
 
     console.log("Pulled down translations: ", translations)
 }
@@ -66,6 +72,11 @@ window.addEventListener("message", async (event) => {
         if (!openResult.error) {
             console.log("OPEN RESULT: ", openResult)
             window.batchTranslatedSentences = openResult.translatedPhrases
+            for (const key in openResult.translatedPhrases) {
+                window.reverseBatchTranslatedSentences[
+                    openResult.translatedPhrases[key]
+                ] = key
+            }
         }
     }
 })
