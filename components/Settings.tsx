@@ -17,17 +17,11 @@ const Settings = () => {
     const [apiKeyStatus, setApiKeyStatus] = useState<API_KEY_STATUS>(
         API_KEY_STATUS.NOT_TESTED
     )
-    const [shouldAutoTranslate, setShouldAutoTranslate] = useState(false)
 
-    const updateSettings = async (
-        newKey: string,
-        newLang: string,
-        shouldAutoTranslate: boolean
-    ) => {
+    const updateSettings = async () => {
         await Promise.all([
-            setData("API_KEY", newKey),
-            setData("TARGET_LANGUAGE", newLang),
-            setData("AUTO_TRANSLATE_WHILE_PLAYING", shouldAutoTranslate)
+            setData("API_KEY", apiKey),
+            setData("TARGET_LANGUAGE", language)
         ])
     }
 
@@ -40,9 +34,6 @@ const Settings = () => {
         getData("TARGET_LANGUAGE").then((lang) =>
             setLanguage(lang ?? navigator.language)
         )
-        getData("AUTO_TRANSLATE_WHILE_PLAYING").then((autoTranslate) =>
-            setShouldAutoTranslate(autoTranslate)
-        )
     }, [])
 
     return (
@@ -53,19 +44,6 @@ const Settings = () => {
                     gap: "8px",
                     flexDirection: "column"
                 }}>
-                <div>
-                    <label htmlFor="should-auto-translate">
-                        Auto Translate While Watching
-                    </label>
-                    <input
-                        id="should-auto-translate"
-                        type="checkbox"
-                        checked={shouldAutoTranslate}
-                        onChange={(e) =>
-                            setShouldAutoTranslate(e.target.checked)
-                        }
-                    />
-                </div>
                 <div>
                     <label htmlFor="api-key-input">Gemini API Key</label>
                     {apiKeyStatus === API_KEY_STATUS.INVALID && (
@@ -97,11 +75,7 @@ const Settings = () => {
                     })
                     if (testResult && !testResult.error) {
                         setApiKeyStatus(API_KEY_STATUS.SUCCESS)
-                        await updateSettings(
-                            apiKey,
-                            language,
-                            shouldAutoTranslate
-                        )
+                        await updateSettings()
                         setTimeout(() => {
                             setApiKeyStatus(API_KEY_STATUS.VALID)
                         }, 2000)

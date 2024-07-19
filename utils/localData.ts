@@ -16,7 +16,14 @@ export type UserSettings = {
     API_KEY: string
     ANKI_CONFIG: "BOTH" | "PROMPT_NATIVE" | "PROMPT_TARGET"
     AUTO_TRANSLATE_WHILE_PLAYING: boolean
+    PAUSE_WHEN_TRANSLATING: boolean
 }
+
+export type BooleanKeys<T> = {
+    [K in keyof T]: T[K] extends boolean ? K : never
+}[keyof T]
+
+export type BooleanUserSettings = Record<BooleanKeys<UserSettings>, boolean>
 
 const storage = new Storage()
 const localStorage = new Storage({

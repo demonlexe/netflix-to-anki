@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 
+import BooleanSettings from "~components/BooleanSettings"
 import DownloadAnkiDeck from "~components/DownloadAnkiDeck"
 import ResetAnkiDeck from "~components/ResetAnkiDeck"
 import Settings from "~components/Settings"
@@ -29,6 +30,7 @@ function IndexPopup() {
             <Settings />
             <DownloadAnkiDeck numberToStudy={numberToStudy} />
             <ResetAnkiDeck onReset={updateNumberToStudy} />
+            <BooleanSettings />
         </div>
     )
 }
