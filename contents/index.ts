@@ -40,7 +40,8 @@ declare global {
         untranslatedSentences: string[]
         batchTranslateRetries: number
         maxOfBatch: number
-        watchingTimedText: HTMLElement
+        watchingTimedTextElement: HTMLElement
+        watchingVideoElement: HTMLVideoElement
     }
 }
 
@@ -130,10 +131,10 @@ const pollSettings = async () => {
 }
 
 const watchTimedText = async (timedText: HTMLElement) => {
-    if (window.watchingTimedText === timedText) {
+    if (window.watchingTimedTextElement === timedText) {
         return //already watching this block.
     }
-    window.watchingTimedText = timedText
+    window.watchingTimedTextElement = timedText
 
     pollSettings()
     left_right_click($(".watch-video"), onLeftClick, onRightClick)
@@ -172,6 +173,27 @@ const watchTimedText = async (timedText: HTMLElement) => {
     observeSection(timedText, doOnMutation)
 }
 
+const watchVideo = async (video: HTMLVideoElement) => {
+    if (window.watchingVideoElement === video) {
+        return // already "watching" this video.
+    }
+    window.watchingVideoElement = video
+    $(video).on("pause", function () {
+        if (window.polledSettings.TRANSLATE_ON_PAUSE) {
+            $(".player-timedtext-text-container").each((_, el) => {
+                // get actual span
+                const deepestSpan = $(el).find("span").last()
+                if (!deepestSpan || !deepestSpan[0]) return
+                onLeftClick(deepestSpan[0]).then((shouldPlay) => {
+                    if (shouldPlay) {
+                        video.play()
+                    }
+                })
+            })
+        }
+    })
+}
+
 window.addEventListener("load", () => {
     waitForElement("#appMountPoint").then(async (mountedElem) => {
         const doOnMountMutate = (mutation: MutationRecord) => {
@@ -183,15 +205,22 @@ window.addEventListener("load", () => {
                             // don't care about home page
                             return
                         }
-                        const timedText =
-                            await waitForElement(".player-timedtext")
+                        const [timedText, video] = await Promise.all([
+                            waitForElement(".player-timedtext"),
+                            waitForElement("video")
+                        ])
                         watchTimedText(timedText)
+                        watchVideo(video as HTMLVideoElement)
                     }
                 })
             }
         }
         observeSection(mountedElem, doOnMountMutate)
-        const firstTimedText = await waitForElement(".player-timedtext")
+        const [firstTimedText, firstVideo] = await Promise.all([
+            waitForElement(".player-timedtext"),
+            waitForElement("video")
+        ])
         watchTimedText(firstTimedText)
+        watchVideo(firstVideo as HTMLVideoElement)
     })
 })

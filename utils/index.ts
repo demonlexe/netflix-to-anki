@@ -79,6 +79,7 @@ export function left_right_click(
 ) {
     return element.each(function () {
         $(element).on("click", function (event) {
+            if (window.polledSettings.TRANSLATE_ON_PAUSE) return // do not translate on click
             const insideDiv = insideWhichDiv(event)
             if (insideDiv) {
                 if (!isVideoPaused()) {
@@ -96,6 +97,7 @@ export function left_right_click(
             }
         })
         $(element).on("contextmenu", function (event) {
+            if (window.polledSettings.TRANSLATE_ON_PAUSE) return // do not translate on click
             const insideDiv = insideWhichDiv(event)
             if (insideDiv) {
                 if (!isVideoPaused()) {

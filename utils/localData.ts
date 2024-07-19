@@ -17,6 +17,7 @@ export type UserSettings = {
     ANKI_CONFIG: "BOTH" | "PROMPT_NATIVE" | "PROMPT_TARGET"
     AUTO_TRANSLATE_WHILE_PLAYING: boolean
     PAUSE_WHEN_TRANSLATING: boolean
+    TRANSLATE_ON_PAUSE: boolean
 }
 
 export type BooleanKeys<T> = {
