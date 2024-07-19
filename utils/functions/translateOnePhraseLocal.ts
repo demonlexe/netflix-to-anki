@@ -23,7 +23,7 @@ export default function translateOnePhraseLocal(currentText: string) {
     } else if (existingTranslation) {
         updateTranslations(currentText, existingTranslation)
         updateNeedToStudy(currentText, existingTranslation)
-        window.doNotTouchSentences[existingTranslation.trim()] = false
+        window.doNotTouchSentences[currentText.trim()] = false
         return window.polledSettings.AUTO_TRANSLATE_WHILE_PLAYING ? true : false
     }
     return null
