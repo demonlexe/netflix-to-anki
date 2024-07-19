@@ -13,7 +13,8 @@ const TranslationRequirements = (language: string) =>
     [
         `The main objective is to translate the following phrase to ${language}.`,
         "If there are times or numbers, please write them out.",
-        "Do not include ANY formatting such as '```json'",
+        "Do not include ANY formatting markdown such as '```json', but please make sure the response is valid json with proper escape characters when needed.",
+        `Try very hard to avoid errors like "Expected ':' after property name in JSON at position 7049" and "Expected ',' or '}' after property value in JSON at position 6594 (line 1 column 6595)"`,
         "Most importantly, do not include any additional information or text in your response.",
         "EXPECTED INPUT: Multiple phrases, numbered for simplicity. For example: { '1.': 'phrase 1', '2.': 'phrase 2' }",
         "EXPECTED OUTPUT: A mapping of the phrases to their translations. For example: { `phrase 1`: `translated phrase 1`, `phrase 2`: `translated phrase 2` }",
