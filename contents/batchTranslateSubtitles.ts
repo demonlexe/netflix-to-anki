@@ -112,7 +112,8 @@ export default async function batchTranslateSubtitles() {
             if (response.translatedPhrases) {
                 for (const key in response.translatedPhrases) {
                     // key should be native language, value should be target language
-                    collectedSentences[key] = response.translatedPhrases[key]
+                    collectedSentences[key?.trim()] =
+                        response.translatedPhrases[key]?.trim()
                 }
             } else if (response.error) {
                 console.error("Error translating: ", response)

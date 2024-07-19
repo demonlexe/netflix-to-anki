@@ -73,6 +73,13 @@ const onLeftClick = async (elem: Element) => {
         name: "gemini_translate",
         body: { phrases: [currentText] } as GeminiSingleRequestBody
     })
+    // Return early and play the video if there is no translation
+    if (
+        !openResult ||
+        !openResult.translatedPhrases ||
+        Object.keys(openResult.translatedPhrases).length <= 0
+    )
+        return true
     console.log("Single Click API Result: ", openResult)
     updateTranslations(currentText, openResult.translatedPhrases[currentText])
     updateNeedToStudy(currentText, openResult.translatedPhrases[currentText])
