@@ -14,15 +14,22 @@ export default async function batchTranslateSubtitles() {
     const collectedSentences = {}
 
     // Figure out what has already been translated.
-    const storedTranslations = await getAllCachedTranslations()
+    const NETFLIX_TO_ANKI_TRANSLATIONS = await getAllCachedTranslations()
     const alreadyTranslatedSentences =
-        storedTranslations &&
-        typeof storedTranslations === "object" &&
-        Object.keys(storedTranslations).length > 1
-            ? Object.keys(storedTranslations)
+        NETFLIX_TO_ANKI_TRANSLATIONS &&
+        typeof NETFLIX_TO_ANKI_TRANSLATIONS === "object" &&
+        Object.keys(NETFLIX_TO_ANKI_TRANSLATIONS).length > 1
+            ? Object.keys(NETFLIX_TO_ANKI_TRANSLATIONS)
             : null
 
-    // Split into BATCH_SIZE sentences from the window.untranslatedSentences
+    // Remove already translated sentences from the window.untranslatedSentences
+    window.untranslatedSentences = Array.from(
+        new Set(window.untranslatedSentences).difference(
+            new Set(alreadyTranslatedSentences)
+        )
+    )
+
+    // Just get the locale
     const dummyArrayForLocale =
         window.untranslatedSentences.length > BATCH_SIZE / 2
             ? window.untranslatedSentences.slice(0, BATCH_SIZE / 2)
@@ -35,6 +42,7 @@ export default async function batchTranslateSubtitles() {
         } as GeminiGetLocaleRequest
     })
 
+    // Split into BATCH_SIZE sentences from the window.untranslatedSentences
     const allPromises = []
 
     for (let i = 0; i < window.untranslatedSentences.length; i += BATCH_SIZE) {
@@ -52,15 +60,20 @@ export default async function batchTranslateSubtitles() {
         )
     }
     await Promise.all(allPromises).then((allResponses) => {
+        const snapshotSet = new Set(window.untranslatedSentences)
         allResponses.forEach((response) => {
             if (response.translatedPhrases) {
                 for (const key in response.translatedPhrases) {
+                    // key should be native language, value should be target language
                     collectedSentences[key] = response.translatedPhrases[key]
                 }
             } else if (response.error) {
                 console.error("Error translating: ", response)
             }
         })
+        window.untranslatedSentences = Array.from(
+            snapshotSet.difference(new Set(Object.keys(collectedSentences)))
+        )
         console.log(
             "# of sentences translated: ",
             Object.keys(collectedSentences).length,

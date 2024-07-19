@@ -67,7 +67,7 @@ const handler: PlasmoMessaging.MessageHandler<
         res.send(response)
     } catch (e) {
         console.error("Error in gemini_translate.ts", e)
-        res.send({ error: e })
+        res.send({ error: e?.message })
         return
     }
 }

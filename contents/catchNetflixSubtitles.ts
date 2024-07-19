@@ -26,8 +26,8 @@ export default function catchNetflixSubtitles() {
                     ...response.netflix_sentences
                 ]
                 console.log(
-                    "Window's untranslated sentences: ",
-                    window.untranslatedSentences
+                    "Window's untranslated sentences: #",
+                    window.untranslatedSentences.length
                 )
                 batchTranslateSubtitles()
             }
