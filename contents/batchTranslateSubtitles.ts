@@ -6,7 +6,8 @@ import type { GeminiGetLocaleResponse } from "~background/types/GeminiGetLocaleR
 import {
     BATCH_SIZE,
     BATCH_TRANSLATE_RETRY_INTERVAL,
-    MAX_TRANSLATE_RETRIES
+    MAX_TRANSLATE_RETRIES,
+    MIN_UNTRANSLATED_SENTENCES
 } from "~utils/constants"
 import getAllCachedTranslations from "~utils/functions/getAllCachedTranslations"
 import initBatchTranslatedSentences from "~utils/functions/initBatchTranslatedSentences"
@@ -20,7 +21,7 @@ export default async function batchTranslateSubtitles() {
     if (
         window.batchTranslateRetries >= MAX_TRANSLATE_RETRIES ||
         !window.untranslatedSentences ||
-        window.untranslatedSentences.length === 0
+        window.untranslatedSentences.length <= MIN_UNTRANSLATED_SENTENCES
     ) {
         setTimeout(
             () => batchTranslateSubtitles(),
