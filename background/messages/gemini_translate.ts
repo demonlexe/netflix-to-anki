@@ -13,9 +13,13 @@ const TranslationRequirements = (language: string) =>
     [
         `The main objective is to translate the following phrase to ${language}.`,
         "If there are times or numbers, please write them out.",
-        "Answer with only a valid JSON object in plaintext with the translated phrases mapped to the exact original phrases. ",
         "Do not include ANY formatting such as '```json'",
-        "Most importantly, do not include any additional information or text in your response."
+        "Most importantly, do not include any additional information or text in your response.",
+        "EXPECTED INPUT: Multiple phrases, numbered for simplicity. For example: { '1.': 'phrase 1', '2.': 'phrase 2' }",
+        "EXPECTED OUTPUT: A mapping of the phrases to their translations. For example: { `phrase 1`: `translated phrase 1`, `phrase 2`: `translated phrase 2` }",
+        "Answer with only a valid JSON object in plaintext with the translated phrases mapped to the exact original phrases. ",
+        "Make sure all input are translated to the target language. That is, if 50 phrases are given, all 50 should be translated separately.",
+        "Do not combine any phrases. They are intentionally separated."
     ].map((line, index) => {
         return `${index + 1}. ${line}`
     })

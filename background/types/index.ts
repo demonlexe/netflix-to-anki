@@ -1,5 +1,5 @@
 export * from "./GeminiSingleRequestResponse"
 export * from "./SupportedLocale"
 export * from "./GeminiSingleRequestBody"
-export * from "./GeminiBatchRequestResponse"
-export * from "./GeminiBatchRequestBody"
+export * from "./CatchNetflixSubtitlesRequest"
+export * from "./CatchNetflixSubtitlesResponse"

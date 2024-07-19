@@ -1,6 +1,8 @@
 import { getData } from "../localData"
 
-export default async function getAllCachedTranslations() {
+export default async function getAllCachedTranslations(): Promise<
+    Record<string, string>
+> {
     // all sentences is a map of sentences to other sentences.
     // split them evenly among the 5 caches.
     const [cache1, cache2, cache3, cache4, cache5] = await Promise.all([

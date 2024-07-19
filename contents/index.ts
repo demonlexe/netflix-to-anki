@@ -4,8 +4,6 @@ import type { PlasmoCSConfig } from "plasmo"
 import { sendToBackground } from "@plasmohq/messaging"
 
 import type {
-    GeminiBatchRequestBody,
-    GeminiBatchRequestResponse,
     GeminiSingleRequestBody,
     GeminiSingleRequestResponse
 } from "~background/types"
@@ -21,6 +19,8 @@ import updateTranslations from "~utils/functions/updateTranslations"
 import { waitForElement } from "~utils/index"
 import { getData, type UserSettings } from "~utils/localData"
 
+import catchNetflixSubtitles from "./catchNetflixSubtitles"
+
 export const config: PlasmoCSConfig = {
     matches: ["https://www.netflix.com/watch/*"]
 }
@@ -34,6 +34,7 @@ declare global {
         batchTranslatedSentences: Record<string, string>
         reverseBatchTranslatedSentences: Record<string, string>
         polledSettings: UserSettings
+        untranslatedSentences: string[]
     }
 }
 
@@ -42,6 +43,7 @@ window.reverseTranslations = {}
 window.batchTranslatedSentences = {}
 window.reverseBatchTranslatedSentences = {}
 window.polledSettings = USER_SETTINGS_DEFAULTS
+window.untranslatedSentences = []
 
 const script = document.createElement("script")
 script.setAttribute("type", "text/javascript")
@@ -62,26 +64,7 @@ async function initBatchTranslatedSentences() {
 }
 
 initBatchTranslatedSentences()
-
-// content.js
-window.addEventListener("message", async (event) => {
-    if (event.source !== window) return
-    if (event.data.type && event.data.type === "NETWORK_REQUEST") {
-        const openResult: GeminiBatchRequestResponse = await sendToBackground({
-            name: "gemini_translate_batch",
-            body: { message: event.data } as GeminiBatchRequestBody
-        })
-        if (!openResult.error) {
-            console.log("OPEN RESULT: ", openResult)
-            window.batchTranslatedSentences = openResult.translatedPhrases
-            for (const key in openResult.translatedPhrases) {
-                window.reverseBatchTranslatedSentences[
-                    openResult.translatedPhrases[key]
-                ] = key
-            }
-        }
-    }
-})
+catchNetflixSubtitles()
 
 // Given the element, translate the text and update the cache.
 // Return "true" if it should play the video.

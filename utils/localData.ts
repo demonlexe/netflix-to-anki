@@ -3,12 +3,12 @@ import { Storage } from "@plasmohq/storage"
 
 export type LocalData = {
     NATIVE_LANGUAGE: string
-    NETFLIX_TO_ANKI_TRANSLATIONS_CACHE_1: object
-    NETFLIX_TO_ANKI_TRANSLATIONS_CACHE_2: object
-    NETFLIX_TO_ANKI_TRANSLATIONS_CACHE_3: object
-    NETFLIX_TO_ANKI_TRANSLATIONS_CACHE_4: object
-    NETFLIX_TO_ANKI_TRANSLATIONS_CACHE_5: object
-    NEED_TO_STUDY: object
+    NETFLIX_TO_ANKI_TRANSLATIONS_CACHE_1: Record<string, string>
+    NETFLIX_TO_ANKI_TRANSLATIONS_CACHE_2: Record<string, string>
+    NETFLIX_TO_ANKI_TRANSLATIONS_CACHE_3: Record<string, string>
+    NETFLIX_TO_ANKI_TRANSLATIONS_CACHE_4: Record<string, string>
+    NETFLIX_TO_ANKI_TRANSLATIONS_CACHE_5: Record<string, string>
+    NEED_TO_STUDY: Record<string, string>
 } & UserSettings
 
 export type UserSettings = {
