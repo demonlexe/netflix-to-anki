@@ -19,6 +19,7 @@ export default function translateOnePhraseLocal(currentText: string) {
         changeText($(liveElement), existingReverseTranslation, "white")
         window.localTranslations[existingReverseTranslation] = null
         window.batchTranslatedSentences[existingReverseTranslation] = null
+        updateNeedToStudy(currentText, existingReverseTranslation)
         return window.polledSettings.AUTO_TRANSLATE_WHILE_PLAYING ? false : true
     } else if (existingTranslation) {
         updateTranslations(currentText, existingTranslation)
