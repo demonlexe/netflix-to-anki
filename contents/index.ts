@@ -39,6 +39,7 @@ declare global {
         untranslatedSentences: string[]
         batchTranslateRetries: number
         maxOfBatch: number
+        watchingTimedText: HTMLElement
     }
 }
 
@@ -120,6 +121,11 @@ const pollSettings = async () => {
 }
 
 const watchTimedText = async (timedText: HTMLElement) => {
+    if (window.watchingTimedText === timedText) {
+        return //already watching this block.
+    }
+    window.watchingTimedText = timedText
+
     pollSettings()
     left_right_click($(".watch-video"), onLeftClick, onRightClick)
 
