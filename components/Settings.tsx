@@ -19,7 +19,11 @@ const Settings = () => {
     )
     const [shouldAutoTranslate, setShouldAutoTranslate] = useState(false)
 
-    const updateSettings = async (newKey: string, newLang: string) => {
+    const updateSettings = async (
+        newKey: string,
+        newLang: string,
+        shouldAutoTranslate: boolean
+    ) => {
         await Promise.all([
             setData("API_KEY", newKey),
             setData("TARGET_LANGUAGE", newLang),
@@ -87,20 +91,22 @@ const Settings = () => {
             <button
                 style={{ width: "100%", color: "green", marginTop: "8px" }}
                 onClick={async () => {
-                    const oldApiKey = await getData("API_KEY")
-                    await updateSettings(apiKey, language)
                     const testResult = await sendToBackground({
                         name: "test_gemini_key",
-                        body: {}
+                        body: { key: apiKey }
                     })
                     if (testResult && !testResult.error) {
                         setApiKeyStatus(API_KEY_STATUS.SUCCESS)
+                        await updateSettings(
+                            apiKey,
+                            language,
+                            shouldAutoTranslate
+                        )
                         setTimeout(() => {
                             setApiKeyStatus(API_KEY_STATUS.VALID)
                         }, 2000)
                     } else {
                         setApiKeyStatus(API_KEY_STATUS.INVALID)
-                        await setData("API_KEY", oldApiKey)
                         setTimeout(() => {
                             setApiKeyStatus(API_KEY_STATUS.NOT_TESTED)
                         }, 2000)

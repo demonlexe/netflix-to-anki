@@ -4,7 +4,6 @@ import type { PlasmoMessaging } from "@plasmohq/messaging"
 
 import { type CatchNetflixSubtitlesRequest } from "~background/types/CatchNetflixSubtitlesRequest"
 import type { CatchNetflixSubtitlesResponse } from "~background/types/CatchNetflixSubtitlesResponse"
-import getAllCachedTranslations from "~utils/functions/getAllCachedTranslations"
 
 type XMLText = {
     $: any
