@@ -86,7 +86,10 @@ export function left_right_click(
                 }
                 checkStopPropagation(event)
                 left_click_callback(insideDiv).then((shouldPlay) => {
-                    if (shouldPlay) {
+                    if (
+                        shouldPlay ||
+                        !window.polledSettings?.PAUSE_WHEN_TRANSLATING
+                    ) {
                         $("video").trigger("play")
                     }
                 })
@@ -100,7 +103,10 @@ export function left_right_click(
                 }
                 checkStopPropagation(event)
                 right_click_callback().then((shouldPlay) => {
-                    if (shouldPlay) {
+                    if (
+                        shouldPlay ||
+                        !window.polledSettings?.PAUSE_WHEN_TRANSLATING
+                    ) {
                         $("video").trigger("play")
                     }
                 })
