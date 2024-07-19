@@ -30,7 +30,9 @@ export default async function batchTranslateSubtitles() {
     }
 
     const [TARGET_LANGUAGE] = await Promise.all([getData("TARGET_LANGUAGE")])
-    const USE_BATCH_SIZE = BATCH_SIZE / window.batchTranslateRetries // diminishing batch size
+    const USE_BATCH_SIZE =
+        (window.maxOfBatch < BATCH_SIZE ? window.maxOfBatch : BATCH_SIZE) /
+        window.batchTranslateRetries // diminishing batch size
 
     // Figure out what has already been translated.
     const NETFLIX_TO_ANKI_TRANSLATIONS = await getAllCachedTranslations()
@@ -73,11 +75,21 @@ export default async function batchTranslateSubtitles() {
     // Split into BATCH_SIZE sentences from the window.untranslatedSentences
     const allPromises = []
 
+    let currentMaxSize = 0
     for (
         let i = 0;
         i < window.untranslatedSentences.length;
         i += USE_BATCH_SIZE
     ) {
+        if (
+            window.untranslatedSentences.slice(i, i + USE_BATCH_SIZE).length >
+            currentMaxSize
+        ) {
+            currentMaxSize = window.untranslatedSentences.slice(
+                i,
+                i + USE_BATCH_SIZE
+            ).length
+        }
         allPromises.push(
             sendToBackground({
                 name: "gemini_translate",
@@ -91,6 +103,8 @@ export default async function batchTranslateSubtitles() {
             })
         )
     }
+    window.maxOfBatch = currentMaxSize
+
     await Promise.all(allPromises).then((allResponses) => {
         const snapshotSet = new Set(window.untranslatedSentences)
         allResponses.forEach((response) => {

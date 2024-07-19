@@ -8,7 +8,7 @@ import type {
     GeminiSingleRequestResponse
 } from "~background/types"
 import { isYellow, left_right_click, observeSection } from "~utils"
-import { USER_SETTINGS_DEFAULTS } from "~utils/constants"
+import { BATCH_SIZE, USER_SETTINGS_DEFAULTS } from "~utils/constants"
 import changeText from "~utils/functions/changeText"
 import checkForExistingTranslation from "~utils/functions/checkForExistingTranslation"
 import initBatchTranslatedSentences from "~utils/functions/initBatchTranslatedSentences"
@@ -37,6 +37,7 @@ declare global {
         allNetflixSentences: string[]
         untranslatedSentences: string[]
         batchTranslateRetries: number
+        maxOfBatch: number
     }
 }
 
@@ -48,6 +49,7 @@ window.polledSettings = USER_SETTINGS_DEFAULTS
 window.untranslatedSentences = []
 window.allNetflixSentences = []
 window.batchTranslateRetries = 0
+window.maxOfBatch = BATCH_SIZE
 
 const script = document.createElement("script")
 script.setAttribute("type", "text/javascript")
