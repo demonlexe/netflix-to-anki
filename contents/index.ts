@@ -8,11 +8,12 @@ import type {
     GeminiSingleRequestResponse
 } from "~background/types"
 import { isYellow, left_right_click, observeSection } from "~utils"
-import { BATCH_SIZE, USER_SETTINGS_DEFAULTS } from "~utils/constants"
+import { USER_SETTINGS_DEFAULTS } from "~utils/constants"
 import changeText from "~utils/functions/changeText"
 import checkForExistingTranslation from "~utils/functions/checkForExistingTranslation"
 import initBatchTranslatedSentences from "~utils/functions/initBatchTranslatedSentences"
 import initData from "~utils/functions/initData"
+import resetNetflixContext from "~utils/functions/resetNetflixContext"
 import translateOnePhraseLocal from "~utils/functions/translateOnePhraseLocal"
 import updateNeedToStudy from "~utils/functions/updateNeedToStudy"
 import updateTranslations from "~utils/functions/updateTranslations"
@@ -46,10 +47,7 @@ window.reverseTranslations = {}
 window.batchTranslatedSentences = {}
 window.reverseBatchTranslatedSentences = {}
 window.polledSettings = USER_SETTINGS_DEFAULTS
-window.untranslatedSentences = []
-window.allNetflixSentences = []
-window.batchTranslateRetries = 0
-window.maxOfBatch = BATCH_SIZE
+resetNetflixContext()
 
 const script = document.createElement("script")
 script.setAttribute("type", "text/javascript")

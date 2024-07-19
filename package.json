@@ -38,9 +38,7 @@
     ],
     "manifest": {
         "host_permissions": [
-            "https://www.netflix.com/watch/*",
-            "https://www.spanishdict.com/translate/*",
-            "https://traductor1.spanishdict.com/*"
+            "https://www.netflix.com/watch/*"
         ],
         "permissions": [
             "scripting",
