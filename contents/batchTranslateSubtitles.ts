@@ -9,6 +9,7 @@ import {
     MAX_TRANSLATE_RETRIES
 } from "~utils/constants"
 import getAllCachedTranslations from "~utils/functions/getAllCachedTranslations"
+import initBatchTranslatedSentences from "~utils/functions/initBatchTranslatedSentences"
 import setAllCachedTranslations from "~utils/functions/setAllCachedTranslations"
 import { getData } from "~utils/localData"
 
@@ -114,7 +115,9 @@ export default async function batchTranslateSubtitles() {
             window.allNetflixSentences.length
         )
         try {
-            setAllCachedTranslations(collectedSentences)
+            setAllCachedTranslations(collectedSentences).then(() => {
+                initBatchTranslatedSentences(collectedSentences)
+            })
         } catch (e) {
             console.error("Error setting translations: ", e)
         }

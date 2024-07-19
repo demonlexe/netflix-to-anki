@@ -11,7 +11,7 @@ import { isYellow, left_right_click, observeSection } from "~utils"
 import { USER_SETTINGS_DEFAULTS } from "~utils/constants"
 import changeText from "~utils/functions/changeText"
 import checkForExistingTranslation from "~utils/functions/checkForExistingTranslation"
-import getAllCachedTranslations from "~utils/functions/getAllCachedTranslations"
+import initBatchTranslatedSentences from "~utils/functions/initBatchTranslatedSentences"
 import initData from "~utils/functions/initData"
 import translateOnePhraseLocal from "~utils/functions/translateOnePhraseLocal"
 import updateNeedToStudy from "~utils/functions/updateNeedToStudy"
@@ -54,21 +54,6 @@ script.setAttribute("type", "text/javascript")
 script.setAttribute("src", chrome.runtime.getURL("inject.js"))
 
 document.documentElement.appendChild(script)
-
-async function initBatchTranslatedSentences() {
-    const translations = await getAllCachedTranslations()
-    if (translations && Object.keys(translations).length > 0) {
-        window.batchTranslatedSentences = translations
-        for (const key in translations) {
-            window.reverseBatchTranslatedSentences[translations[key]] = key
-        }
-    }
-
-    console.log(
-        "Pulled down translations: #",
-        translations && Object.keys(translations).length
-    )
-}
 
 initBatchTranslatedSentences()
 catchNetflixSubtitles()
