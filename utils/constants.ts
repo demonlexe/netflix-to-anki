@@ -9,3 +9,5 @@ export const USER_SETTINGS_DEFAULTS: UserSettings = {
 }
 // every 1 minute
 export const BATCH_TRANSLATE_RETRY_INTERVAL = 60000
+// Stop translating after 10 retries
+export const MAX_TRANSLATE_RETRIES = 10

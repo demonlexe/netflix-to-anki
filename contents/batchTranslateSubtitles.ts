@@ -3,13 +3,33 @@ import { sendToBackground } from "@plasmohq/messaging"
 import type { GeminiSingleRequestBody } from "~background/types"
 import type { GeminiGetLocaleRequest } from "~background/types/GeminiGetLocaleRequest"
 import type { GeminiGetLocaleResponse } from "~background/types/GeminiGetLocaleResponse"
-import { BATCH_SIZE, BATCH_TRANSLATE_RETRY_INTERVAL } from "~utils/constants"
+import {
+    BATCH_SIZE,
+    BATCH_TRANSLATE_RETRY_INTERVAL,
+    MAX_TRANSLATE_RETRIES
+} from "~utils/constants"
 import getAllCachedTranslations from "~utils/functions/getAllCachedTranslations"
 import setAllCachedTranslations from "~utils/functions/setAllCachedTranslations"
 import { getData } from "~utils/localData"
 
 export default async function batchTranslateSubtitles() {
+    window.batchTranslateRetries++
+
+    // don't do looping if nothing to translate or too many retries
+    if (
+        window.batchTranslateRetries >= MAX_TRANSLATE_RETRIES ||
+        !window.untranslatedSentences ||
+        window.untranslatedSentences.length === 0
+    ) {
+        setTimeout(
+            () => batchTranslateSubtitles(),
+            BATCH_TRANSLATE_RETRY_INTERVAL * 2
+        )
+        return // stop looping
+    }
+
     const [TARGET_LANGUAGE] = await Promise.all([getData("TARGET_LANGUAGE")])
+    const USE_BATCH_SIZE = BATCH_SIZE / window.batchTranslateRetries // diminishing batch size
 
     const collectedSentences = {}
 
@@ -45,14 +65,18 @@ export default async function batchTranslateSubtitles() {
     // Split into BATCH_SIZE sentences from the window.untranslatedSentences
     const allPromises = []
 
-    for (let i = 0; i < window.untranslatedSentences.length; i += BATCH_SIZE) {
+    for (
+        let i = 0;
+        i < window.untranslatedSentences.length;
+        i += USE_BATCH_SIZE
+    ) {
         allPromises.push(
             sendToBackground({
                 name: "gemini_translate",
                 body: {
                     phrases: window.untranslatedSentences.slice(
                         i,
-                        i + BATCH_SIZE
+                        i + USE_BATCH_SIZE
                     ),
                     sentencesLocale: sentencesLocale.locale
                 } as GeminiSingleRequestBody

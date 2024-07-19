@@ -35,6 +35,7 @@ declare global {
         reverseBatchTranslatedSentences: Record<string, string>
         polledSettings: UserSettings
         untranslatedSentences: string[]
+        batchTranslateRetries: number
     }
 }
 
@@ -44,6 +45,7 @@ window.batchTranslatedSentences = {}
 window.reverseBatchTranslatedSentences = {}
 window.polledSettings = USER_SETTINGS_DEFAULTS
 window.untranslatedSentences = []
+window.batchTranslateRetries = 0
 
 const script = document.createElement("script")
 script.setAttribute("type", "text/javascript")
