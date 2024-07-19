@@ -154,12 +154,12 @@ const watchTimedText = async (timedText: HTMLElement) => {
 }
 
 window.addEventListener("load", () => {
-    if (!window?.location?.href?.includes("netflix.com/watch")) {
-        // don't care about subtitles on main netflix page
-        return
-    }
     waitForElement("#appMountPoint").then(async (mountedElem) => {
         const doOnMountMutate = (mutation: MutationRecord) => {
+            if (!window?.location?.href?.includes("netflix.com/watch")) {
+                // don't care about subtitles on main netflix page
+                return
+            }
             if (mutation.addedNodes.length > 0) {
                 mutation.addedNodes.forEach(async (node) => {
                     // if the node is .player-timedtext
