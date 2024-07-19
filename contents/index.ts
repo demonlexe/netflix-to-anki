@@ -34,6 +34,7 @@ declare global {
         reverseTranslations: Record<string, string>
         batchTranslatedSentences: Record<string, string>
         reverseBatchTranslatedSentences: Record<string, string>
+        doNotTouchSentences: Record<string, boolean>
         polledSettings: UserSettings
         allNetflixSentences: string[]
         untranslatedSentences: string[]
@@ -47,6 +48,7 @@ window.localTranslations = {}
 window.reverseTranslations = {}
 window.batchTranslatedSentences = {}
 window.reverseBatchTranslatedSentences = {}
+window.doNotTouchSentences = {}
 window.polledSettings = USER_SETTINGS_DEFAULTS
 resetNetflixContext()
 
@@ -137,6 +139,10 @@ const watchTimedText = async (timedText: HTMLElement) => {
                 const currentText = $(node).text()?.trim()
                 const existingTranslation =
                     checkForExistingTranslation(currentText)
+                if (window.doNotTouchSentences[currentText]) {
+                    // do not touch this sentence.
+                    continue
+                }
                 if (
                     window.localTranslations[currentText] &&
                     !isYellow(deepestSpan)

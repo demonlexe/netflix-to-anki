@@ -17,13 +17,13 @@ export default function translateOnePhraseLocal(currentText: string) {
     if (isYellow($(liveElement)) && existingReverseTranslation) {
         // Untranslate the text.
         changeText($(liveElement), existingReverseTranslation, "white")
-        window.localTranslations[existingReverseTranslation] = null
-        window.batchTranslatedSentences[existingReverseTranslation] = null
+        window.doNotTouchSentences[existingReverseTranslation.trim()] = true
         updateNeedToStudy(currentText, existingReverseTranslation)
         return window.polledSettings.AUTO_TRANSLATE_WHILE_PLAYING ? false : true
     } else if (existingTranslation) {
         updateTranslations(currentText, existingTranslation)
         updateNeedToStudy(currentText, existingTranslation)
+        window.doNotTouchSentences[existingTranslation.trim()] = false
         return window.polledSettings.AUTO_TRANSLATE_WHILE_PLAYING ? true : false
     }
     return null
