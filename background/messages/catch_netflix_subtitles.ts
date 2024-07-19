@@ -30,19 +30,11 @@ const handler: PlasmoMessaging.MessageHandler<
         message.url.includes("nflxvideo.net") &&
         message.response?.length > 0
     ) {
-        const storedTranslations = await getAllCachedTranslations()
-        const alreadyTranslatedSentences =
-            storedTranslations &&
-            typeof storedTranslations === "object" &&
-            Object.keys(storedTranslations).length > 1
-                ? Object.keys(storedTranslations)
-                : null
         parseString(message.response, async function (err, result) {
             if (err) {
                 console.error("Error parsing XML: ", err)
                 return res.send({ error: "Error parsing XML" })
             }
-            const collectedSentences = {}
             const allText: XMLText[] = result.tt.body?.[0]?.div?.[0]?.p
             const grouping = {}
             allText.forEach((text: XMLText) => {
@@ -57,15 +49,7 @@ const handler: PlasmoMessaging.MessageHandler<
             for (const key in grouping) {
                 const sentences = grouping[key]
                 sentences.forEach((sentence: string) => {
-                    if (
-                        !alreadyTranslatedSentences ||
-                        !alreadyTranslatedSentences.includes(sentence)
-                    ) {
-                        allSentencesSet.add(sentence)
-                    } else {
-                        collectedSentences[sentence] =
-                            storedTranslations[sentence]
-                    }
+                    allSentencesSet.add(sentence)
                 })
             }
             const allSentencesArray: string[] = Array.from(allSentencesSet)

@@ -34,6 +34,7 @@ declare global {
         batchTranslatedSentences: Record<string, string>
         reverseBatchTranslatedSentences: Record<string, string>
         polledSettings: UserSettings
+        allNetflixSentences: string[]
         untranslatedSentences: string[]
         batchTranslateRetries: number
     }
@@ -45,6 +46,7 @@ window.batchTranslatedSentences = {}
 window.reverseBatchTranslatedSentences = {}
 window.polledSettings = USER_SETTINGS_DEFAULTS
 window.untranslatedSentences = []
+window.allNetflixSentences = []
 window.batchTranslateRetries = 0
 
 const script = document.createElement("script")
@@ -62,7 +64,10 @@ async function initBatchTranslatedSentences() {
         }
     }
 
-    console.log("Pulled down translations: ", translations)
+    console.log(
+        "Pulled down translations: #",
+        translations && Object.keys(translations).length
+    )
 }
 
 initBatchTranslatedSentences()
