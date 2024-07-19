@@ -30,7 +30,6 @@ const handler: PlasmoMessaging.MessageHandler<
         message.url.includes("nflxvideo.net") &&
         message.response?.length > 0
     ) {
-        console.log("message received: ", message)
         const storedTranslations = await getAllCachedTranslations()
         const alreadyTranslatedSentences =
             storedTranslations &&
@@ -70,7 +69,6 @@ const handler: PlasmoMessaging.MessageHandler<
                 })
             }
             const allSentencesArray: string[] = Array.from(allSentencesSet)
-            console.log("Done parsing! All sentences are ", allSentencesArray)
             res.send({ netflix_sentences: allSentencesArray })
         })
     } else {

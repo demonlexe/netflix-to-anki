@@ -25,6 +25,7 @@ const handler: PlasmoMessaging.MessageHandler<
         )
         res.send({ locale: sentencesLocale })
     } catch (e) {
+        console.error("Error in gemini_get_locale.ts", e)
         res.send({ error: e })
         return
     }

@@ -9,13 +9,9 @@ import setAllCachedTranslations from "~utils/functions/setAllCachedTranslations"
 import { getData } from "~utils/localData"
 
 export default async function batchTranslateSubtitles() {
-    const [TARGET_LANGUAGE, NATIVE_LANGUAGE] = await Promise.all([
-        getData("API_KEY"),
-        getData("TARGET_LANGUAGE"),
-        getData("NATIVE_LANGUAGE")
-    ])
+    const [TARGET_LANGUAGE] = await Promise.all([getData("TARGET_LANGUAGE")])
 
-    const collectedSentences = []
+    const collectedSentences = {}
 
     // Figure out what has already been translated.
     const storedTranslations = await getAllCachedTranslations()
@@ -61,9 +57,16 @@ export default async function batchTranslateSubtitles() {
                 for (const key in response.translatedPhrases) {
                     collectedSentences[key] = response.translatedPhrases[key]
                 }
+            } else if (response.error) {
+                console.error("Error translating: ", response)
             }
         })
-        console.log("All sentences translated: ", collectedSentences)
+        console.log(
+            "# of sentences translated: ",
+            Object.keys(collectedSentences).length,
+            "# sentences remaining: ",
+            window.untranslatedSentences.length
+        )
         try {
             setAllCachedTranslations(collectedSentences)
         } catch (e) {
