@@ -1,5 +1,9 @@
-import type { SupportedLocale } from "./SupportedLocale"
-
-export type GeminiSingleRequestResponse = {
-    translatedPhrases: Map<string, string>
-}
+export type GeminiSingleRequestResponse =
+    | {
+          translatedPhrases: Map<string, string>
+          error?: never
+      }
+    | {
+          error: string
+          translatedPhrases?: never
+      }

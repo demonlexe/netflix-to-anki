@@ -2,6 +2,7 @@ import { sendToBackground } from "@plasmohq/messaging"
 
 import type { CatchNetflixSubtitlesRequest } from "~background/types/CatchNetflixSubtitlesRequest"
 import type { CatchNetflixSubtitlesResponse } from "~background/types/CatchNetflixSubtitlesResponse"
+import batchTranslateSubtitles from "~contents/batchTranslateSubtitles"
 
 export default function catchNetflixSubtitles() {
     window.addEventListener("message", async (event) => {
@@ -28,6 +29,7 @@ export default function catchNetflixSubtitles() {
                     "Window's untranslated sentences: ",
                     window.untranslatedSentences
                 )
+                batchTranslateSubtitles()
             }
         }
     })

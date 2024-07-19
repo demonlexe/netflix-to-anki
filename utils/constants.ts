@@ -7,3 +7,5 @@ export const USER_SETTINGS_DEFAULTS: UserSettings = {
     ANKI_CONFIG: "BOTH",
     AUTO_TRANSLATE_WHILE_PLAYING: true
 }
+// every 1 minute
+export const BATCH_TRANSLATE_RETRY_INTERVAL = 60000

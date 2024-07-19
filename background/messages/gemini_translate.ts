@@ -36,35 +36,39 @@ const handler: PlasmoMessaging.MessageHandler<
     const genAI = new GoogleGenerativeAI(
         process.env.PLASMO_PUBLIC_GEMINI_TOKEN ?? API_KEY
     )
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
 
-    console.log("Request received: ", req.body)
-    const { phrases } = req.body
+    try {
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
 
-    const sentencesLocale = await getCurrentLanguageFromModel(
-        model,
-        phrases,
-        TARGET_LANGUAGE
-    )
+        console.log("Request received: ", req.body)
+        const { phrases } = req.body
 
-    const TRANSLATE_TO_LANGUAGE =
-        sentencesLocale.match(TARGET_LANGUAGE)?.length > 0
-            ? NATIVE_LANGUAGE
-            : TARGET_LANGUAGE
+        const sentencesLocale =
+            req.body.sentencesLocale ??
+            (await getCurrentLanguageFromModel(model, phrases, TARGET_LANGUAGE))
 
-    const prompt = TranslationRequirements(TRANSLATE_TO_LANGUAGE).join("\n")
+        const TRANSLATE_TO_LANGUAGE =
+            sentencesLocale.match(TARGET_LANGUAGE)?.length > 0
+                ? NATIVE_LANGUAGE
+                : TARGET_LANGUAGE
 
-    const result = await model.generateContent([
-        prompt,
-        JSON.stringify(phrases)
-    ])
-    console.log("Result: ", result.response?.text())
-    const resultAsJson = JSON.parse(result.response?.text()?.trim())
-    const response: GeminiSingleRequestResponse = {
-        translatedPhrases: resultAsJson
+        const prompt = TranslationRequirements(TRANSLATE_TO_LANGUAGE).join("\n")
+
+        const result = await model.generateContent([
+            prompt,
+            JSON.stringify(phrases)
+        ])
+        console.log("Result: ", result.response?.text())
+        const resultAsJson = JSON.parse(result.response?.text()?.trim())
+        const response: GeminiSingleRequestResponse = {
+            translatedPhrases: resultAsJson
+        }
+        console.log("Sending response...", response)
+        res.send(response)
+    } catch (e) {
+        res.send({ error: e })
+        return
     }
-    console.log("Sending response...", response)
-    res.send(response)
 }
 
 export default handler
