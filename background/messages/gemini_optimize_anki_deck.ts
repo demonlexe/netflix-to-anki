@@ -20,13 +20,11 @@ const handler: PlasmoMessaging.MessageHandler<
     GeminiOptimizeAnkiDeckResponse
 > = async (req, res) => {
     try {
-        console.log("Deck before optimization: ", req.body.deck)
         const genAI = new GoogleGenerativeAI(await getData("API_KEY"))
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
         const newDeck = await model.generateContent([
             geminiPrompt(req.body.deck)
         ])
-        console.log("Gemini Optimization Result: ", newDeck.response?.text())
         res.send({ deck: JSON.parse(newDeck.response?.text()) })
     } catch (e) {
         res.send({ error: e?.message })
