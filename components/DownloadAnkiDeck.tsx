@@ -12,6 +12,7 @@ export default function DownloadAnkiDeck(props: DownloadAnkiDeckProps) {
             disabled={!numberToStudy}
             onClick={async () => {
                 const file = await createAnkiDeck()
+                if (!file) return //FIXME - Show an error here.
                 download(file)
             }}>
             {`Click me to download Anki deck.${numberToStudy ? ` [${numberToStudy}]` : ""}`}

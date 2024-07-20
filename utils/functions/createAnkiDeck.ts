@@ -11,6 +11,9 @@ export default async function createAnkiDeck(): Promise<File> {
             name: "gemini_optimize_anki_deck",
             body: { deck: NEED_TO_STUDY }
         })
+    if (!optimizedDeckResponse || optimizedDeckResponse.error) {
+        return null
+    }
     const optimizedDeck = optimizedDeckResponse.deck
     // Then build the file
     const allCards = []
