@@ -34,9 +34,7 @@ const handler: PlasmoMessaging.MessageHandler<
         getData("TARGET_LANGUAGE"),
         getData("NATIVE_LANGUAGE")
     ])
-    const genAI = new GoogleGenerativeAI(
-        process.env.PLASMO_PUBLIC_GEMINI_TOKEN ?? API_KEY
-    )
+    const genAI = new GoogleGenerativeAI(API_KEY)
 
     try {
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
