@@ -22,6 +22,12 @@ const handler: PlasmoMessaging.MessageHandler<
     GeminiOptimizeAnkiDeckResponse
 > = async (req, res) => {
     try {
+        console.log(
+            "Deck before optimization: ",
+            req.body.deck,
+            "Total phrases: ",
+            Object.keys(req.body.deck).length
+        )
         const genAI = new GoogleGenerativeAI(await getData("API_KEY"))
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
         const newDeck = await model.generateContent([
@@ -42,6 +48,28 @@ const handler: PlasmoMessaging.MessageHandler<
                 optimizedDeckWithDuplicatedRemoved[trimmedKey] = trimmedValue
             }
         }
+        console.log(
+            "Deck after optimization: ",
+            optimizedDeckWithDuplicatedRemoved,
+            "Total phrases: ",
+            Object.keys(optimizedDeckWithDuplicatedRemoved).length
+        )
+
+        const allPhrasesOriginal = new Set(Object.values(req.body.deck)).union(
+            new Set(Object.keys(req.body.deck))
+        )
+        const allPhrasesOptimized = new Set(
+            Object.values(optimizedDeckWithDuplicatedRemoved)
+        ).union(new Set(Object.keys(optimizedDeckWithDuplicatedRemoved)))
+        const missingPhrasesSet =
+            allPhrasesOriginal.difference(allPhrasesOptimized)
+        console.log(
+            "Missing phrases set:",
+            missingPhrasesSet,
+            "Missing phrases set count:",
+            missingPhrasesSet.size
+        )
+
         res.send({ deck: optimizedDeckWithDuplicatedRemoved })
     } catch (e) {
         console.log("ERROR: ", e)
