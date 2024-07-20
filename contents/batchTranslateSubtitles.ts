@@ -31,9 +31,10 @@ export default async function batchTranslateSubtitles() {
     }
 
     const [TARGET_LANGUAGE] = await Promise.all([getData("TARGET_LANGUAGE")])
-    const USE_BATCH_SIZE =
+    const USE_BATCH_SIZE = Math.ceil(
         (window.maxOfBatch < BATCH_SIZE ? window.maxOfBatch : BATCH_SIZE) /
-        window.batchTranslateRetries // diminishing batch size
+            window.batchTranslateRetries
+    ) // diminishing batch size
 
     // Figure out what has already been translated.
     const NETFLIX_TO_ANKI_TRANSLATIONS = await getAllCachedTranslations()
