@@ -5,10 +5,12 @@ import type { GeminiGetLocaleRequest } from "~background/types/GeminiGetLocaleRe
 import type { GeminiGetLocaleResponse } from "~background/types/GeminiGetLocaleResponse"
 import {
     BATCH_SIZE,
+    BATCH_TRANSLATE_DELAY_TIME,
     BATCH_TRANSLATE_RETRY_INTERVAL,
     MAX_TRANSLATE_RETRIES,
     MIN_UNTRANSLATED_SENTENCES
 } from "~utils/constants"
+import delay from "~utils/functions/delay"
 import getAllCachedTranslations from "~utils/functions/getAllCachedTranslations"
 import initBatchTranslatedSentences from "~utils/functions/initBatchTranslatedSentences"
 import setAllCachedTranslations from "~utils/functions/setAllCachedTranslations"
@@ -92,6 +94,7 @@ export default async function batchTranslateSubtitles() {
                 i + USE_BATCH_SIZE
             ).length
         }
+        await delay(BATCH_TRANSLATE_DELAY_TIME * window.batchTranslateRetries)
         allPromises.push(
             sendToBackground({
                 name: "gemini_translate",
