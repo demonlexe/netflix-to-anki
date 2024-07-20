@@ -28,7 +28,14 @@ function IndexPopup() {
             }}>
             <h2>netflix-to-anki</h2>
             <Settings />
-            <DownloadAnkiDeck numberToStudy={numberToStudy} />
+            <DownloadAnkiDeck
+                numberToStudy={numberToStudy}
+                useOptimized={false}
+            />
+            <DownloadAnkiDeck
+                numberToStudy={numberToStudy}
+                useOptimized={true}
+            />
             <ResetAnkiDeck onReset={updateNumberToStudy} />
             <BooleanSettings />
         </div>
