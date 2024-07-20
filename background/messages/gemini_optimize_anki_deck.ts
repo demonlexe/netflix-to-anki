@@ -10,6 +10,8 @@ const geminiPrompt = (deck: Record<string, string>) =>
     [
         "Please optimize the following anki deck, and return the optimized deck. It should be in the same JSON format.",
         "Please remove any duplicate phrases, including those that are translated reversely to the same phrase.",
+        "Do not include ANY formatting markdown such as '```json', but please make sure the response is valid json with proper escape characters when needed.",
+        `Try very hard to avoid errors like "Expected ':' after property name in JSON at position 7049" and "Expected ',' or '}' after property value in JSON at position 6594 (line 1 column 6595)"`,
         JSON.stringify(deck)
     ].join("\n")
 
