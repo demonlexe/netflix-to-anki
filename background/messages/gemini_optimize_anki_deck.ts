@@ -22,17 +22,27 @@ const handler: PlasmoMessaging.MessageHandler<
     GeminiOptimizeAnkiDeckResponse
 > = async (req, res) => {
     try {
-        console.log("Deck before optimization: ", req.body.deck)
         const genAI = new GoogleGenerativeAI(await getData("API_KEY"))
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
         const newDeck = await model.generateContent([
             geminiPrompt(req.body.deck)
         ])
-        console.log(
-            "Gemini Optimization Result: ",
-            JSON.parse(newDeck.response?.text())
+        const optimizedDeck: Record<string, string> = JSON.parse(
+            newDeck.response?.text()
         )
-        res.send({ deck: JSON.parse(newDeck.response?.text()) })
+        if (!optimizedDeck) {
+            throw new Error("Optimized deck is empty.")
+        }
+        const optimizedDeckWithDuplicatedRemoved = {}
+        // iterate optimized deck and manually remove duplicates
+        for (const [key, value] of Object.entries(optimizedDeck)) {
+            const trimmedKey = key?.trim()
+            const trimmedValue = value?.trim()
+            if (trimmedKey !== trimmedValue) {
+                optimizedDeckWithDuplicatedRemoved[trimmedKey] = trimmedValue
+            }
+        }
+        res.send({ deck: optimizedDeckWithDuplicatedRemoved })
     } catch (e) {
         console.log("ERROR: ", e)
         res.send({ error: e?.message })
