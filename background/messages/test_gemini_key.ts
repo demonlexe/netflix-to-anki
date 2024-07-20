@@ -13,11 +13,7 @@ const handler: PlasmoMessaging.MessageHandler<
     console.log("Request received: ", req.body)
 
     try {
-        const genAI = new GoogleGenerativeAI(
-            req.body.key ??
-                process.env.PLASMO_PUBLIC_GEMINI_TOKEN ??
-                (await getData("API_KEY"))
-        )
+        const genAI = new GoogleGenerativeAI(req.body.key)
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
         await model.generateContent(["Translate this to english", "Hola"])
     } catch (e) {

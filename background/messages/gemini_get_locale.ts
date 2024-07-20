@@ -14,9 +14,7 @@ const handler: PlasmoMessaging.MessageHandler<
     const { sentences, targetLanguage } = req.body
 
     try {
-        const genAI = new GoogleGenerativeAI(
-            process.env.PLASMO_PUBLIC_GEMINI_TOKEN ?? (await getData("API_KEY"))
-        )
+        const genAI = new GoogleGenerativeAI(await getData("API_KEY"))
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
         const sentencesLocale = await getCurrentLanguageFromModel(
             model,
