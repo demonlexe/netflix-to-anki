@@ -1,5 +1,7 @@
 import $ from "jquery"
 
+import onClick from "./handlers/onClick"
+
 export function observeSection(
     section: HTMLElement,
     doOnMutation: (mutation: MutationRecord) => void
@@ -72,11 +74,7 @@ export function removeNoPointerEvents(
     $(element).css("z-index", 1000)
 }
 
-export function left_right_click(
-    element: JQuery<Node>,
-    left_click_callback: (element: Element) => Promise<boolean>,
-    right_click_callback: () => Promise<boolean>
-) {
+export function left_right_click(element: JQuery<Node>) {
     return element.each(function () {
         $(element).on("click", function (event) {
             const insideDiv = insideWhichDiv(event)
@@ -85,7 +83,7 @@ export function left_right_click(
                     $("video").trigger("pause")
                 }
                 checkStopPropagation(event)
-                left_click_callback(insideDiv).then((shouldPlay) => {
+                onClick().then((shouldPlay) => {
                     if (
                         shouldPlay ||
                         !window.polledSettings?.PAUSE_WHEN_TRANSLATING
@@ -102,7 +100,7 @@ export function left_right_click(
                     $("video").trigger("pause")
                 }
                 checkStopPropagation(event)
-                right_click_callback().then((shouldPlay) => {
+                onClick().then((shouldPlay) => {
                     if (
                         shouldPlay ||
                         !window.polledSettings?.PAUSE_WHEN_TRANSLATING
@@ -182,10 +180,6 @@ export function checkStopPropagation(event) {
         event.stopPropagation()
         return true
     }
-}
-
-export function getLiveElement(currentText: string) {
-    return $(`span:contains("${currentText}")`).find("span").last()
 }
 
 export function removeElementSiblings(element: HTMLElement) {

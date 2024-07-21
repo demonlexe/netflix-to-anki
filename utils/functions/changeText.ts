@@ -8,8 +8,8 @@ export default function changeText(
     color: string = "yellow"
 ) {
     const currentText = extractTextFromHTML(elem?.[0]?.innerHTML)
-    const breakOnBefore = currentText?.split(/(\n)|(<br\s*\/>)/g)
-    const breakOnAfter = newText?.split(/(\n)|(<br\s*\/>)/g)
+    const breakOnBefore = currentText?.split(/(<br\s*\/>)/g)
+    const breakOnAfter = newText?.split(/(<br\s*\/>)/g)
 
     if (breakOnBefore.length !== breakOnAfter.length) return // do nothing, not matching
 

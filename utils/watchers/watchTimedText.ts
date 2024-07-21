@@ -5,8 +5,6 @@ import changeText from "~utils/functions/changeText"
 import checkForExistingTranslation from "~utils/functions/checkForExistingTranslation"
 import extractTextFromHTML from "~utils/functions/extractTextFromHtml"
 import pollSettings from "~utils/functions/pollSettings"
-import onLeftClick from "~utils/handlers/onLeftClick"
-import onRightClick from "~utils/handlers/onRightClick"
 
 export default async function watchTimedText(timedText: HTMLElement) {
     if (window.watchingTimedText === timedText) {
@@ -15,7 +13,7 @@ export default async function watchTimedText(timedText: HTMLElement) {
     window.watchingTimedText = timedText
 
     pollSettings()
-    left_right_click($(".watch-video"), onLeftClick, onRightClick)
+    left_right_click($(".watch-video"))
 
     const doOnMutation = (mutation: MutationRecord) => {
         if (mutation?.addedNodes?.length > 0) {
@@ -24,6 +22,7 @@ export default async function watchTimedText(timedText: HTMLElement) {
                 const parentSpan = $(node).find("span").first()
                 if (!parentSpan || !parentSpan[0]) continue
                 const currentText = extractTextFromHTML(parentSpan[0].innerHTML)
+                console.log("CURRENT TEXT FROM TIMED TEXT: ", currentText)
                 const existingTranslation =
                     checkForExistingTranslation(currentText)
                 if (window.doNotTouchSentences[currentText]) {

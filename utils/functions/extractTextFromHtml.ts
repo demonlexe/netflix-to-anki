@@ -1,6 +1,7 @@
 import { parseFromString } from "dom-parser"
 
 export default function extractTextFromHTML(htmlString: string) {
+    if (!htmlString || htmlString.length === 0) return ""
     // Parse the HTML string into a document
     const doc = parseFromString(htmlString)
 
@@ -19,5 +20,5 @@ export default function extractTextFromHTML(htmlString: string) {
         result += span.textContent
     })
 
-    return result
+    return result?.trim()
 }
