@@ -62,7 +62,10 @@ const batchPromise = (phrases: string[], locale: string) =>
                     await getAlreadyTranslatedSentences()
                 const collectedSentences = {}
                 for (const sentence of alreadyTranslatedSentences) {
-                    if (window.allNetflixSentences.includes(sentence)) {
+                    if (
+                        window.allNetflixSentences.includes(sentence) ||
+                        window.allNetflixSentences.includes(sentence?.trim())
+                    ) {
                         collectedSentences[sentence] =
                             NETFLIX_TO_ANKI_TRANSLATIONS[sentence]
                     }
@@ -91,12 +94,19 @@ const batchPromise = (phrases: string[], locale: string) =>
                     "ASYNC FORK # of sentences translated this time: ",
                     Object.keys(response.translatedPhrases).length
                 )
-                setAllCachedTranslations(collectedSentences).then(() => {
-                    initBatchTranslatedSentences(collectedSentences)
-                })
-                resolve({ newSentences: collectedSentences })
+                if (
+                    Object.keys(collectedSentences).length >=
+                    alreadyTranslatedSentences.length
+                ) {
+                    setAllCachedTranslations(collectedSentences).then(() => {
+                        initBatchTranslatedSentences(collectedSentences)
+                    })
+                    resolve({ newSentences: collectedSentences })
+                } else {
+                    throw new Error("No new sentences translated.")
+                }
             } catch (e) {
-                console.error("Error setting translations: ", e)
+                console.error("Error setting ASYNC translations: ", e)
                 resolve({
                     newSentences: {},
                     checkQuotaExceeded: response?.error?.status === 429
@@ -171,35 +181,41 @@ export default async function batchTranslateSubtitles() {
     window.maxOfBatch = currentMaxSize
 
     let hadCheckQuotaExceeded = false
-    await Promise.all(allPromises)
-        .then((results: BatchPromise[]) => {
-            let newSentences = {}
-            // if one of the results had checkQuotaExceeded, set hadCheckQuotaExceeded to true
-            hadCheckQuotaExceeded = results.some(
-                (res) => res.checkQuotaExceeded
-            )
-            for (const result of results) {
-                if (result.newSentences) {
-                    newSentences = { ...newSentences, ...result.newSentences }
+    await Promise.all(allPromises).then((results: BatchPromise[]) => {
+        getAllCachedTranslations()
+            .then((alreadyTranslated) => {
+                let newSentences = alreadyTranslated
+                // if one of the results had checkQuotaExceeded, set hadCheckQuotaExceeded to true
+                hadCheckQuotaExceeded = results.some(
+                    (res) => res.checkQuotaExceeded
+                )
+                for (const result of results) {
+                    if (result.newSentences) {
+                        newSentences = {
+                            ...newSentences,
+                            ...result.newSentences
+                        }
+                    }
                 }
-            }
-            // update cached translations
-            setAllCachedTranslations(newSentences).then(() => {
-                initBatchTranslatedSentences(newSentences)
+                // update cached translations
+                setAllCachedTranslations(newSentences).then(() => {
+                    initBatchTranslatedSentences(newSentences)
+                })
+                console.log(
+                    "FINAL # of sentences translated: ",
+                    Object.keys(newSentences).length,
+                    "# sentences remaining: ",
+                    window.untranslatedSentences.length,
+                    "of total sentences ",
+                    window.allNetflixSentences.length
+                )
             })
-            console.log(
-                "FINAL # of sentences translated: ",
-                Object.keys(newSentences).length,
-                "# sentences remaining: ",
-                window.untranslatedSentences.length,
-                "of total sentences ",
-                window.allNetflixSentences.length
-            )
-        })
-        .finally(() => {
-            setTimeout(
-                () => batchTranslateSubtitles(),
-                BATCH_TRANSLATE_RETRY_INTERVAL * (hadCheckQuotaExceeded ? 2 : 1)
-            )
-        })
+            .finally(() => {
+                setTimeout(
+                    () => batchTranslateSubtitles(),
+                    BATCH_TRANSLATE_RETRY_INTERVAL *
+                        (hadCheckQuotaExceeded ? 2 : 1)
+                )
+            })
+    })
 }
