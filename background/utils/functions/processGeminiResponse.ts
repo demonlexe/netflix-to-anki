@@ -31,10 +31,13 @@ function fixJSON(
             if (jsonString[0] !== "{") {
                 jsonString = "{" + jsonString
             }
-            // remove all trailing brackets or braces
+            // remove all trailing brackets, braces, useless characters
             while (
                 jsonString[jsonString.length - 1] === "}" ||
-                jsonString[jsonString.length - 1] === "]"
+                jsonString[jsonString.length - 1] === "]" ||
+                jsonString[jsonString.length - 1] === "," ||
+                jsonString[jsonString.length - 1] === " " ||
+                jsonString[jsonString.length - 1] === "\n"
             ) {
                 jsonString = jsonString.slice(0, jsonString.length - 1)
             }

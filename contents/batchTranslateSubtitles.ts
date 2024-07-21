@@ -139,8 +139,9 @@ export default async function batchTranslateSubtitles(showId: string) {
 
     const [TARGET_LANGUAGE] = await Promise.all([getData("TARGET_LANGUAGE")])
     const USE_BATCH_SIZE = Math.ceil(
-        (BATCH_SIZE < window.maxOfBatch ? window.maxOfBatch : BATCH_SIZE) /
-            window.batchTranslateRetries
+        (BATCH_SIZE > window.untranslatedSentences.length
+            ? window.untranslatedSentences.length
+            : BATCH_SIZE) / window.batchTranslateRetries
     ) // diminishing batch size
 
     // Just get the locale
@@ -172,15 +173,6 @@ export default async function batchTranslateSubtitles(showId: string) {
         i < window.untranslatedSentences.length;
         i += USE_BATCH_SIZE
     ) {
-        if (
-            window.untranslatedSentences.slice(i, i + USE_BATCH_SIZE).length >
-            currentMaxSize
-        ) {
-            currentMaxSize = window.untranslatedSentences.slice(
-                i,
-                i + USE_BATCH_SIZE
-            ).length
-        }
         await delay(BATCH_TRANSLATE_DELAY_TIME * window.batchTranslateRetries)
         allPromises.push(
             batchPromise(
@@ -190,7 +182,6 @@ export default async function batchTranslateSubtitles(showId: string) {
             )
         )
     }
-    window.maxOfBatch = currentMaxSize
 
     let hadCheckQuotaExceeded = false
     await Promise.all(allPromises).then((results: BatchPromise[]) => {
