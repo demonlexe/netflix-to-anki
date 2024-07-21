@@ -71,15 +71,19 @@ const batchPromise = (phrases: string[], locale: string) =>
                     }
                 }
                 const snapshotSet = new Set(window.untranslatedSentences)
-                if (response.translatedPhrases) {
+                if (
+                    response.translatedPhrases &&
+                    Object.keys(response.translatedPhrases).length > 0
+                ) {
                     for (const key in response.translatedPhrases) {
                         // key should be native language, value should be target language
                         collectedSentences[key?.trim()] =
                             response.translatedPhrases[key]?.trim()
                     }
-                } else if (response.error) {
-                    console.error("Error translating: ", response)
-                    throw new Error("Error translating: " + response.error)
+                } else {
+                    throw new Error(
+                        "No translated phrases in response from Gemini."
+                    )
                 }
                 window.untranslatedSentences = Array.from(
                     snapshotSet.difference(
