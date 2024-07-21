@@ -22,7 +22,6 @@ export default async function watchTimedText(timedText: HTMLElement) {
                 const parentSpan = $(node).find("span").first()
                 if (!parentSpan || !parentSpan[0]) continue
                 const currentText = extractTextFromHTML(parentSpan[0].innerHTML)
-                console.log("CURRENT TEXT FROM TIMED TEXT: ", currentText)
                 const existingTranslation =
                     checkForExistingTranslation(currentText)
                 if (window.doNotTouchSentences[currentText]) {

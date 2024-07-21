@@ -10,8 +10,11 @@ import updateNeedToStudy from "./updateNeedToStudy"
 import updateTranslations from "./updateTranslations"
 
 // returns boolean, if yes, it means we should play the video.
-export default function translatePhraseLocal(currentText: string) {
-    const liveElement = getLiveElement()
+export default function translatePhraseLocal(
+    currentText: string,
+    container?: JQuery<HTMLElement>
+) {
+    const liveElement = getLiveElement("", container)
 
     let shouldPlay = null
     const existingTranslation = checkForExistingTranslation(currentText)
