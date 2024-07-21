@@ -4,7 +4,7 @@ import type {
     UserSettings
 } from "~utils/localData"
 
-export const BATCH_SIZE = 80
+export const BATCH_SIZE = 140
 
 export const BOOLEAN_USER_SETTINGS_DEFAULTS: BooleanUserSettings = {
     AUTO_TRANSLATE_WHILE_PLAYING: true,
@@ -33,8 +33,8 @@ export const READABLE_BOOLEAN_SETTINGS: Record<
 }
 // every 15 seconds
 export const BATCH_TRANSLATE_RETRY_INTERVAL = 15000
-// every 2 seconds
-export const BATCH_TRANSLATE_DELAY_TIME = 2000
+// every 2.5 seconds
+export const BATCH_TRANSLATE_DELAY_TIME = 2500
 // Stop translating after 6 retries
 export const MAX_TRANSLATE_RETRIES = 6
 export const MIN_UNTRANSLATED_SENTENCES = 10
