@@ -19,7 +19,6 @@ export default async function onClick() {
     const allTexts: { container: JQuery<HTMLElement>; text: string }[] = []
     $(".player-timedtext-text-container").each((_, el) => {
         const liveElement = getLiveElement("", $(el))
-        console.log("Live Element: ", liveElement)
         const textOfElement = extractTextFromHTML($(liveElement).html())
         allTexts.push({ container: $(el), text: textOfElement })
     })
