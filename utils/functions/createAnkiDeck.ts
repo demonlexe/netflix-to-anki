@@ -7,7 +7,7 @@ export default async function createAnkiDeck(
     useOptimized: boolean
 ): Promise<File> {
     const [NEED_TO_STUDY] = await Promise.all([getData("NEED_TO_STUDY")])
-    let deckToUse = NEED_TO_STUDY
+    let deckToUse = NEED_TO_STUDY ?? {}
     if (useOptimized) {
         // optimize with Gemini
         const optimizedDeckResponse: GeminiOptimizeAnkiDeckResponse =
@@ -23,9 +23,17 @@ export default async function createAnkiDeck(
 
     // Then build the file
     const allCards = []
-    for (const [key, value] of Object.entries(deckToUse ?? {})) {
-        const newKey = key?.replace(/\n/g, " ")?.replace(/\t/g, " ")?.trim()
-        const newValue = value?.replace(/\n/g, " ")?.replace(/\t/g, " ")?.trim()
+    for (const [key, value] of Object.entries(deckToUse)) {
+        const newKey = key
+            ?.replace(/\n/g, " ")
+            ?.replace(/\t/g, " ")
+            ?.replace(/(<br\s*\/>)/g, " ")
+            ?.trim()
+        const newValue = value
+            ?.replace(/\n/g, " ")
+            ?.replace(/\t/g, " ")
+            ?.replace(/(<br\s*\/>)/g, " ")
+            ?.trim()
         if (!newKey || !newValue) continue
 
         allCards.push(`${newKey}\t${newValue}`)
