@@ -31,10 +31,10 @@ export const READABLE_BOOLEAN_SETTINGS: Record<
         title: "Pause Video When Clicking to Translate"
     }
 }
-// every 15 seconds
+// every x seconds
 export const BATCH_TRANSLATE_RETRY_INTERVAL = 15000
-// every 2.5 seconds
+// every x seconds
 export const BATCH_TRANSLATE_DELAY_TIME = 2500
-// Stop translating after 6 retries
-export const MAX_TRANSLATE_RETRIES = 6
+// Stop translating after x retries
+export const MAX_TRANSLATE_RETRIES = 8
 export const MIN_UNTRANSLATED_SENTENCES = 10
