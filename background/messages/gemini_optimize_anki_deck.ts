@@ -1,10 +1,16 @@
-import { GoogleGenerativeAI } from "@google/generative-ai"
-
 import type { PlasmoMessaging } from "@plasmohq/messaging"
 
 import type { GeminiOptimizeAnkiDeckRequest } from "~background/types/GeminiOptimizeAnkiDeckRequest"
 import type { GeminiOptimizeAnkiDeckResponse } from "~background/types/GeminiOptimizeAnkiDeckResponse"
+import initModel, {
+    type HandlerState
+} from "~background/utils/functions/initModel"
 import { getData } from "~utils/localData"
+
+const handlerState: HandlerState = {
+    usingApiKey: null,
+    model: null
+}
 
 const geminiPrompt = (deck: Record<string, string>) =>
     [
@@ -28,9 +34,8 @@ const handler: PlasmoMessaging.MessageHandler<
             "Total phrases: ",
             Object.keys(req.body.deck).length
         )
-        const genAI = new GoogleGenerativeAI(await getData("API_KEY"))
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
-        const newDeck = await model.generateContent([
+        await initModel(handlerState, await getData("API_KEY"))
+        const newDeck = await handlerState.model.generateContent([
             geminiPrompt(req.body.deck)
         ])
         const optimizedDeck: Record<string, string> = JSON.parse(

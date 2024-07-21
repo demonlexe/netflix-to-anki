@@ -1,7 +1,7 @@
 import type { SupportedLocale } from "~background/types"
 import type { GeminiModelResponse } from "~background/types/GeminiModelResponse"
 
-export async function getCurrentLanguageFromModel(
+export default async function getCurrentLanguageFromModel(
     model: any,
     phrases: string[],
     targetLanguage: string

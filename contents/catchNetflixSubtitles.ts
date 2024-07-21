@@ -3,6 +3,7 @@ import { sendToBackground } from "@plasmohq/messaging"
 import type { CatchNetflixSubtitlesRequest } from "~background/types/CatchNetflixSubtitlesRequest"
 import type { CatchNetflixSubtitlesResponse } from "~background/types/CatchNetflixSubtitlesResponse"
 import batchTranslateSubtitles from "~contents/batchTranslateSubtitles"
+import extractIdFromUrl from "~utils/functions/extractMovieFromNetflixUrl"
 import resetNetflixContext from "~utils/functions/resetNetflixContext"
 
 export default function catchNetflixSubtitles() {
@@ -34,7 +35,8 @@ export default function catchNetflixSubtitles() {
                     "This movie/episode's sentences: #",
                     window.untranslatedSentences.length
                 )
-                batchTranslateSubtitles()
+                const showId = extractIdFromUrl(window.location.href)
+                batchTranslateSubtitles(showId)
             }
         }
     })

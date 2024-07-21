@@ -4,19 +4,19 @@ import type { PlasmoMessaging } from "@plasmohq/messaging"
 
 import { type TestGeminiRequest } from "~background/types/TestGeminiRequest"
 import type { TestGeminiResponse } from "~background/types/TestGeminiResponse"
-import { getData } from "~utils/localData"
 
 const handler: PlasmoMessaging.MessageHandler<
     TestGeminiRequest,
     TestGeminiResponse
 > = async (req, res) => {
-    console.log("Request received: ", req.body)
+    console.log("test_gemini_key Request received: ", req.body)
 
     try {
         const genAI = new GoogleGenerativeAI(req.body.key)
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
-        await model.generateContent(["Translate this to english", "Hola"])
+        await model.generateContent(["Translate this to english\n", "Hola"])
     } catch (e) {
+        console.log("test_gemini_key CAUGHT ERROR: ", e)
         res.send({ error: e?.message })
         return
     }

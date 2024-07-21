@@ -14,11 +14,18 @@ export default async function getAllCachedTranslations(): Promise<
     ])
 
     // combine the caches and return
-    return {
+    const allSentences = {
         ...cache1,
         ...cache2,
         ...cache3,
         ...cache4,
         ...cache5
     }
+
+    // trim all key value pairs then return
+    const trimmedSentences = {}
+    for (const [sentence, translation] of Object.entries(allSentences)) {
+        trimmedSentences[sentence?.trim()] = translation?.trim()
+    }
+    return trimmedSentences
 }

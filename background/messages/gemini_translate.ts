@@ -1,20 +1,26 @@
-import { GoogleGenerativeAI } from "@google/generative-ai"
-
 import type { PlasmoMessaging } from "@plasmohq/messaging"
 
 import type {
     GeminiSingleRequestBody,
     GeminiSingleRequestResponse
 } from "~background/types"
-import { getCurrentLanguageFromModel } from "~background/utils"
+import getCurrentLanguageFromModel from "~background/utils/functions/getCurrentLanguageFromModel"
+import initModel, {
+    type HandlerState
+} from "~background/utils/functions/initModel"
+import preprocessGeminiResponse from "~background/utils/functions/preprocessGeminiResponse"
 import { getData } from "~utils/localData"
+
+const handlerState: HandlerState = {
+    usingApiKey: null,
+    model: null
+}
 
 const TranslationRequirements = (language: string) =>
     [
         `The main objective is to translate the following phrases to ${language}.`,
         "If there are times or numbers, please write them out.",
-        "Do not include ANY formatting markdown such as '```json', but please make sure the response is valid json with proper escape characters when needed.",
-        `Try very hard to avoid errors like "Expected ':' after property name in JSON at position 7049" and "Expected ',' or '}' after property value in JSON at position 6594 (line 1 column 6595)"`,
+        "Do not include ANY formatting markdown such as '```json', but please make sure the response is valid json.",
         "Most importantly, do not include any additional information or text in your response.",
         "EXPECTED INPUT: Multiple phrases, numbered for simplicity. For example: { '1.': 'phrase 1', '2.': 'phrase 2' }",
         "EXPECTED OUTPUT: A mapping of the phrases to their translations. For example: { `phrase 1`: `translated phrase 1`, `phrase 2`: `translated phrase 2` }",
@@ -34,17 +40,20 @@ const handler: PlasmoMessaging.MessageHandler<
         getData("TARGET_LANGUAGE"),
         getData("NATIVE_LANGUAGE")
     ])
-    const genAI = new GoogleGenerativeAI(API_KEY)
 
     try {
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+        await initModel(handlerState, API_KEY)
 
         console.log("Request received: ", req.body)
         const { phrases } = req.body
 
         const sentencesLocale =
             req.body.sentencesLocale ??
-            (await getCurrentLanguageFromModel(model, phrases, TARGET_LANGUAGE))
+            (await getCurrentLanguageFromModel(
+                handlerState.model,
+                phrases,
+                TARGET_LANGUAGE
+            ))
 
         const TRANSLATE_TO_LANGUAGE =
             sentencesLocale.match(TARGET_LANGUAGE)?.length > 0
@@ -53,20 +62,32 @@ const handler: PlasmoMessaging.MessageHandler<
 
         const prompt = TranslationRequirements(TRANSLATE_TO_LANGUAGE).join("\n")
 
-        const result = await model.generateContent([
+        const result = await handlerState.model.generateContent([
             prompt,
             JSON.stringify(phrases)
         ])
-        console.log("Result: ", result.response?.text())
-        const resultAsJson = JSON.parse(result.response?.text()?.trim())
+        const preprocessed = preprocessGeminiResponse(result.response?.text())
+        console.log("Result: ", preprocessed)
+        if (!preprocessed || Object.keys(preprocessed).length <= 0) {
+            res.send({
+                error: {
+                    message: "No translations found."
+                }
+            })
+        }
         const response: GeminiSingleRequestResponse = {
-            translatedPhrases: resultAsJson
+            translatedPhrases: JSON.parse(preprocessed)
         }
         console.log("Sending response...", response)
         res.send(response)
     } catch (e) {
-        console.error("Error in gemini_translate.ts", e)
-        res.send({ error: e?.message })
+        console.error("INTERNAL ERROR: ", e)
+        res.send({
+            error: {
+                message: e?.message,
+                status: e?.status
+            }
+        })
         return
     }
 }

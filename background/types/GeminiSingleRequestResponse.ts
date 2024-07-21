@@ -1,9 +1,12 @@
 export type GeminiSingleRequestResponse =
     | {
-          translatedPhrases: Map<string, string>
+          translatedPhrases: Record<string, string>
           error?: never
       }
     | {
-          error: string
+          error: {
+              message?: string
+              status?: number
+          }
           translatedPhrases?: never
       }

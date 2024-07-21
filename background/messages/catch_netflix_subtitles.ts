@@ -29,6 +29,7 @@ const handler: PlasmoMessaging.MessageHandler<
         message.url.includes("nflxvideo.net") &&
         message.response?.length > 0
     ) {
+        console.log("Caught netflix subtitles: ", message)
         parseString(message.response, async function (err, result) {
             if (err) {
                 console.error("Error parsing XML: ", err)
@@ -48,7 +49,7 @@ const handler: PlasmoMessaging.MessageHandler<
             for (const key in grouping) {
                 const sentences = grouping[key]
                 sentences.forEach((sentence: string) => {
-                    allSentencesSet.add(sentence)
+                    allSentencesSet.add(sentence?.trim())
                 })
             }
             const allSentencesArray: string[] = Array.from(allSentencesSet)
