@@ -42,8 +42,9 @@ type BatchPromise = {
     newSentences: Record<string, string>
     checkQuotaExceeded?: boolean
 }
-const batchPromise = (phrases: string[], locale: string) =>
+const batchPromise = (phrases: string[], locale: string, showId: string) =>
     new Promise<BatchPromise>((resolve) => {
+        if (showId !== window.currentShowId) return
         sendToBackground({
             name: "gemini_translate",
             body: {
@@ -51,6 +52,7 @@ const batchPromise = (phrases: string[], locale: string) =>
                 sentencesLocale: locale
             } as GeminiSingleRequestBody
         }).then(async (response: GeminiSingleRequestResponse) => {
+            if (showId !== window.currentShowId) return
             try {
                 if (response?.error) {
                     throw response.error
@@ -115,7 +117,8 @@ const batchPromise = (phrases: string[], locale: string) =>
         })
     })
 
-export default async function batchTranslateSubtitles() {
+export default async function batchTranslateSubtitles(showId: string) {
+    if (showId !== window.currentShowId) return
     window.batchTranslateRetries++
 
     const alreadyTranslatedSentences = await getAlreadyTranslatedSentences()
@@ -127,7 +130,7 @@ export default async function batchTranslateSubtitles() {
         window.untranslatedSentences.length <= MIN_UNTRANSLATED_SENTENCES
     ) {
         setTimeout(
-            () => batchTranslateSubtitles(),
+            () => batchTranslateSubtitles(showId),
             BATCH_TRANSLATE_RETRY_INTERVAL * 2
         )
         return // stop looping
@@ -156,6 +159,13 @@ export default async function batchTranslateSubtitles() {
     const allPromises = []
 
     let currentMaxSize = 0
+    console.log(
+        "Allocating batches of size ",
+        USE_BATCH_SIZE,
+        "and there are ",
+        window.untranslatedSentences.length,
+        "untranslated sentences"
+    )
     for (
         let i = 0;
         i < window.untranslatedSentences.length;
@@ -174,7 +184,8 @@ export default async function batchTranslateSubtitles() {
         allPromises.push(
             batchPromise(
                 window.untranslatedSentences.slice(i, i + USE_BATCH_SIZE),
-                sentencesLocale.locale
+                sentencesLocale.locale,
+                showId
             )
         )
     }
@@ -182,8 +193,10 @@ export default async function batchTranslateSubtitles() {
 
     let hadCheckQuotaExceeded = false
     await Promise.all(allPromises).then((results: BatchPromise[]) => {
+        if (showId !== window.currentShowId) return
         getAllCachedTranslations()
             .then((alreadyTranslated) => {
+                if (showId !== window.currentShowId) return
                 let newSentences = alreadyTranslated
                 // if one of the results had checkQuotaExceeded, set hadCheckQuotaExceeded to true
                 hadCheckQuotaExceeded = results.some(
@@ -211,8 +224,9 @@ export default async function batchTranslateSubtitles() {
                 )
             })
             .finally(() => {
+                if (showId !== window.currentShowId) return
                 setTimeout(
-                    () => batchTranslateSubtitles(),
+                    () => batchTranslateSubtitles(showId),
                     BATCH_TRANSLATE_RETRY_INTERVAL *
                         (hadCheckQuotaExceeded ? 2 : 1)
                 )

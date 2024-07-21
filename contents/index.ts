@@ -11,6 +11,7 @@ import { isYellow, left_right_click, observeSection } from "~utils"
 import { USER_SETTINGS_DEFAULTS } from "~utils/constants"
 import changeText from "~utils/functions/changeText"
 import checkForExistingTranslation from "~utils/functions/checkForExistingTranslation"
+import extractIdFromUrl from "~utils/functions/extractMovieFromNetflixUrl"
 import initBatchTranslatedSentences from "~utils/functions/initBatchTranslatedSentences"
 import initData from "~utils/functions/initData"
 import resetNetflixContext from "~utils/functions/resetNetflixContext"
@@ -41,6 +42,7 @@ declare global {
         batchTranslateRetries: number
         maxOfBatch: number
         watchingTimedText: HTMLElement
+        currentShowId: string
     }
 }
 
@@ -50,6 +52,7 @@ window.batchTranslatedSentences = {}
 window.reverseBatchTranslatedSentences = {}
 window.doNotTouchSentences = {}
 window.polledSettings = USER_SETTINGS_DEFAULTS
+window.currentShowId = extractIdFromUrl(window.location.href)
 resetNetflixContext()
 
 const script = document.createElement("script")
@@ -185,6 +188,10 @@ window.addEventListener("load", () => {
                         if (!window.location.href.includes("watch")) {
                             // don't care about home page
                             return
+                        } else {
+                            window.currentShowId = extractIdFromUrl(
+                                window.location.href
+                            )
                         }
                         const timedText =
                             await waitForElement(".player-timedtext")
