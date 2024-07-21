@@ -49,7 +49,7 @@ const handler: PlasmoMessaging.MessageHandler<
             for (const key in grouping) {
                 const sentences = grouping[key]
                 sentences.forEach((sentence: string) => {
-                    allSentencesSet.add(sentence)
+                    allSentencesSet.add(sentence?.trim())
                 })
             }
             const allSentencesArray: string[] = Array.from(allSentencesSet)
