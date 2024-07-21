@@ -32,9 +32,9 @@ export const READABLE_BOOLEAN_SETTINGS: Record<
     }
 }
 // every x seconds
-export const BATCH_TRANSLATE_RETRY_INTERVAL = 15000
+export const BATCH_TRANSLATE_RETRY_INTERVAL = 10000
 // every x seconds
-export const BATCH_TRANSLATE_DELAY_TIME = 2500
+export const BATCH_TRANSLATE_DELAY_TIME = 2000
 // Stop translating after x retries
 export const MAX_TRANSLATE_RETRIES = 8
 export const MIN_UNTRANSLATED_SENTENCES = 10
