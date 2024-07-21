@@ -4,7 +4,7 @@ import type {
     UserSettings
 } from "~utils/localData"
 
-export const BATCH_SIZE = 140
+export const BATCH_SIZE = 80
 
 export const BOOLEAN_USER_SETTINGS_DEFAULTS: BooleanUserSettings = {
     AUTO_TRANSLATE_WHILE_PLAYING: true,

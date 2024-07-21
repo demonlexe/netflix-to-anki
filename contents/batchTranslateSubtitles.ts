@@ -51,13 +51,10 @@ const batchPromise = (phrases: string[], locale: string) =>
                 sentencesLocale: locale
             } as GeminiSingleRequestBody
         }).then(async (response: GeminiSingleRequestResponse) => {
-            if (response?.error) {
-                resolve({
-                    newSentences: {},
-                    checkQuotaExceeded: response.error.status === 429
-                })
-            }
             try {
+                if (response?.error) {
+                    throw response.error
+                }
                 // Initialize to include members of window.allNetflixSentences that are in NETFLIX_TO_ANKI_TRANSLATIONS
                 const NETFLIX_TO_ANKI_TRANSLATIONS =
                     await getAllCachedTranslations()
@@ -100,7 +97,10 @@ const batchPromise = (phrases: string[], locale: string) =>
                 resolve({ newSentences: collectedSentences })
             } catch (e) {
                 console.error("Error setting translations: ", e)
-                resolve({ newSentences: {} })
+                resolve({
+                    newSentences: {},
+                    checkQuotaExceeded: response?.error?.status === 429
+                })
             }
         })
     })
