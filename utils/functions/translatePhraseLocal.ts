@@ -27,8 +27,8 @@ export default function translatePhraseLocal(
         window.doNotTouchSentences[existingReverseTranslation.trim()] = true
         updateNeedToStudy(currentText, existingReverseTranslation)
         shouldPlay = window.polledSettings.AUTO_TRANSLATE_WHILE_PLAYING
-            ? false
-            : true
+            ? true
+            : false
     } else if (existingTranslation) {
         updateTranslations(currentText, existingTranslation)
         updateNeedToStudy(currentText, existingTranslation)
