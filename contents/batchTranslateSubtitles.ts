@@ -108,6 +108,8 @@ const batchPromise = (phrases: string[], locale: string) =>
 export default async function batchTranslateSubtitles() {
     window.batchTranslateRetries++
 
+    const alreadyTranslatedSentences = await getAlreadyTranslatedSentences()
+
     // don't do looping if nothing to translate or too many retries
     if (
         window.batchTranslateRetries >= MAX_TRANSLATE_RETRIES ||
@@ -123,11 +125,9 @@ export default async function batchTranslateSubtitles() {
 
     const [TARGET_LANGUAGE] = await Promise.all([getData("TARGET_LANGUAGE")])
     const USE_BATCH_SIZE = Math.ceil(
-        (window.maxOfBatch < BATCH_SIZE ? window.maxOfBatch : BATCH_SIZE) /
+        (BATCH_SIZE < window.maxOfBatch ? window.maxOfBatch : BATCH_SIZE) /
             window.batchTranslateRetries
     ) // diminishing batch size
-
-    const alreadyTranslatedSentences = await getAlreadyTranslatedSentences()
 
     // Just get the locale
     const dummyArrayForLocale =
