@@ -19,23 +19,34 @@ import initBatchTranslatedSentences from "~utils/functions/initBatchTranslatedSe
 import setAllCachedTranslations from "~utils/functions/setAllCachedTranslations"
 import { getData } from "~utils/localData"
 
-async function getAlreadyTranslatedSentences(): Promise<string[]> {
+async function getAlreadyTranslatedSentences(): Promise<
+    Record<string, string>
+> {
     // Figure out what has already been translated.
     const NETFLIX_TO_ANKI_TRANSLATIONS = await getAllCachedTranslations()
-    const alreadyTranslatedSentences =
+    const allTranslatedKeys =
         NETFLIX_TO_ANKI_TRANSLATIONS &&
         typeof NETFLIX_TO_ANKI_TRANSLATIONS === "object" &&
         Object.keys(NETFLIX_TO_ANKI_TRANSLATIONS).length > 1
             ? Object.keys(NETFLIX_TO_ANKI_TRANSLATIONS)
             : []
-
+    const collectedSentences = {}
+    for (const sentence of allTranslatedKeys) {
+        if (
+            window.allNetflixSentences.includes(sentence) ||
+            window.allNetflixSentences.includes(sentence?.trim())
+        ) {
+            collectedSentences[sentence] =
+                NETFLIX_TO_ANKI_TRANSLATIONS[sentence]
+        }
+    }
     // Remove already translated sentences from the window.untranslatedSentences
     window.untranslatedSentences = Array.from(
         new Set(window.untranslatedSentences).difference(
-            new Set(alreadyTranslatedSentences)
+            new Set(allTranslatedKeys)
         )
     )
-    return alreadyTranslatedSentences
+    return collectedSentences
 }
 
 type BatchPromise = {
@@ -58,20 +69,10 @@ const batchPromise = (phrases: string[], locale: string, showId: string) =>
                     throw response.error
                 }
                 // Initialize to include members of window.allNetflixSentences that are in NETFLIX_TO_ANKI_TRANSLATIONS
-                const NETFLIX_TO_ANKI_TRANSLATIONS =
-                    await getAllCachedTranslations()
-                const alreadyTranslatedSentences =
-                    await getAlreadyTranslatedSentences()
-                const collectedSentences = {}
-                for (const sentence of alreadyTranslatedSentences) {
-                    if (
-                        window.allNetflixSentences.includes(sentence) ||
-                        window.allNetflixSentences.includes(sentence?.trim())
-                    ) {
-                        collectedSentences[sentence] =
-                            NETFLIX_TO_ANKI_TRANSLATIONS[sentence]
-                    }
-                }
+                const collectedSentences = await getAlreadyTranslatedSentences()
+                const previousCollectedSentencesCount =
+                    Object.keys(collectedSentences).length
+
                 const snapshotSet = new Set(window.untranslatedSentences)
                 if (
                     response.translatedPhrases &&
@@ -98,7 +99,7 @@ const batchPromise = (phrases: string[], locale: string, showId: string) =>
                 )
                 if (
                     Object.keys(collectedSentences).length >=
-                    alreadyTranslatedSentences.length
+                    previousCollectedSentencesCount
                 ) {
                     setAllCachedTranslations(collectedSentences).then(() => {
                         initBatchTranslatedSentences(collectedSentences)
@@ -146,7 +147,7 @@ export default async function batchTranslateSubtitles(showId: string) {
     const dummyArrayForLocale =
         window.untranslatedSentences.length > BATCH_SIZE / 2
             ? window.untranslatedSentences.slice(0, BATCH_SIZE / 2)
-            : alreadyTranslatedSentences.slice(0, BATCH_SIZE / 2)
+            : Object.keys(alreadyTranslatedSentences).slice(0, BATCH_SIZE / 2)
     const sentencesLocale: GeminiGetLocaleResponse = await sendToBackground({
         name: "gemini_get_locale",
         body: {
@@ -194,22 +195,11 @@ export default async function batchTranslateSubtitles(showId: string) {
     let hadCheckQuotaExceeded = false
     await Promise.all(allPromises).then((results: BatchPromise[]) => {
         if (showId !== window.currentShowId) return
-        getAllCachedTranslations()
+        getAlreadyTranslatedSentences()
             .then((allTranslations: Record<string, string>) => {
                 if (showId !== window.currentShowId) return
 
-                // newSentences should include the key/value pairs of allTranslations that are needed, because they are in window.allNetflixSentences
-                let newSentences = {}
-                for (const [sentence, translation] of Object.entries(
-                    allTranslations
-                )) {
-                    if (
-                        window.allNetflixSentences.includes(sentence) ||
-                        window.allNetflixSentences.includes(sentence?.trim())
-                    ) {
-                        newSentences[sentence] = translation
-                    }
-                }
+                let newSentences = allTranslations
 
                 // if one of the results had checkQuotaExceeded, set hadCheckQuotaExceeded to true
                 hadCheckQuotaExceeded = results.some(
