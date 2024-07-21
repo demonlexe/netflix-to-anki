@@ -47,6 +47,13 @@ const handler: PlasmoMessaging.MessageHandler<
         console.log("Request received: ", req.body)
         const { phrases } = req.body
 
+        if (!phrases || phrases.length <= 0) {
+            res.send({
+                error: { message: "Invalid request, no sentences to translate" }
+            })
+            return
+        }
+
         const sentencesLocale =
             req.body.sentencesLocale ??
             (await getCurrentLanguageFromModel(

@@ -19,6 +19,10 @@ const handler: PlasmoMessaging.MessageHandler<
 > = async (req, res) => {
     const { sentences, targetLanguage } = req.body
 
+    if (!sentences || !targetLanguage || sentences.length <= 0) {
+        res.send({ error: "Invalid request" })
+        return
+    }
     try {
         await initModel(handlerState, await getData("API_KEY"))
         const sentencesLocale = await getCurrentLanguageFromModel(

@@ -156,11 +156,18 @@ export default async function batchTranslateSubtitles(showId: string) {
             sentences: dummyArrayForLocale
         } as GeminiGetLocaleRequest
     })
+    if (!sentencesLocale?.locale || sentencesLocale?.error) {
+        console.error("Error getting locale: ", sentencesLocale?.error)
+        setTimeout(
+            () => batchTranslateSubtitles(showId),
+            BATCH_TRANSLATE_RETRY_INTERVAL * 2
+        )
+        return
+    }
 
     // Split into BATCH_SIZE sentences from the window.untranslatedSentences
     const allPromises = []
 
-    let currentMaxSize = 0
     console.log(
         "Allocating batches of size ",
         USE_BATCH_SIZE,
