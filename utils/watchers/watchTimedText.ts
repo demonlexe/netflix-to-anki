@@ -3,6 +3,7 @@ import $ from "jquery"
 import { isYellow, left_right_click, observeSection } from "~utils"
 import changeText from "~utils/functions/changeText"
 import checkForExistingTranslation from "~utils/functions/checkForExistingTranslation"
+import extractTextFromHTML from "~utils/functions/extractTextFromHtml"
 import pollSettings from "~utils/functions/pollSettings"
 import onLeftClick from "~utils/handlers/onLeftClick"
 import onRightClick from "~utils/handlers/onRightClick"
@@ -20,8 +21,9 @@ export default async function watchTimedText(timedText: HTMLElement) {
         if (mutation?.addedNodes?.length > 0) {
             // loop all added nodes and log if they are clicked.
             for (const node of mutation.addedNodes) {
-                const deepestSpan = $(node).find("span").last()
-                const currentText = $(node).text()?.trim()
+                const parentSpan = $(node).find("span").first()
+                if (!parentSpan || !parentSpan[0]) continue
+                const currentText = extractTextFromHTML(parentSpan[0].innerHTML)
                 const existingTranslation =
                     checkForExistingTranslation(currentText)
                 if (window.doNotTouchSentences[currentText]) {
@@ -30,18 +32,18 @@ export default async function watchTimedText(timedText: HTMLElement) {
                 }
                 if (
                     window.localTranslations[currentText] &&
-                    !isYellow(deepestSpan)
+                    !isYellow(parentSpan)
                 ) {
                     changeText(
-                        deepestSpan,
+                        parentSpan,
                         window.localTranslations[currentText]
                     )
                 } else if (
                     window.polledSettings.AUTO_TRANSLATE_WHILE_PLAYING &&
                     existingTranslation &&
-                    !isYellow(deepestSpan)
+                    !isYellow(parentSpan)
                 ) {
-                    changeText(deepestSpan, existingTranslation)
+                    changeText(parentSpan, existingTranslation)
                 }
             }
             $(timedText).css("pointer-events", "auto")

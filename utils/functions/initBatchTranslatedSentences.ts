@@ -14,6 +14,7 @@ export default async function initBatchTranslatedSentences(
 
     console.log(
         "Loaded translations from Local Storage: #",
-        translations && Object.keys(translations).length
+        translations && Object.keys(translations).length,
+        translations
     )
 }
