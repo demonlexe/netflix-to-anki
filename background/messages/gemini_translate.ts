@@ -42,7 +42,7 @@ const handler: PlasmoMessaging.MessageHandler<
     ])
 
     try {
-        await initModel(handlerState, await getData("API_KEY"))
+        await initModel(handlerState, API_KEY)
 
         console.log("Request received: ", req.body)
         const { phrases } = req.body
@@ -74,8 +74,12 @@ const handler: PlasmoMessaging.MessageHandler<
         console.log("Sending response...", response)
         res.send(response)
     } catch (e) {
-        console.error("Error in gemini_translate.ts", e)
-        res.send({ error: e?.message })
+        res.send({
+            error: {
+                message: e?.message,
+                status: e?.status
+            }
+        })
         return
     }
 }

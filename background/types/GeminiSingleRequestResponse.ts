@@ -4,6 +4,9 @@ export type GeminiSingleRequestResponse =
           error?: never
       }
     | {
-          error: string
+          error: {
+              message?: string
+              status?: number
+          }
           translatedPhrases?: never
       }

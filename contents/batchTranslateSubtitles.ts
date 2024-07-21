@@ -38,8 +38,12 @@ async function getAlreadyTranslatedSentences(): Promise<string[]> {
     return alreadyTranslatedSentences
 }
 
+type BatchPromise = {
+    newSentences: Record<string, string>
+    checkQuotaExceeded?: boolean
+}
 const batchPromise = (phrases: string[], locale: string) =>
-    new Promise<{ newSentences: Record<string, string> }>((resolve, reject) => {
+    new Promise<BatchPromise>((resolve) => {
         sendToBackground({
             name: "gemini_translate",
             body: {
@@ -47,6 +51,12 @@ const batchPromise = (phrases: string[], locale: string) =>
                 sentencesLocale: locale
             } as GeminiSingleRequestBody
         }).then(async (response: GeminiSingleRequestResponse) => {
+            if (response?.error) {
+                resolve({
+                    newSentences: {},
+                    checkQuotaExceeded: response.error.status === 429
+                })
+            }
             try {
                 // Initialize to include members of window.allNetflixSentences that are in NETFLIX_TO_ANKI_TRANSLATIONS
                 const NETFLIX_TO_ANKI_TRANSLATIONS =
@@ -156,9 +166,14 @@ export default async function batchTranslateSubtitles() {
     }
     window.maxOfBatch = currentMaxSize
 
+    let hadCheckQuotaExceeded = false
     await Promise.all(allPromises)
-        .then((results) => {
+        .then((results: BatchPromise[]) => {
             let newSentences = {}
+            // if one of the results had checkQuotaExceeded, set hadCheckQuotaExceeded to true
+            hadCheckQuotaExceeded = results.some(
+                (res) => res.checkQuotaExceeded
+            )
             for (const result of results) {
                 if (result.newSentences) {
                     newSentences = { ...newSentences, ...result.newSentences }
@@ -180,7 +195,7 @@ export default async function batchTranslateSubtitles() {
         .finally(() => {
             setTimeout(
                 () => batchTranslateSubtitles(),
-                BATCH_TRANSLATE_RETRY_INTERVAL
+                BATCH_TRANSLATE_RETRY_INTERVAL * (hadCheckQuotaExceeded ? 2 : 1)
             )
         })
 }
