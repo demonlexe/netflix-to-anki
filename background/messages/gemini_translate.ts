@@ -8,6 +8,7 @@ import getCurrentLanguageFromModel from "~background/utils/functions/getCurrentL
 import initModel, {
     type HandlerState
 } from "~background/utils/functions/initModel"
+import processGeminiJson from "~background/utils/functions/processGeminiJson"
 import { getData } from "~utils/localData"
 
 const handlerState: HandlerState = {
@@ -19,8 +20,7 @@ const TranslationRequirements = (language: string) =>
     [
         `The main objective is to translate the following phrases to ${language}.`,
         "If there are times or numbers, please write them out.",
-        "Do not include ANY formatting markdown such as '```json', but please make sure the response is valid json with proper escape characters when needed.",
-        `If there are any Quotation marks like \", please escape them with a backslash, so that the JSON is valid..`,
+        "Do not include ANY formatting markdown such as '```json', but please make sure the response is valid json.",
         "Most importantly, do not include any additional information or text in your response.",
         "EXPECTED INPUT: Multiple phrases, numbered for simplicity. For example: { '1.': 'phrase 1', '2.': 'phrase 2' }",
         "EXPECTED OUTPUT: A mapping of the phrases to their translations. For example: { `phrase 1`: `translated phrase 1`, `phrase 2`: `translated phrase 2` }",
@@ -67,14 +67,21 @@ const handler: PlasmoMessaging.MessageHandler<
             JSON.stringify(phrases)
         ])
         console.log("Result: ", result.response?.text())
-        const resultAsJson = JSON.parse(result.response?.text()?.trim())
+        const resultAsJson = processGeminiJson(result.response?.text())
+        if (!resultAsJson || Object.keys(resultAsJson).length <= 0) {
+            res.send({
+                error: {
+                    message: "No translations found."
+                }
+            })
+        }
         const response: GeminiSingleRequestResponse = {
             translatedPhrases: resultAsJson
         }
         console.log("Sending response...", response)
         res.send(response)
     } catch (e) {
-        console.error("INTERNAL ERROR")
+        console.error("INTERNAL ERROR: ", e)
         res.send({
             error: {
                 message: e?.message,
