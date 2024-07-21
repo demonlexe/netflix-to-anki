@@ -8,7 +8,7 @@ import getCurrentLanguageFromModel from "~background/utils/functions/getCurrentL
 import initModel, {
     type HandlerState
 } from "~background/utils/functions/initModel"
-import processGeminiJson from "~background/utils/functions/processGeminiJson"
+import preprocessGeminiResponse from "~background/utils/functions/preprocessGeminiResponse"
 import { getData } from "~utils/localData"
 
 const handlerState: HandlerState = {
@@ -66,9 +66,9 @@ const handler: PlasmoMessaging.MessageHandler<
             prompt,
             JSON.stringify(phrases)
         ])
-        console.log("Result: ", result.response?.text())
-        const resultAsJson = processGeminiJson(result.response?.text())
-        if (!resultAsJson || Object.keys(resultAsJson).length <= 0) {
+        const preprocessed = preprocessGeminiResponse(result.response?.text())
+        console.log("Result: ", preprocessed)
+        if (!preprocessed || Object.keys(preprocessed).length <= 0) {
             res.send({
                 error: {
                     message: "No translations found."
@@ -76,7 +76,7 @@ const handler: PlasmoMessaging.MessageHandler<
             })
         }
         const response: GeminiSingleRequestResponse = {
-            translatedPhrases: resultAsJson
+            translatedPhrases: JSON.parse(preprocessed)
         }
         console.log("Sending response...", response)
         res.send(response)

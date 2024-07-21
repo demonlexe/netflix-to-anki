@@ -195,9 +195,22 @@ export default async function batchTranslateSubtitles(showId: string) {
     await Promise.all(allPromises).then((results: BatchPromise[]) => {
         if (showId !== window.currentShowId) return
         getAllCachedTranslations()
-            .then((alreadyTranslated) => {
+            .then((allTranslations: Record<string, string>) => {
                 if (showId !== window.currentShowId) return
-                let newSentences = alreadyTranslated
+
+                // newSentences should include the key/value pairs of allTranslations that are needed, because they are in window.allNetflixSentences
+                let newSentences = {}
+                for (const [sentence, translation] of Object.entries(
+                    allTranslations
+                )) {
+                    if (
+                        window.allNetflixSentences.includes(sentence) ||
+                        window.allNetflixSentences.includes(sentence?.trim())
+                    ) {
+                        newSentences[sentence] = translation
+                    }
+                }
+
                 // if one of the results had checkQuotaExceeded, set hadCheckQuotaExceeded to true
                 hadCheckQuotaExceeded = results.some(
                     (res) => res.checkQuotaExceeded
