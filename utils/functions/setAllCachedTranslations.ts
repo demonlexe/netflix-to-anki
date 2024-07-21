@@ -14,15 +14,15 @@ export default async function setAllCachedTranslations(allSentences: object) {
     for (let i = 0; i < sentences.length; i++) {
         const [sentence, translation] = sentences[i]
         if (i < split) {
-            cache1[sentence] = translation
+            cache1[sentence?.trim()] = translation?.trim()
         } else if (i < split * 2) {
-            cache2[sentence] = translation
+            cache2[sentence?.trim()] = translation?.trim()
         } else if (i < split * 3) {
-            cache3[sentence] = translation
+            cache3[sentence?.trim()] = translation?.trim()
         } else if (i < split * 4) {
-            cache4[sentence] = translation
+            cache4[sentence?.trim()] = translation?.trim()
         } else {
-            cache5[sentence] = translation
+            cache5[sentence?.trim()] = translation?.trim()
         }
     }
 
