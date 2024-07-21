@@ -1,13 +1,19 @@
-import { GoogleGenerativeAI } from "@google/generative-ai"
-
 import type { PlasmoMessaging } from "@plasmohq/messaging"
 
 import type {
     GeminiSingleRequestBody,
     GeminiSingleRequestResponse
 } from "~background/types"
-import { getCurrentLanguageFromModel } from "~background/utils"
+import getCurrentLanguageFromModel from "~background/utils/functions/getCurrentLanguageFromModel"
+import initModel, {
+    type HandlerState
+} from "~background/utils/functions/initModel"
 import { getData } from "~utils/localData"
+
+const handlerState: HandlerState = {
+    usingApiKey: null,
+    model: null
+}
 
 const TranslationRequirements = (language: string) =>
     [
@@ -34,17 +40,20 @@ const handler: PlasmoMessaging.MessageHandler<
         getData("TARGET_LANGUAGE"),
         getData("NATIVE_LANGUAGE")
     ])
-    const genAI = new GoogleGenerativeAI(API_KEY)
 
     try {
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+        await initModel(handlerState, await getData("API_KEY"))
 
         console.log("Request received: ", req.body)
         const { phrases } = req.body
 
         const sentencesLocale =
             req.body.sentencesLocale ??
-            (await getCurrentLanguageFromModel(model, phrases, TARGET_LANGUAGE))
+            (await getCurrentLanguageFromModel(
+                handlerState.model,
+                phrases,
+                TARGET_LANGUAGE
+            ))
 
         const TRANSLATE_TO_LANGUAGE =
             sentencesLocale.match(TARGET_LANGUAGE)?.length > 0
@@ -53,7 +62,7 @@ const handler: PlasmoMessaging.MessageHandler<
 
         const prompt = TranslationRequirements(TRANSLATE_TO_LANGUAGE).join("\n")
 
-        const result = await model.generateContent([
+        const result = await handlerState.model.generateContent([
             prompt,
             JSON.stringify(phrases)
         ])

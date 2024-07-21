@@ -1,11 +1,17 @@
-import { GoogleGenerativeAI } from "@google/generative-ai"
-
 import type { PlasmoMessaging } from "@plasmohq/messaging"
 
 import { type GeminiGetLocaleRequest } from "~background/types/GeminiGetLocaleRequest"
 import type { GeminiGetLocaleResponse } from "~background/types/GeminiGetLocaleResponse"
-import { getCurrentLanguageFromModel } from "~background/utils"
+import getCurrentLanguageFromModel from "~background/utils/functions/getCurrentLanguageFromModel"
+import initModel, {
+    type HandlerState
+} from "~background/utils/functions/initModel"
 import { getData } from "~utils/localData"
+
+const handlerState: HandlerState = {
+    usingApiKey: null,
+    model: null
+}
 
 const handler: PlasmoMessaging.MessageHandler<
     GeminiGetLocaleRequest,
@@ -14,10 +20,9 @@ const handler: PlasmoMessaging.MessageHandler<
     const { sentences, targetLanguage } = req.body
 
     try {
-        const genAI = new GoogleGenerativeAI(await getData("API_KEY"))
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+        await initModel(handlerState, await getData("API_KEY"))
         const sentencesLocale = await getCurrentLanguageFromModel(
-            model,
+            handlerState.model,
             sentences,
             targetLanguage
         )
