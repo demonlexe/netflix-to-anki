@@ -25,7 +25,6 @@ function fixJSON(
         return parsed // If no errors, return the original string
     } catch (error) {
         // Handle missing brackets or extra characters
-        console.log("CAUGHT ERROR: ", error)
         if (error.message) {
             jsonString = jsonString.trim()
             // add opening bracket if missing
