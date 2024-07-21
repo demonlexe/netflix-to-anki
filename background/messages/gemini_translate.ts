@@ -20,7 +20,7 @@ const TranslationRequirements = (language: string) =>
         `The main objective is to translate the following phrases to ${language}.`,
         "If there are times or numbers, please write them out.",
         "Do not include ANY formatting markdown such as '```json', but please make sure the response is valid json with proper escape characters when needed.",
-        `Try very hard to avoid errors like "Expected ':' after property name in JSON at position 7049" and "Expected ',' or '}' after property value in JSON at position 6594 (line 1 column 6595)"`,
+        `If there are any Quotation marks like \", please escape them with a backslash, so that the JSON is valid..`,
         "Most importantly, do not include any additional information or text in your response.",
         "EXPECTED INPUT: Multiple phrases, numbered for simplicity. For example: { '1.': 'phrase 1', '2.': 'phrase 2' }",
         "EXPECTED OUTPUT: A mapping of the phrases to their translations. For example: { `phrase 1`: `translated phrase 1`, `phrase 2`: `translated phrase 2` }",
@@ -74,6 +74,7 @@ const handler: PlasmoMessaging.MessageHandler<
         console.log("Sending response...", response)
         res.send(response)
     } catch (e) {
+        console.error("INTERNAL ERROR")
         res.send({
             error: {
                 message: e?.message,

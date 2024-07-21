@@ -81,8 +81,11 @@ const onLeftClick = async (elem: Element) => {
     )
         return true
     console.log("Single Click API Result: ", openResult)
-    updateTranslations(currentText, openResult.translatedPhrases[currentText])
-    updateNeedToStudy(currentText, openResult.translatedPhrases[currentText])
+    const transText =
+        openResult.translatedPhrases[currentText] ??
+        openResult.translatedPhrases[currentText.trim()]
+    updateTranslations(currentText, transText)
+    updateNeedToStudy(currentText, transText)
     return false
 }
 
