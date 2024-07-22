@@ -27,7 +27,7 @@ export default async function onClick() {
     // if there is no need to do the grouped translation, return early
     if (allTexts.length === 0) return false
 
-    const localTranslateResults = []
+    const localTranslateResults: { text: string; isYellow: boolean }[] = []
     allTexts.forEach((curr) => {
         const tryTranslateLocal = translatePhraseLocal(
             curr.text,
@@ -36,7 +36,11 @@ export default async function onClick() {
         localTranslateResults.push(tryTranslateLocal)
     })
 
-    if (localTranslateResults.includes(null)) {
+    const allTextsAsString = allTexts
+        .map((obj) => obj.text)
+        .join(" ")
+        .replace(/\s+/g, " ") // remove extra spaces
+    if (localTranslateResults.some((elem) => elem.text === null)) {
         const openResult: GeminiSingleRequestResponse = await sendToBackground({
             name: "gemini_translate",
             body: {
@@ -56,11 +60,24 @@ export default async function onClick() {
             )
             translatedTexts.push(openResult.translatedPhrases[curr.text])
         })
-        const text1 = allTexts.join(" ").replace(/\s+/g, " ") // remove extra spaces
-        const text2 = translatedTexts.join(" ").replace(/\s+/g, " ") // remove extra spaces
-        updateNeedToStudy(text1, text2)
+
+        const translatedTextsAsString = translatedTexts
+            .join(" ")
+            .replace(/\s+/g, " ") // remove extra spaces
+        updateNeedToStudy(allTextsAsString, translatedTextsAsString)
         return false
     } else {
-        return localTranslateResults.includes(false) ? false : true // prioritize not playing over playing
+        const localTranslatedTextsAsString = localTranslateResults
+            .map((elem) => elem.text)
+            .join(" ")
+            .replace(/\s+/g, " ") // remove extra spaces
+        updateNeedToStudy(allTextsAsString, localTranslatedTextsAsString)
+        // true plays the video
+        // false keeps default behavior of on-click
+        return window.polledSettings.PAUSE_WHEN_TRANSLATING &&
+            (localTranslateResults.includes(null) ||
+                localTranslateResults.some((elem) => elem.isYellow))
+            ? false
+            : true
     }
 }

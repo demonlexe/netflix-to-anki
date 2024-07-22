@@ -93,24 +93,8 @@ export function left_right_click(element: JQuery<Node>) {
                 })
             }
         })
-        $(element).on("contextmenu", function (event) {
-            const insideDiv = insideWhichDiv(event)
-            if (insideDiv) {
-                if (!isVideoPaused()) {
-                    $("video").trigger("pause")
-                }
-                checkStopPropagation(event)
-                onClick().then((shouldPlay) => {
-                    if (
-                        shouldPlay ||
-                        !window.polledSettings?.PAUSE_WHEN_TRANSLATING
-                    ) {
-                        $("video").trigger("play")
-                    }
-                })
-                return false
-            }
-            return true
+        $(element).on("contextmenu", function () {
+            // FIXME; What should we do here?
         })
     })
 }
