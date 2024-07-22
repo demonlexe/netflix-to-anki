@@ -8,7 +8,7 @@ import getCurrentLanguageFromModel from "~background/utils/functions/getCurrentL
 import initModel, {
     type HandlerState
 } from "~background/utils/functions/initModel"
-import preprocessGeminiResponse from "~background/utils/functions/preprocessGeminiResponse"
+import processGeminiResponse from "~background/utils/functions/processGeminiResponse"
 import { getData } from "~utils/localData"
 
 const handlerState: HandlerState = {
@@ -47,6 +47,13 @@ const handler: PlasmoMessaging.MessageHandler<
         console.log("Request received: ", req.body)
         const { phrases } = req.body
 
+        if (!phrases || phrases.length <= 0) {
+            res.send({
+                error: { message: "Invalid request, no sentences to translate" }
+            })
+            return
+        }
+
         const sentencesLocale =
             req.body.sentencesLocale ??
             (await getCurrentLanguageFromModel(
@@ -66,9 +73,8 @@ const handler: PlasmoMessaging.MessageHandler<
             prompt,
             JSON.stringify(phrases)
         ])
-        const preprocessed = preprocessGeminiResponse(result.response?.text())
-        console.log("Result: ", preprocessed)
-        if (!preprocessed || Object.keys(preprocessed).length <= 0) {
+        const processed = processGeminiResponse(result.response?.text())
+        if (!processed || Object.keys(processed).length <= 0) {
             res.send({
                 error: {
                     message: "No translations found."
@@ -76,9 +82,8 @@ const handler: PlasmoMessaging.MessageHandler<
             })
         }
         const response: GeminiSingleRequestResponse = {
-            translatedPhrases: JSON.parse(preprocessed)
+            translatedPhrases: processed
         }
-        console.log("Sending response...", response)
         res.send(response)
     } catch (e) {
         console.error("INTERNAL ERROR: ", e)

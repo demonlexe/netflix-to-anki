@@ -31,7 +31,6 @@ declare global {
         allNetflixSentences: string[]
         untranslatedSentences: string[]
         batchTranslateRetries: number
-        maxOfBatch: number
         watchingTimedText: HTMLElement
         currentShowId: string
     }

@@ -1,6 +1,5 @@
-import $ from "jquery"
-
 import changeText from "./changeText"
+import getLiveElement from "./getLiveElement"
 
 export default function updateTranslations(
     currentText: string,
@@ -14,7 +13,7 @@ export default function updateTranslations(
     if (!translatedText || translatedText.length === 0) return
 
     // update the displayed text
-    const liveElement = $(`span:contains("${currentText}")`).find("span").last()
+    const liveElement = getLiveElement(currentText)
     changeText(liveElement, translatedText)
 
     // update the cache
