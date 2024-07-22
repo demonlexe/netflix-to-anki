@@ -180,7 +180,10 @@ export default async function batchTranslateSubtitles(showId: string) {
         i < window.untranslatedSentences.length;
         i += USE_BATCH_SIZE
     ) {
-        await delay(BATCH_TRANSLATE_DELAY_TIME * window.batchTranslateRetries)
+        await delay(
+            BATCH_TRANSLATE_DELAY_TIME *
+                ((window.batchTranslateRetries + 1) / 2)
+        )
         allPromises.push(
             batchPromise(
                 window.untranslatedSentences.slice(i, i + USE_BATCH_SIZE),
