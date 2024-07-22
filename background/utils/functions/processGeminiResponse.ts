@@ -27,10 +27,22 @@ function fixJSON(
         // Handle missing brackets or extra characters
         if (error.message) {
             jsonString = jsonString.trim()
-            // add opening bracket if missing
+
+            // remove leading brackets, braces, useless characters
+            while (
+                jsonString[0] === "{" ||
+                jsonString[0] === "[" ||
+                jsonString[0] === "," ||
+                jsonString[0] === " " ||
+                jsonString[0] === "\n"
+            ) {
+                jsonString = jsonString.slice(1)
+            }
+            // add opening bracket
             if (jsonString[0] !== "{") {
                 jsonString = "{" + jsonString
             }
+
             // remove all trailing brackets, braces, useless characters
             while (
                 jsonString[jsonString.length - 1] === "}" ||
