@@ -30,6 +30,9 @@
         "prettier": "3.2.4",
         "typescript": "5.3.3"
     },
+    "optionalDependencies": {
+        "@parcel/watcher-darwin-x64": "2.4.2-alpha.0"
+    },
     "permissions": [
         "scripting",
         "webRequest",
