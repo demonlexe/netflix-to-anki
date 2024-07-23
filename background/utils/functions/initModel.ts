@@ -13,7 +13,7 @@ export default async function initModel(
         handlerState.usingApiKey = API_KEY
         const genAI = new GoogleGenerativeAI(API_KEY)
         handlerState.model = genAI.getGenerativeModel({
-            model: "gemini-1.5-flash"
+            model: "gemini-1.5-flash-latest"
         })
     }
 }
