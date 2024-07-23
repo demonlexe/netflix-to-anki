@@ -35,6 +35,9 @@ async function getAllCachedTranslations(): Promise<TranslationsCache> {
     const [cache] = await Promise.all([
         getData("NETFLIX_TO_ANKI_TRANSLATIONS_BY_ID")
     ])
+    if (!cache || typeof cache !== "object") {
+        return {}
+    }
 
     const newCache: TranslationsCache = {}
     for (const [id, record] of Object.entries(cache)) {
