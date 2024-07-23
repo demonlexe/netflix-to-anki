@@ -3,13 +3,18 @@ import { Storage } from "@plasmohq/storage"
 
 export type LocalData = {
     NATIVE_LANGUAGE: string
-    NETFLIX_TO_ANKI_TRANSLATIONS_CACHE_1: Record<string, string>
-    NETFLIX_TO_ANKI_TRANSLATIONS_CACHE_2: Record<string, string>
-    NETFLIX_TO_ANKI_TRANSLATIONS_CACHE_3: Record<string, string>
-    NETFLIX_TO_ANKI_TRANSLATIONS_CACHE_4: Record<string, string>
-    NETFLIX_TO_ANKI_TRANSLATIONS_CACHE_5: Record<string, string>
+    NETFLIX_TO_ANKI_TRANSLATIONS_BY_ID: TranslationsCache
     NEED_TO_STUDY: Record<string, string>
 } & UserSettings
+
+// {243534233: {lastUpdated: 1234234, sentences: {"sentence": "translation"}}}
+export type TranslationsCache = Record<
+    string,
+    {
+        sentences: Record<string, string>
+        lastUpdated: number // os.time()
+    }
+>
 
 export type UserSettings = {
     TARGET_LANGUAGE: string

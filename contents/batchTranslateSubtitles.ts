@@ -14,7 +14,7 @@ import {
     MIN_UNTRANSLATED_SENTENCES
 } from "~utils/constants"
 import delay from "~utils/functions/delay"
-import getAllCachedTranslations from "~utils/functions/getAllCachedTranslations"
+import getCurrentShowCachedTranslations from "~utils/functions/getCurrentShowCachedTranslations"
 import initBatchTranslatedSentences from "~utils/functions/initBatchTranslatedSentences"
 import setAllCachedTranslations from "~utils/functions/setAllCachedTranslations"
 import { getData } from "~utils/localData"
@@ -23,7 +23,8 @@ async function getAlreadyTranslatedSentences(): Promise<
     Record<string, string>
 > {
     // Figure out what has already been translated.
-    const NETFLIX_TO_ANKI_TRANSLATIONS = await getAllCachedTranslations()
+    const NETFLIX_TO_ANKI_TRANSLATIONS =
+        await getCurrentShowCachedTranslations()
     const allTranslatedKeys =
         NETFLIX_TO_ANKI_TRANSLATIONS &&
         typeof NETFLIX_TO_ANKI_TRANSLATIONS === "object" &&

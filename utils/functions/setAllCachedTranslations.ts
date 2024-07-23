@@ -1,36 +1,26 @@
+import getAllCachedTranslations from "~utils/functions/getAllCachedTranslations"
+
 import { setData } from "../localData"
 
+// update the sentences for the current show.
 export default async function setAllCachedTranslations(allSentences: object) {
-    // all sentences is a map of sentences to other sentences.
-    // split them evenly among the 5 caches.
-    const cache1 = {}
-    const cache2 = {}
-    const cache3 = {}
-    const cache4 = {}
-    const cache5 = {}
+    const cache = await getAllCachedTranslations()
+    const fixedSentences = {}
 
-    const sentences = Object.entries(allSentences)
-    const split = Math.ceil(sentences.length / 5)
-    for (let i = 0; i < sentences.length; i++) {
-        const [sentence, translation] = sentences[i]
-        if (i < split) {
-            cache1[sentence?.trim()] = translation?.trim()
-        } else if (i < split * 2) {
-            cache2[sentence?.trim()] = translation?.trim()
-        } else if (i < split * 3) {
-            cache3[sentence?.trim()] = translation?.trim()
-        } else if (i < split * 4) {
-            cache4[sentence?.trim()] = translation?.trim()
-        } else {
-            cache5[sentence?.trim()] = translation?.trim()
-        }
+    for (const [sentence, translation] of Object.entries(allSentences)) {
+        fixedSentences[sentence?.trim()] = translation?.trim()
     }
 
-    await Promise.all([
-        setData("NETFLIX_TO_ANKI_TRANSLATIONS_CACHE_1", cache1),
-        setData("NETFLIX_TO_ANKI_TRANSLATIONS_CACHE_2", cache2),
-        setData("NETFLIX_TO_ANKI_TRANSLATIONS_CACHE_3", cache3),
-        setData("NETFLIX_TO_ANKI_TRANSLATIONS_CACHE_4", cache4),
-        setData("NETFLIX_TO_ANKI_TRANSLATIONS_CACHE_5", cache5)
-    ])
+    cache[window.currentShowId] = {
+        sentences: {
+            // save previous sentences and new sentences.
+            ...(cache?.[window.currentShowId]
+                ? cache[window.currentShowId].sentences
+                : {}),
+            ...fixedSentences
+        },
+        lastUpdated: Date.now()
+    }
+
+    await Promise.all([setData("NETFLIX_TO_ANKI_TRANSLATIONS_BY_ID", cache)])
 }
