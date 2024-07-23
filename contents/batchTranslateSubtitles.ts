@@ -13,10 +13,12 @@ import {
     MAX_TRANSLATE_RETRIES,
     MIN_UNTRANSLATED_SENTENCES
 } from "~utils/constants"
+import {
+    getCurrentShowCachedTranslations,
+    setAllCachedTranslations
+} from "~utils/functions/cachedTranslations"
 import delay from "~utils/functions/delay"
-import getCurrentShowCachedTranslations from "~utils/functions/getCurrentShowCachedTranslations"
 import initBatchTranslatedSentences from "~utils/functions/initBatchTranslatedSentences"
-import setAllCachedTranslations from "~utils/functions/setAllCachedTranslations"
 import { getData } from "~utils/localData"
 
 async function getAlreadyTranslatedSentences(): Promise<

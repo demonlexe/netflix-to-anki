@@ -1,4 +1,4 @@
-import getCurrentShowCachedTranslations from "~utils/functions/getCurrentShowCachedTranslations"
+import { getCurrentShowCachedTranslations } from "~utils/functions/cachedTranslations"
 
 export default async function initBatchTranslatedSentences(
     collectedSentences?: Record<string, string>

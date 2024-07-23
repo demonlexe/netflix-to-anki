@@ -1,6 +1,35 @@
-import { getData, type TranslationsCache } from "../localData"
+import { getData, setData, type TranslationsCache } from "../localData"
 
-export default async function getAllCachedTranslations(): Promise<TranslationsCache> {
+// update the sentences for the current show.
+export async function setAllCachedTranslations(allSentences: object) {
+    const cache = await getAllCachedTranslations()
+    const fixedSentences = {}
+
+    for (const [sentence, translation] of Object.entries(allSentences)) {
+        fixedSentences[sentence?.trim()] = translation?.trim()
+    }
+
+    cache[window.currentShowId] = {
+        sentences: {
+            // save previous sentences and new sentences.
+            ...(cache?.[window.currentShowId]
+                ? cache[window.currentShowId].sentences
+                : {}),
+            ...fixedSentences
+        },
+        lastUpdated: Date.now()
+    }
+
+    await Promise.all([setData("NETFLIX_TO_ANKI_TRANSLATIONS_BY_ID", cache)])
+}
+
+export async function getCurrentShowCachedTranslations() {
+    const cache = await getAllCachedTranslations()
+    return cache?.[window.currentShowId]?.sentences || {}
+}
+
+// Do not use outside this file
+async function getAllCachedTranslations(): Promise<TranslationsCache> {
     // all sentences is a map of sentences to other sentences.
     // split them evenly among the 5 caches.
     const [cache] = await Promise.all([
