@@ -1,5 +1,5 @@
 export default function resetNetflixContext() {
-    window.untranslatedSentences = []
+    window.untranslatedSentencesCache = {}
     window.allNetflixSentences = []
     window.batchTranslateRetries = 0
 }

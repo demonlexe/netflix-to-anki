@@ -9,7 +9,7 @@ import initData from "~utils/functions/initData"
 import resetNetflixContext from "~utils/functions/resetNetflixContext"
 import handleUrlChange from "~utils/handlers/handleUrlChange"
 import { waitForElement } from "~utils/index"
-import { type UserSettings } from "~utils/localData"
+import type { UntranslatedCache, UserSettings } from "~utils/localData"
 import watchTimedText from "~utils/watchers/watchTimedText"
 
 import catchNetflixSubtitles from "./catchNetflixSubtitles"
@@ -29,7 +29,7 @@ declare global {
         doNotTouchSentences: Record<string, boolean>
         polledSettings: UserSettings
         allNetflixSentences: string[]
-        untranslatedSentences: string[]
+        untranslatedSentencesCache: UntranslatedCache
         batchTranslateRetries: number
         watchingTimedText: HTMLElement
         currentShowId: string

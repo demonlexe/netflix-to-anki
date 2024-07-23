@@ -7,7 +7,7 @@ export type LocalData = {
     NEED_TO_STUDY: Record<string, string>
 } & UserSettings
 
-// {"243534233": {"french": {lastUpdated: 1234234, sentences: {"sentence": "translation"}}}}
+// {"243534233": {"french": {"lastUpdated": 1234234, "sentences": {"sentence": "translation"}}}}
 export type TranslationsCache = Record<
     string, // show id
     TranslationsCacheShow
@@ -21,6 +21,10 @@ export type TranslationsCacheShowLanguage = {
     sentences: Record<string, string>
     lastUpdated: number // os.time()
 }
+
+// {"243534233": {"french": {"lastUpdated": 1234234, "sentences": ["sentence1", "sentence2"]}}}
+export type UntranslatedCache = Record<string, UntranslatedCacheShow>
+export type UntranslatedCacheShow = Record<string, string[]>
 
 export type UserSettings = {
     TARGET_LANGUAGE: string
