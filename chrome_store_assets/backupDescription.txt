@@ -1,0 +1,32 @@
+Elevate Your Netflix Experience with Netflix To Anki
+
+**ALPHA Development Stage**
+
+"Netflix To Anki" is a cutting-edge Chrome extension designed to enhance your Netflix experience in ways you never thought possible. By integrating Netflix with Anki Flashcards, you can watch your favorite Netflix show while also studying a new language. Say what??
+
+Why use this extension?
+
+Enhanced Productivity: You no longer need to manually enter data into Anki cards while studying a new language. Simply click on a few subtitles, download the translations by the click of a button, and import the file into Anki.
+
+Join Our Community
+
+Be part of the growing community of Netflix To Anki users. Share feedback, request new features, and get support from our dedicated team. Together, we're making the web a better place, one click at a time. 
+
+Ready to transform your Netflix experience? Install Netflix To Anki from the Chrome Web Store and discover the difference it makes. 
+
+Report Bugs or Suggest Features: 
+- https://forms.gle/4iBmAWWf9WZuwqo8A
+Visit the GitHub:
+- https://github.com/demonlexe/netflix-to-anki
+BuyMeACoffee:
+- https://buymeacoffee.com/demonlexe
+
+
+// Storage Justification
+It utilizes a cache of translations for each movie/show when it batch translates the subtitles. This is saved in local storage and can grow somewhat large if a lot of different shows/episodes/movies are being viewed. Data is stored for 7 days per unique show/movie ID.
+
+// Scripting Justification
+The extension must be able to inject a script into the Netflix page to watch for the API Call to be made for subtitles from the Netflix server. It is then intercepted by the code and sent to the background for processing through Gemini.
+
+// Hosting Justificaiton
+The extension must have access to Netflix in order to perform the duties, such as translating subtitles, or allowing clicks on subtitles to perform the anki-saving action.
