@@ -41,10 +41,6 @@ async function getAllCachedTranslations(): Promise<TranslationsCache> {
 
     const newCache: TranslationsCache = {}
     for (const [id, record] of Object.entries(cache)) {
-        console.log(
-            "How long ago was this one? ",
-            Date.now() - record.lastUpdated
-        )
         if (
             !record ||
             !id ||
