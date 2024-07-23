@@ -1,10 +1,10 @@
-import getAllCachedTranslations from "~utils/functions/getAllCachedTranslations"
+import { getCurrentShowCachedTranslations } from "~utils/functions/cachedTranslations"
 
 export default async function initBatchTranslatedSentences(
     collectedSentences?: Record<string, string>
 ) {
     const translations =
-        collectedSentences ?? (await getAllCachedTranslations())
+        collectedSentences ?? (await getCurrentShowCachedTranslations())
     if (translations && Object.keys(translations).length > 0) {
         window.batchTranslatedSentences = translations
         for (const key in translations) {

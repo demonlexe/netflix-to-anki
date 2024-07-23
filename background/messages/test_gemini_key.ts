@@ -13,7 +13,9 @@ const handler: PlasmoMessaging.MessageHandler<
 
     try {
         const genAI = new GoogleGenerativeAI(req.body.key)
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+        const model = genAI.getGenerativeModel({
+            model: "gemini-1.5-flash-latest"
+        })
         await model.generateContent(["Translate this to english\n", "Hola"])
     } catch (e) {
         console.log("test_gemini_key CAUGHT ERROR: ", e)
