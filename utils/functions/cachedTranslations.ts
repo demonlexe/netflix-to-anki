@@ -1,3 +1,5 @@
+import { type TranslationsCacheShowLanguage } from "~utils/localData"
+
 import { getData, setData, type TranslationsCache } from "../localData"
 
 // update the sentences for the current show.
@@ -9,12 +11,20 @@ export async function setAllCachedTranslations(allSentences: object) {
         fixedSentences[sentence?.trim()] = translation?.trim()
     }
 
-    cache[window.currentShowId] = {
+    if (!cache[window.currentShowId]) {
+        cache[window.currentShowId] = {}
+    }
+
+    const currentShowAndLang: TranslationsCacheShowLanguage = cache?.[
+        window.currentShowId
+    ]?.[window.polledSettings.TARGET_LANGUAGE] || {
+        sentences: {},
+        lastUpdated: Date.now()
+    }
+    cache[window.currentShowId][window.polledSettings.TARGET_LANGUAGE] = {
         sentences: {
             // save previous sentences and new sentences.
-            ...(cache?.[window.currentShowId]
-                ? cache[window.currentShowId].sentences
-                : {}),
+            ...(currentShowAndLang?.sentences ?? {}),
             ...fixedSentences
         },
         lastUpdated: Date.now()
@@ -25,7 +35,11 @@ export async function setAllCachedTranslations(allSentences: object) {
 
 export async function getCurrentShowCachedTranslations() {
     const cache = await getAllCachedTranslations()
-    return cache?.[window.currentShowId]?.sentences || {}
+    console.log("getCurrentShowCachedTranslations BIG CACHE: ", cache)
+    return (
+        cache?.[window.currentShowId]?.[window.polledSettings.TARGET_LANGUAGE]
+            ?.sentences || {}
+    )
 }
 
 // Do not use outside this file
@@ -40,28 +54,32 @@ async function getAllCachedTranslations(): Promise<TranslationsCache> {
     }
 
     const newCache: TranslationsCache = {}
-    for (const [id, record] of Object.entries(cache)) {
-        if (
-            !record ||
-            !id ||
-            !record.sentences ||
-            !record.lastUpdated ||
-            Date.now() - record.lastUpdated > 1000 * 60 * 60 * 24 * 7
-        ) {
-            // skip if the record is empty or if the record is older than a week.
-            continue
+    for (const [id, langStruct] of Object.entries(cache)) {
+        const thisShow: typeof langStruct = {}
+        for (const [language, record] of Object.entries(langStruct)) {
+            if (
+                !record ||
+                !id ||
+                !record.sentences ||
+                !record.lastUpdated ||
+                Date.now() - record.lastUpdated > 1000 * 60 * 60 * 24 * 7
+            ) {
+                // skip if the record is empty or if the record is older than a week.
+                continue
+            }
+            // trim all key value pairs then return
+            const trimmedSentences: Record<string, string> = {}
+            for (const [sentence, translation] of Object.entries(
+                record.sentences
+            )) {
+                trimmedSentences[sentence?.trim()] = translation?.trim()
+            }
+            thisShow[language] = {
+                sentences: trimmedSentences,
+                lastUpdated: record.lastUpdated
+            }
         }
-        // trim all key value pairs then return
-        const trimmedSentences = {}
-        for (const [sentence, translation] of Object.entries(
-            record.sentences
-        )) {
-            trimmedSentences[sentence?.trim()] = translation?.trim()
-        }
-        newCache[id] = {
-            sentences: trimmedSentences,
-            lastUpdated: record.lastUpdated
-        }
+        newCache[id] = thisShow
     }
 
     return newCache
