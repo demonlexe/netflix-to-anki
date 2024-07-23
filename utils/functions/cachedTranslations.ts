@@ -43,14 +43,14 @@ async function getAllCachedTranslations(): Promise<TranslationsCache> {
     for (const [id, record] of Object.entries(cache)) {
         console.log(
             "How long ago was this one? ",
-            record.lastUpdated - Date.now()
+            Date.now() - record.lastUpdated
         )
         if (
             !record ||
             !id ||
             !record.sentences ||
             !record.lastUpdated ||
-            record.lastUpdated - Date.now() > 1000 * 60 * 60 * 24 * 7
+            Date.now() - record.lastUpdated > 1000 * 60 * 60 * 24 * 7
         ) {
             // skip if the record is empty or if the record is older than a week.
             continue
