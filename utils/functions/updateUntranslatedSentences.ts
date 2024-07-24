@@ -5,8 +5,14 @@ export default async function updateUntranslatedSentences(
     targetLanguage: string,
     sentences: string[]
 ) {
+    const savedUntranslatedSentences = getUntranslatedSentences(
+        showId,
+        targetLanguage
+    )
     const snapshotSet = new Set<string>(
-        getUntranslatedSentences(showId, targetLanguage)
+        savedUntranslatedSentences.length > 0
+            ? savedUntranslatedSentences
+            : sentences
     )
     window.untranslatedSentencesCache = {
         ...window.untranslatedSentencesCache,
