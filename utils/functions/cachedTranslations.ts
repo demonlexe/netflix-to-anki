@@ -1,3 +1,4 @@
+import { POLLING_TRANSLATIONS_CACHE_INTERVAL } from "~utils/constants"
 import { getData, type TranslationsCacheShowLanguage } from "~utils/localData"
 
 import { setData, type TranslationsCache } from "../localData"
@@ -62,7 +63,7 @@ export async function pollCachedTranslations() {
         const cache = await getAllCachedTranslations()
         await setData("NETFLIX_TO_ANKI_TRANSLATIONS_BY_ID", cache)
         pollCachedTranslations()
-    }, 10000)
+    }, POLLING_TRANSLATIONS_CACHE_INTERVAL)
 }
 
 // Do not use outside this file
