@@ -1,7 +1,8 @@
 import { getCurrentShowCachedTranslations } from "./cachedTranslations"
 
-export default function checkForExistingTranslation(phrase: string) {
-    const translations = getCurrentShowCachedTranslations()
+export default async function checkForExistingTranslation(phrase: string) {
+    const translations = await getCurrentShowCachedTranslations()
+    console.log("Translations: #", Object.keys(translations).length)
     // pre-processing
     phrase = phrase?.trim()
     if (!phrase || phrase.length === 0) return null

@@ -15,7 +15,7 @@ export default async function watchTimedText(timedText: HTMLElement) {
     pollSettings()
     left_right_click($(".watch-video"))
 
-    const doOnMutation = (mutation: MutationRecord) => {
+    const doOnMutation = async (mutation: MutationRecord) => {
         if (mutation?.addedNodes?.length > 0) {
             // loop all added nodes and log if they are clicked.
             for (const node of mutation.addedNodes) {
@@ -23,7 +23,7 @@ export default async function watchTimedText(timedText: HTMLElement) {
                 if (!parentSpan || !parentSpan[0]) continue
                 const currentText = extractTextFromHTML(parentSpan[0].innerHTML)
                 const existingTranslation =
-                    checkForExistingTranslation(currentText)
+                    await checkForExistingTranslation(currentText)
                 if (window.doNotTouchSentences[currentText]) {
                     // do not touch this sentence.
                     continue

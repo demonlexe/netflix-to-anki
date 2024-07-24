@@ -9,16 +9,16 @@ import getLiveElement from "./getLiveElement"
 import updateTranslations from "./updateTranslations"
 
 // returns boolean, if yes, it means we should play the video.
-export default function translatePhraseLocal(
+export default async function translatePhraseLocal(
     currentText: string,
     container?: JQuery<HTMLElement>
-): { text: string; isYellow: boolean } {
+): Promise<{ text: string; isYellow: boolean }> {
     const liveElement = getLiveElement("", container)
 
     let translatedPhrase = { text: null, isYellow: false }
-    const existingTranslation = checkForExistingTranslation(currentText)
+    const existingTranslation = await checkForExistingTranslation(currentText)
     const existingReverseTranslation =
-        checkForExistingReverseTranslation(currentText)
+        await checkForExistingReverseTranslation(currentText)
     // const tryChangeText = changeText($(liveElement), currentText, "yellow")
     if (isYellow($(liveElement)) && existingReverseTranslation) {
         // Untranslate the text.
