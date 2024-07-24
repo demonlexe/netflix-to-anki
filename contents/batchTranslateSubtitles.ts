@@ -82,7 +82,6 @@ const batchPromise = (
                     throw new Error("No new sentences translated.")
                 }
             } catch (e) {
-                console.error("Error setting ASYNC translations: ", e)
                 resolve({
                     newSentences: {},
                     checkQuotaExceeded: response?.error?.status === 429
