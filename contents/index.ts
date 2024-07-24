@@ -41,7 +41,10 @@ window.reverseTranslations = {}
 window.batchTranslatedSentences = {}
 window.reverseBatchTranslatedSentences = {}
 window.doNotTouchSentences = {}
-window.polledSettings = USER_SETTINGS_DEFAULTS
+window.polledSettings = {
+    ...USER_SETTINGS_DEFAULTS,
+    TARGET_LANGUAGE: undefined
+}
 window.currentShowId = extractIdFromUrl(window.location.href)
 resetNetflixContext()
 

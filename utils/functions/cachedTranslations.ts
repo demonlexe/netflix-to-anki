@@ -35,6 +35,7 @@ export async function setAllCachedTranslations(allSentences: object) {
 
 export async function getCurrentShowCachedTranslations() {
     const cache = await getAllCachedTranslations()
+    console.log("getCurrentShowCachedTranslations BIG CACHE: ", cache)
     return (
         cache?.[window.currentShowId]?.[window.polledSettings.TARGET_LANGUAGE]
             ?.sentences || {}

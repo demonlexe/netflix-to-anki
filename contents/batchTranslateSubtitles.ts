@@ -13,51 +13,13 @@ import {
     MAX_TRANSLATE_RETRIES,
     MIN_UNTRANSLATED_SENTENCES
 } from "~utils/constants"
-import {
-    getCurrentShowCachedTranslations,
-    setAllCachedTranslations
-} from "~utils/functions/cachedTranslations"
+import { setAllCachedTranslations } from "~utils/functions/cachedTranslations"
 import delay from "~utils/functions/delay"
+import getAlreadyTranslatedSentences from "~utils/functions/getAlreadyTranslatedSentences"
 import getUntranslatedSentences from "~utils/functions/getUntranslatedSentences"
 import initBatchTranslatedSentences from "~utils/functions/initBatchTranslatedSentences"
 import updateUntranslatedSentences from "~utils/functions/updateUntranslatedSentences"
 import { getData } from "~utils/localData"
-
-async function getAlreadyTranslatedSentences(
-    showId: string,
-    targetLanguage: string
-): Promise<Record<string, string>> {
-    // Figure out what has already been translated.
-    const NETFLIX_TO_ANKI_TRANSLATIONS =
-        await getCurrentShowCachedTranslations()
-    const allTranslatedKeys =
-        NETFLIX_TO_ANKI_TRANSLATIONS &&
-        typeof NETFLIX_TO_ANKI_TRANSLATIONS === "object" &&
-        Object.keys(NETFLIX_TO_ANKI_TRANSLATIONS).length > 1
-            ? Object.keys(NETFLIX_TO_ANKI_TRANSLATIONS)
-            : []
-    const collectedSentences = {}
-    for (const sentence of allTranslatedKeys) {
-        if (
-            window.allNetflixSentences.includes(sentence) ||
-            window.allNetflixSentences.includes(sentence?.trim())
-        ) {
-            collectedSentences[sentence] =
-                NETFLIX_TO_ANKI_TRANSLATIONS[sentence]
-        }
-    }
-    // Remove already translated sentences from the untranslatedSentences
-    updateUntranslatedSentences(
-        showId,
-        targetLanguage,
-        Array.from(
-            new Set<string>(
-                getUntranslatedSentences(showId, targetLanguage)
-            ).difference(new Set(allTranslatedKeys))
-        )
-    )
-    return collectedSentences
-}
 
 type BatchPromise = {
     newSentences: Record<string, string>
@@ -91,9 +53,6 @@ const batchPromise = (
                 const previousCollectedSentencesCount =
                     Object.keys(collectedSentences).length
 
-                const snapshotSet = new Set<string>(
-                    getUntranslatedSentences(showId, targetLanguage)
-                )
                 if (
                     response.translatedPhrases &&
                     Object.keys(response.translatedPhrases).length > 0
@@ -108,14 +67,10 @@ const batchPromise = (
                         "No translated phrases in response from Gemini."
                     )
                 }
-                updateUntranslatedSentences(
+                await updateUntranslatedSentences(
                     showId,
                     targetLanguage,
-                    Array.from(
-                        snapshotSet.difference(
-                            new Set(Object.keys(collectedSentences))
-                        )
-                    )
+                    Object.keys(collectedSentences)
                 )
                 console.log(
                     "ASYNC FORK # of sentences translated this time: ",

@@ -4,6 +4,7 @@ import type { CatchNetflixSubtitlesRequest } from "~background/types/CatchNetfli
 import type { CatchNetflixSubtitlesResponse } from "~background/types/CatchNetflixSubtitlesResponse"
 import batchTranslateSubtitles from "~contents/batchTranslateSubtitles"
 import extractIdFromUrl from "~utils/functions/extractMovieFromNetflixUrl"
+import getUntranslatedSentences from "~utils/functions/getUntranslatedSentences"
 import resetNetflixContext from "~utils/functions/resetNetflixContext"
 import updateUntranslatedSentences from "~utils/functions/updateUntranslatedSentences"
 import { getData } from "~utils/localData"
@@ -33,15 +34,20 @@ export default function catchNetflixSubtitles() {
                 resetNetflixContext()
                 const showId = extractIdFromUrl(window.location.href)
                 const targetLanguage = await getData("TARGET_LANGUAGE")
-                updateUntranslatedSentences(
+
+                await updateUntranslatedSentences(
                     showId,
                     targetLanguage,
                     response.netflix_sentences
                 )
+                const untranslatedSentences = getUntranslatedSentences(
+                    showId,
+                    targetLanguage
+                )
                 window.allNetflixSentences = response.netflix_sentences
                 console.log(
                     "This movie/episode's sentences: #",
-                    window.untranslatedSentencesCache.length
+                    untranslatedSentences.length
                 )
                 batchTranslateSubtitles(showId, targetLanguage)
             }
