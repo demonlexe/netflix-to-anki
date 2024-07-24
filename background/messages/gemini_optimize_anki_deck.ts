@@ -5,6 +5,7 @@ import type { GeminiOptimizeAnkiDeckResponse } from "~background/types/GeminiOpt
 import initModel, {
     type HandlerState
 } from "~background/utils/functions/initModel"
+import optimizeAnkiDeck from "~utils/functions/optimizeAnkiDeck"
 import { getData } from "~utils/localData"
 
 const handlerState: HandlerState = {
@@ -44,15 +45,9 @@ const handler: PlasmoMessaging.MessageHandler<
         if (!optimizedDeck) {
             throw new Error("Optimized deck is empty.")
         }
-        const optimizedDeckWithDuplicatedRemoved = {}
-        // iterate optimized deck and manually remove duplicates
-        for (const [key, value] of Object.entries(optimizedDeck)) {
-            const trimmedKey = key?.trim()
-            const trimmedValue = value?.trim()
-            if (trimmedKey !== trimmedValue) {
-                optimizedDeckWithDuplicatedRemoved[trimmedKey] = trimmedValue
-            }
-        }
+        const optimizedDeckWithDuplicatedRemoved =
+            optimizeAnkiDeck(optimizedDeck)
+
         console.log(
             "Deck after optimization: ",
             optimizedDeckWithDuplicatedRemoved,

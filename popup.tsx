@@ -58,7 +58,10 @@ function IndexPopup() {
                 numberToStudy={numberToStudy}
                 useOptimized={true}
             />
-            <ResetAnkiDeck onReset={updateNumberToStudy} />
+            <ResetAnkiDeck
+                onReset={updateNumberToStudy}
+                disabled={!numberToStudy}
+            />
             <BooleanSettings />
         </div>
     )

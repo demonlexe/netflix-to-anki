@@ -3,6 +3,8 @@ import { sendToBackground } from "@plasmohq/messaging"
 import type { GeminiOptimizeAnkiDeckResponse } from "~background/types/GeminiOptimizeAnkiDeckResponse"
 import { getData } from "~utils/localData"
 
+import optimizeAnkiDeck from "./optimizeAnkiDeck"
+
 export default async function createAnkiDeck(
     useOptimized: boolean
 ): Promise<File> {
@@ -19,6 +21,8 @@ export default async function createAnkiDeck(
             return null
         }
         deckToUse = optimizedDeckResponse.deck
+    } else {
+        deckToUse = optimizeAnkiDeck(deckToUse)
     }
 
     // Then build the file
