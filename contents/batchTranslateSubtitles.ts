@@ -38,7 +38,7 @@ const batchPromise = (
             } as GeminiSingleRequestBody
         }).then(async (response: GeminiSingleRequestResponse) => {
             try {
-                if (response?.error) {
+                if (response?.error || showId !== window.currentShowId) {
                     throw response.error
                 }
                 // Initialize to include members of window.allNetflixSentences that are in NETFLIX_TO_ANKI_TRANSLATIONS
@@ -125,11 +125,25 @@ export default async function batchTranslateSubtitles(
         showId,
         targetLanguage
     )
+    console.log(
+        "Already translated sentences: #",
+        Object.keys(alreadyTranslatedSentences).length
+    )
     const untranslatedSentences = getUntranslatedSentences(
         showId,
         targetLanguage
     )
 
+    console.log(
+        "Before translating: ",
+        Object.keys(alreadyTranslatedSentences).length,
+        "already translated sentences",
+        "and ",
+        untranslatedSentences.length,
+        "untranslated sentences",
+        "And retries: ",
+        retries
+    )
     // don't do looping if nothing to translate or too many retries
     if (
         retries >= MAX_TRANSLATE_RETRIES ||
@@ -222,6 +236,7 @@ export default async function batchTranslateSubtitles(
                 )
             })
             .finally(() => {
+                if (showId !== window.currentShowId) return // stop iterating, show's sentences have changed
                 setTimeout(
                     () =>
                         batchTranslateSubtitles(

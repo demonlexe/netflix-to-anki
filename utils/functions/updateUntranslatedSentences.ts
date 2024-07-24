@@ -20,7 +20,7 @@ export default async function updateUntranslatedSentences(
             : sentences
     )
 
-    console.log("Sentences: #", savedUntranslatedSentences.length)
+    console.log("Untranslated Sentences: #", savedUntranslatedSentences.length)
     console.log(
         "Already translated: ",
         Object.keys(alreadyTranslatedSentences).length
