@@ -34,7 +34,7 @@ export default async function pollSettings() {
                 "" + newValue,
                 window.allNetflixSentences
             )
-            batchTranslateSubtitles(showId, "" + newValue)
+            batchTranslateSubtitles(showId, "" + newValue, 0)
         }
         window.polledSettings[key] = newValue
     })

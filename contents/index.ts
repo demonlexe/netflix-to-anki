@@ -4,9 +4,7 @@ import type { PlasmoCSConfig } from "plasmo"
 import { observeSection } from "~utils"
 import { USER_SETTINGS_DEFAULTS } from "~utils/constants"
 import extractIdFromUrl from "~utils/functions/extractMovieFromNetflixUrl"
-import initBatchTranslatedSentences from "~utils/functions/initBatchTranslatedSentences"
 import initData from "~utils/functions/initData"
-import resetNetflixContext from "~utils/functions/resetNetflixContext"
 import handleUrlChange from "~utils/handlers/handleUrlChange"
 import { waitForElement } from "~utils/index"
 import type { UntranslatedCache, UserSettings } from "~utils/localData"
@@ -24,13 +22,10 @@ declare global {
     interface Window {
         localTranslations: Record<string, string>
         reverseTranslations: Record<string, string>
-        batchTranslatedSentences: Record<string, string>
-        reverseBatchTranslatedSentences: Record<string, string>
         doNotTouchSentences: Record<string, boolean>
         polledSettings: UserSettings
         allNetflixSentences: string[]
         untranslatedSentencesCache: UntranslatedCache
-        batchTranslateRetries: number
         watchingTimedText: HTMLElement
         currentShowId: string
     }
@@ -38,15 +33,14 @@ declare global {
 
 window.localTranslations = {}
 window.reverseTranslations = {}
-window.batchTranslatedSentences = {}
-window.reverseBatchTranslatedSentences = {}
 window.doNotTouchSentences = {}
+window.untranslatedSentencesCache = {}
+window.allNetflixSentences = []
 window.polledSettings = {
     ...USER_SETTINGS_DEFAULTS,
     TARGET_LANGUAGE: undefined
 }
 window.currentShowId = extractIdFromUrl(window.location.href)
-resetNetflixContext()
 
 const script = document.createElement("script")
 script.setAttribute("type", "text/javascript")
@@ -54,7 +48,6 @@ script.setAttribute("src", chrome.runtime.getURL("inject.js"))
 
 document.documentElement.appendChild(script)
 
-initBatchTranslatedSentences()
 catchNetflixSubtitles()
 
 window.addEventListener("load", () => {

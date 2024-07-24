@@ -17,9 +17,7 @@ import { setAllCachedTranslations } from "~utils/functions/cachedTranslations"
 import delay from "~utils/functions/delay"
 import getAlreadyTranslatedSentences from "~utils/functions/getAlreadyTranslatedSentences"
 import getUntranslatedSentences from "~utils/functions/getUntranslatedSentences"
-import initBatchTranslatedSentences from "~utils/functions/initBatchTranslatedSentences"
 import updateUntranslatedSentences from "~utils/functions/updateUntranslatedSentences"
-import { getData } from "~utils/localData"
 
 type BatchPromise = {
     newSentences: Record<string, string>
@@ -32,7 +30,6 @@ const batchPromise = (
     targetLanguage: string
 ) =>
     new Promise<BatchPromise>((resolve) => {
-        if (showId !== window.currentShowId) return
         sendToBackground({
             name: "gemini_translate",
             body: {
@@ -40,7 +37,6 @@ const batchPromise = (
                 sentencesLocale: locale
             } as GeminiSingleRequestBody
         }).then(async (response: GeminiSingleRequestResponse) => {
-            if (showId !== window.currentShowId) return
             try {
                 if (response?.error) {
                     throw response.error
@@ -80,9 +76,7 @@ const batchPromise = (
                     Object.keys(collectedSentences).length >=
                     previousCollectedSentencesCount
                 ) {
-                    setAllCachedTranslations(collectedSentences).then(() => {
-                        initBatchTranslatedSentences(collectedSentences)
-                    })
+                    setAllCachedTranslations(collectedSentences)
                     resolve({ newSentences: collectedSentences })
                 } else {
                     throw new Error("No new sentences translated.")
@@ -99,10 +93,10 @@ const batchPromise = (
 
 export default async function batchTranslateSubtitles(
     showId: string,
-    targetLanguage: string
+    targetLanguage: string,
+    retries: number
 ) {
-    if (showId !== window.currentShowId) return
-    window.batchTranslateRetries++
+    retries++
 
     const alreadyTranslatedSentences = await getAlreadyTranslatedSentences(
         showId,
@@ -115,22 +109,21 @@ export default async function batchTranslateSubtitles(
 
     // don't do looping if nothing to translate or too many retries
     if (
-        window.batchTranslateRetries >= MAX_TRANSLATE_RETRIES ||
+        retries >= MAX_TRANSLATE_RETRIES ||
         !untranslatedSentences ||
         untranslatedSentences.length <= MIN_UNTRANSLATED_SENTENCES
     ) {
         setTimeout(
-            () => batchTranslateSubtitles(showId, targetLanguage),
+            () => batchTranslateSubtitles(showId, targetLanguage, retries),
             BATCH_TRANSLATE_RETRY_INTERVAL * 2
         )
         return // stop looping
     }
 
-    const [TARGET_LANGUAGE] = await Promise.all([getData("TARGET_LANGUAGE")])
     const USE_BATCH_SIZE = Math.ceil(
         (BATCH_SIZE > untranslatedSentences.length
             ? untranslatedSentences.length
-            : BATCH_SIZE) / window.batchTranslateRetries
+            : BATCH_SIZE) / retries
     ) // diminishing batch size
 
     // Just get the locale
@@ -141,14 +134,14 @@ export default async function batchTranslateSubtitles(
     const sentencesLocale: GeminiGetLocaleResponse = await sendToBackground({
         name: "gemini_get_locale",
         body: {
-            targetLanguage: TARGET_LANGUAGE,
+            targetLanguage: targetLanguage,
             sentences: dummyArrayForLocale
         } as GeminiGetLocaleRequest
     })
     if (!sentencesLocale?.locale || sentencesLocale?.error) {
         console.error("Error getting locale: ", sentencesLocale?.error)
         setTimeout(
-            () => batchTranslateSubtitles(showId, targetLanguage),
+            () => batchTranslateSubtitles(showId, targetLanguage, retries),
             BATCH_TRANSLATE_RETRY_INTERVAL * 2
         )
         return
@@ -165,10 +158,7 @@ export default async function batchTranslateSubtitles(
         "untranslated sentences"
     )
     for (let i = 0; i < untranslatedSentences.length; i += USE_BATCH_SIZE) {
-        await delay(
-            BATCH_TRANSLATE_DELAY_TIME *
-                ((window.batchTranslateRetries + 1) / 2)
-        )
+        await delay(BATCH_TRANSLATE_DELAY_TIME * ((retries + 1) / 2))
         allPromises.push(
             batchPromise(
                 untranslatedSentences.slice(i, i + USE_BATCH_SIZE),
@@ -181,11 +171,8 @@ export default async function batchTranslateSubtitles(
 
     let hadCheckQuotaExceeded = false
     await Promise.all(allPromises).then((results: BatchPromise[]) => {
-        if (showId !== window.currentShowId) return
         getAlreadyTranslatedSentences(showId, targetLanguage)
             .then((allTranslations: Record<string, string>) => {
-                if (showId !== window.currentShowId) return
-
                 let newSentences = allTranslations
 
                 // if one of the results had checkQuotaExceeded, set hadCheckQuotaExceeded to true
@@ -201,9 +188,7 @@ export default async function batchTranslateSubtitles(
                     }
                 }
                 // update cached translations
-                setAllCachedTranslations(newSentences).then(() => {
-                    initBatchTranslatedSentences(newSentences)
-                })
+                setAllCachedTranslations(newSentences)
                 console.log(
                     "FINAL # of sentences translated: ",
                     Object.keys(newSentences).length,
@@ -214,9 +199,13 @@ export default async function batchTranslateSubtitles(
                 )
             })
             .finally(() => {
-                if (showId !== window.currentShowId) return
                 setTimeout(
-                    () => batchTranslateSubtitles(showId, targetLanguage),
+                    () =>
+                        batchTranslateSubtitles(
+                            showId,
+                            targetLanguage,
+                            retries
+                        ),
                     BATCH_TRANSLATE_RETRY_INTERVAL *
                         (hadCheckQuotaExceeded ? 2 : 1)
                 )

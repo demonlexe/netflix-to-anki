@@ -35,11 +35,31 @@ export async function setAllCachedTranslations(allSentences: object) {
 
 export async function getCurrentShowCachedTranslations() {
     const cache = await getAllCachedTranslations()
-    console.log("getCurrentShowCachedTranslations BIG CACHE: ", cache)
+    console.log(
+        "getCurrentShowCachedTranslations cache for this show: ",
+        window.currentShowId,
+        "this lang: ",
+        window.polledSettings.TARGET_LANGUAGE,
+        cache?.[window.currentShowId]?.[window.polledSettings.TARGET_LANGUAGE]
+    )
     return (
         cache?.[window.currentShowId]?.[window.polledSettings.TARGET_LANGUAGE]
             ?.sentences || {}
     )
+}
+
+export async function getCurrentShowCachedReverseTranslations() {
+    const cache = await getAllCachedTranslations()
+
+    const translations =
+        cache?.[window.currentShowId]?.[window.polledSettings.TARGET_LANGUAGE]
+            ?.sentences || {}
+    // reverse the translations
+    const reverseTranslations = {}
+    for (const [sentence, translation] of Object.entries(translations)) {
+        reverseTranslations[translation] = sentence
+    }
+    return reverseTranslations
 }
 
 // Do not use outside this file
