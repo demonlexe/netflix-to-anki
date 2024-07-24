@@ -1,12 +1,31 @@
 # netflix-to-anki
 Chrome extension allowing users to translate Netflix subtitles by clicking, and these clicks can be exported to Anki decks.
 
-This is a [Plasmo extension](https://docs.plasmo.com/) project bootstrapped with [`plasmo init`](https://www.npmjs.com/package/plasmo).
+It also supports the automatic translation while watching, if applicable.
 
-## Getting Started
+Currently tested languages include:
+- English
+- Spanish
+- French
+- German
+- Dutch
+- More to come!
 
-First, run the development server:
+## "pay what you want"
+Hi there!
 
+If you've found my project helpful or inspiring, consider showing your support by buying me a coffee. Your contributions help keep the project running and allow me to continue developing and improving it. Every little bit helps and is greatly appreciated!
+
+Thank you for your support!
+[Buy Me A Coffee](https://buymeacoffee.com/demonlexe)
+
+## DEVELOPING
+
+Install dependencies:
+```bash
+npm i
+```
+Run the development server:
 ```bash
 pnpm dev
 # or
