@@ -1,6 +1,6 @@
-import { type TranslationsCacheShowLanguage } from "~utils/localData"
+import { getData, type TranslationsCacheShowLanguage } from "~utils/localData"
 
-import { getData, setData, type TranslationsCache } from "../localData"
+import { setData, type TranslationsCache } from "../localData"
 
 // update the sentences for the current show.
 export async function setAllCachedTranslations(allSentences: object) {
@@ -30,7 +30,7 @@ export async function setAllCachedTranslations(allSentences: object) {
         lastUpdated: Date.now()
     }
 
-    await Promise.all([setData("NETFLIX_TO_ANKI_TRANSLATIONS_BY_ID", cache)])
+    window.translatedSentencesCache = cache
 }
 
 export async function getCurrentShowCachedTranslations() {
@@ -55,20 +55,33 @@ export async function getCurrentShowCachedReverseTranslations() {
     return reverseTranslations
 }
 
+// upload the translations to the local device.
+export async function pollCachedTranslations() {
+    setTimeout(async () => {
+        const cache = await getAllCachedTranslations()
+        await setData("NETFLIX_TO_ANKI_TRANSLATIONS_BY_ID", cache)
+        pollCachedTranslations()
+    }, 10000)
+}
+
 // Do not use outside this file
 async function getAllCachedTranslations(): Promise<TranslationsCache> {
     // all sentences is a map of sentences to other sentences.
     // split them evenly among the 5 caches.
-    const [cache] = await Promise.all([
-        getData("NETFLIX_TO_ANKI_TRANSLATIONS_BY_ID")
-    ])
-    if (!cache || typeof cache !== "object") {
-        return {}
+    if (
+        !window.translatedSentencesCache ||
+        typeof window.translatedSentencesCache !== "object" ||
+        Object.keys(window.translatedSentencesCache).length === 0
+    ) {
+        // initialize
+        window.translatedSentencesCache = await getData(
+            "NETFLIX_TO_ANKI_TRANSLATIONS_BY_ID"
+        )
     }
 
-    const newCache: TranslationsCache = {}
-    for (const [id, langStruct] of Object.entries(cache)) {
-        const thisShow: typeof langStruct = {}
+    for (const [id, langStruct] of Object.entries(
+        window.translatedSentencesCache
+    )) {
         for (const [language, record] of Object.entries(langStruct)) {
             if (
                 !record ||
@@ -81,19 +94,17 @@ async function getAllCachedTranslations(): Promise<TranslationsCache> {
                 continue
             }
             // trim all key value pairs then return
-            const trimmedSentences: Record<string, string> = {}
             for (const [sentence, translation] of Object.entries(
                 record.sentences
             )) {
-                trimmedSentences[sentence?.trim()] = translation?.trim()
+                window.translatedSentencesCache[id][language].sentences[
+                    sentence?.trim()
+                ] = translation?.trim()
             }
-            thisShow[language] = {
-                sentences: trimmedSentences,
-                lastUpdated: record.lastUpdated
-            }
+            window.translatedSentencesCache[id][language].lastUpdated =
+                record.lastUpdated
         }
-        newCache[id] = thisShow
     }
 
-    return newCache
+    return window.translatedSentencesCache
 }

@@ -3,11 +3,16 @@ import type { PlasmoCSConfig } from "plasmo"
 
 import { observeSection } from "~utils"
 import { USER_SETTINGS_DEFAULTS } from "~utils/constants"
+import { pollCachedTranslations } from "~utils/functions/cachedTranslations"
 import extractIdFromUrl from "~utils/functions/extractMovieFromNetflixUrl"
 import initData from "~utils/functions/initData"
 import handleUrlChange from "~utils/handlers/handleUrlChange"
 import { waitForElement } from "~utils/index"
-import type { UntranslatedCache, UserSettings } from "~utils/localData"
+import type {
+    TranslationsCache,
+    UntranslatedCache,
+    UserSettings
+} from "~utils/localData"
 import watchTimedText from "~utils/watchers/watchTimedText"
 
 import catchNetflixSubtitles from "./catchNetflixSubtitles"
@@ -26,6 +31,7 @@ declare global {
         polledSettings: UserSettings
         allNetflixSentences: string[]
         untranslatedSentencesCache: UntranslatedCache
+        translatedSentencesCache: TranslationsCache
         watchingTimedText: HTMLElement
         currentShowId: string
     }
@@ -35,6 +41,7 @@ window.localTranslations = {}
 window.reverseTranslations = {}
 window.doNotTouchSentences = {}
 window.untranslatedSentencesCache = {}
+window.translatedSentencesCache = {}
 window.allNetflixSentences = []
 window.polledSettings = {
     ...USER_SETTINGS_DEFAULTS,
@@ -49,6 +56,7 @@ script.setAttribute("src", chrome.runtime.getURL("inject.js"))
 document.documentElement.appendChild(script)
 
 catchNetflixSubtitles()
+pollCachedTranslations()
 
 window.addEventListener("load", () => {
     waitForElement("#appMountPoint").then(async (mountedElem) => {
