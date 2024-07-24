@@ -10,14 +10,16 @@ enum ConfirmStatus {
 
 type ResetAnkiDeckProps = {
     onReset: () => void
+    disabled: boolean
 }
 
 export default function ResetAnkiDeck(props: ResetAnkiDeckProps) {
-    const { onReset } = props
+    const { onReset, disabled } = props
     const [confirm, setConfirm] = useState(ConfirmStatus.NOT_CLICKED)
     return (
         <>
             <button
+                disabled={disabled}
                 onClick={() => {
                     if (
                         confirm === ConfirmStatus.NOT_CLICKED ||
