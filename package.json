@@ -42,7 +42,7 @@
     ],
     "manifest": {
         "host_permissions": [
-            "https://www.netflix.com/watch/*"
+            "https://www.netflix.com/*"
         ],
         "permissions": [
             "scripting",
