@@ -20,16 +20,13 @@ export default async function updateUntranslatedSentences(
             : sentences
     )
 
-    console.log("Untranslated Sentences: #", savedUntranslatedSentences.length)
-    console.log(
-        "Already translated: ",
-        Object.keys(alreadyTranslatedSentences).length
-    )
     window.untranslatedSentencesCache = {
         ...window.untranslatedSentencesCache,
         [showId]: {
             [targetLanguage]: Array.from(
-                snapshotSet.difference(new Set(Object.keys(sentences)))
+                snapshotSet.difference(
+                    new Set(Object.keys(alreadyTranslatedSentences))
+                )
             )
         }
     }

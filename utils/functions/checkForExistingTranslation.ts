@@ -5,7 +5,6 @@ export default async function checkForExistingTranslation(phrase: string) {
         window.currentShowId,
         window.polledSettings.TARGET_LANGUAGE
     )
-    console.log("Translations: #", Object.keys(translations).length)
     // pre-processing
     phrase = phrase?.trim()
     if (!phrase || phrase.length === 0) return null

@@ -7,10 +7,6 @@ export default async function checkForExistingReverseTranslation(
         window.currentShowId,
         window.polledSettings.TARGET_LANGUAGE
     )
-    console.log(
-        "Reverse Translations: #",
-        Object.keys(reverseTranslations).length
-    )
     // pre-processing
     phrase = phrase?.trim()
     if (!phrase || phrase.length === 0) return null
