@@ -96,6 +96,29 @@ export default async function batchTranslateSubtitles(
     targetLanguage: string,
     retries: number
 ) {
+    if (retries === 0) {
+        // this is being initialized. check if we are already translating for this combination of showId and targetLanguage.
+        if (window.untranslatedSentencesCache?.[showId]?.[targetLanguage]) {
+            // already translating
+            console.log(
+                `Already translating for this ${showId} and ${targetLanguage}`
+            )
+            return
+        } else {
+            console.log(
+                "Begin translating for ",
+                showId,
+                targetLanguage,
+                "# allNetflixSentences: ",
+                window.allNetflixSentences.length
+            )
+            await updateUntranslatedSentences(
+                showId,
+                targetLanguage,
+                window.allNetflixSentences
+            )
+        }
+    }
     retries++
 
     const alreadyTranslatedSentences = await getAlreadyTranslatedSentences(
