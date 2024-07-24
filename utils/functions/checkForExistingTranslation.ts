@@ -1,7 +1,10 @@
-import { getCurrentShowCachedTranslations } from "./cachedTranslations"
+import { getShowCachedTranslations } from "./cachedTranslations"
 
 export default async function checkForExistingTranslation(phrase: string) {
-    const translations = await getCurrentShowCachedTranslations()
+    const translations = await getShowCachedTranslations(
+        window.currentShowId,
+        window.polledSettings.TARGET_LANGUAGE
+    )
     console.log("Translations: #", Object.keys(translations).length)
     // pre-processing
     phrase = phrase?.trim()

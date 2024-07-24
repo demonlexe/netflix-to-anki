@@ -1,4 +1,4 @@
-import { getCurrentShowCachedTranslations } from "~utils/functions/cachedTranslations"
+import { getShowCachedTranslations } from "~utils/functions/cachedTranslations"
 
 export default async function getAlreadyTranslatedSentences(
     showId: string,
@@ -6,8 +6,10 @@ export default async function getAlreadyTranslatedSentences(
 ): Promise<Record<string, string>> {
     // Figure out what has already been translated.
     if (showId !== window.currentShowId) return {}
-    const NETFLIX_TO_ANKI_TRANSLATIONS =
-        await getCurrentShowCachedTranslations()
+    const NETFLIX_TO_ANKI_TRANSLATIONS = await getShowCachedTranslations(
+        showId,
+        targetLanguage
+    )
     const allTranslatedKeys =
         NETFLIX_TO_ANKI_TRANSLATIONS &&
         typeof NETFLIX_TO_ANKI_TRANSLATIONS === "object" &&

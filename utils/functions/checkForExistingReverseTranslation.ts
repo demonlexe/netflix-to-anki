@@ -1,9 +1,12 @@
-import { getCurrentShowCachedReverseTranslations } from "~utils/functions/cachedTranslations"
+import { getShowCachedReverseTranslations } from "~utils/functions/cachedTranslations"
 
 export default async function checkForExistingReverseTranslation(
     phrase: string
 ) {
-    const reverseTranslations = await getCurrentShowCachedReverseTranslations()
+    const reverseTranslations = await getShowCachedReverseTranslations(
+        window.currentShowId,
+        window.polledSettings.TARGET_LANGUAGE
+    )
     console.log(
         "Reverse Translations: #",
         Object.keys(reverseTranslations).length

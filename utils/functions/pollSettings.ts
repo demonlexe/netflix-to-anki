@@ -4,7 +4,6 @@ import extractIdFromUrl from "~utils/functions/extractMovieFromNetflixUrl"
 import { getData, type UserSettings } from "~utils/localData"
 
 import getUntranslatedSentences from "./getUntranslatedSentences"
-import updateUntranslatedSentences from "./updateUntranslatedSentences"
 
 // refetch settings every 8 seconds
 export default async function pollSettings() {
