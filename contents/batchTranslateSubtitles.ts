@@ -103,6 +103,15 @@ export default async function batchTranslateSubtitles(
     netflixSentences: string[],
     retries: number
 ) {
+    // take more time between intervals if it's not the current language
+    const BATCH_INTERVAL =
+        targetLanguage === window.polledSettings?.TARGET_LANGUAGE
+            ? BATCH_TRANSLATE_RETRY_INTERVAL
+            : BATCH_TRANSLATE_RETRY_INTERVAL * 4
+    const BATCH_MINI_INTERVAL =
+        targetLanguage === window.polledSettings?.TARGET_LANGUAGE
+            ? BATCH_TRANSLATE_DELAY_TIME
+            : BATCH_TRANSLATE_DELAY_TIME * 4
     if (retries === 0) {
         // this is being initialized. check if we are already translating for this combination of showId and targetLanguage.
         if (window.untranslatedSentencesCache?.[showId]?.[targetLanguage]) {
@@ -168,7 +177,7 @@ export default async function batchTranslateSubtitles(
                     netflixSentences,
                     retries
                 ),
-            BATCH_TRANSLATE_RETRY_INTERVAL * 2
+            BATCH_INTERVAL * 2
         )
         return // stop looping
     }
@@ -201,7 +210,7 @@ export default async function batchTranslateSubtitles(
                     netflixSentences,
                     retries
                 ),
-            BATCH_TRANSLATE_RETRY_INTERVAL * 2
+            BATCH_INTERVAL * 2
         )
         return
     }
@@ -218,7 +227,7 @@ export default async function batchTranslateSubtitles(
         "untranslated sentences"
     )
     for (let i = 0; i < untranslatedSentences.length; i += USE_BATCH_SIZE) {
-        await delay(BATCH_TRANSLATE_DELAY_TIME * ((retries + 1) / 2))
+        await delay(BATCH_MINI_INTERVAL * ((retries + 1) / 2))
         allPromises.push(
             batchPromise(
                 untranslatedSentences.slice(i, i + USE_BATCH_SIZE),
@@ -269,8 +278,7 @@ export default async function batchTranslateSubtitles(
                             netflixSentences,
                             retries
                         ),
-                    BATCH_TRANSLATE_RETRY_INTERVAL *
-                        (hadCheckQuotaExceeded ? 2 : 1)
+                    BATCH_INTERVAL * (hadCheckQuotaExceeded ? 2 : 1)
                 )
             })
     })
