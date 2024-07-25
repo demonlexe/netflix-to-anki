@@ -124,10 +124,7 @@ export default async function batchTranslateSubtitles(
         showId,
         targetLanguage
     )
-    console.log(
-        "Already translated sentences: #",
-        Object.keys(alreadyTranslatedSentences).length
-    )
+
     const untranslatedSentences = getUntranslatedSentences(
         showId,
         targetLanguage
