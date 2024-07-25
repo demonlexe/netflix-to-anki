@@ -48,7 +48,7 @@ export default function catchNetflixSubtitles() {
                 batchTranslateSubtitles(
                     window.untranslatedSentencesCache?.[showId]?.[
                         targetLanguage
-                    ]
+                    ] && showId === window.currentShowId
                         ? "" + (Number(showId.trim()) + 1)
                         : showId,
                     targetLanguage,
