@@ -1,5 +1,8 @@
 import batchTranslateSubtitles from "~contents/batchTranslateSubtitles"
-import { USER_SETTINGS_DEFAULTS } from "~utils/constants"
+import {
+    POLLING_TRANSLATIONS_CACHE_INTERVAL,
+    USER_SETTINGS_DEFAULTS
+} from "~utils/constants"
 import extractIdFromUrl from "~utils/functions/extractMovieFromNetflixUrl"
 import { getData, type UserSettings } from "~utils/localData"
 
@@ -50,5 +53,5 @@ export default async function pollSettings() {
         }
         window.polledSettings[key] = newValue
     })
-    setTimeout(pollSettings, 8000)
+    setTimeout(pollSettings, POLLING_TRANSLATIONS_CACHE_INTERVAL)
 }

@@ -71,6 +71,7 @@ const batchPromise = (
                     Object.keys(collectedSentences)
                 )
                 console.log(
+                    `LANG [${targetLanguage}] SHOW [${showId}]`,
                     "ASYNC FORK # of sentences translated this time: ",
                     Object.keys(response.translatedPhrases).length
                 )
@@ -103,11 +104,13 @@ export default async function batchTranslateSubtitles(
         if (window.untranslatedSentencesCache?.[showId]?.[targetLanguage]) {
             // already translating
             console.log(
+                `LANG [${targetLanguage}] SHOW [${showId}]`,
                 `Already translating for this ${showId} and ${targetLanguage}`
             )
             return
         } else {
             console.log(
+                `LANG [${targetLanguage}] SHOW [${showId}]`,
                 "Begin translating for ",
                 showId,
                 targetLanguage,
@@ -135,6 +138,7 @@ export default async function batchTranslateSubtitles(
     )
 
     console.log(
+        `LANG [${targetLanguage}] SHOW [${showId}]`,
         `LANG [${targetLanguage}] SHOW [${showId}]`,
         "Before translating: #",
         Object.keys(alreadyTranslatedSentences).length,
@@ -203,6 +207,7 @@ export default async function batchTranslateSubtitles(
     const allPromises = []
 
     console.log(
+        `LANG [${targetLanguage}] SHOW [${showId}]`,
         "Allocating batches of size ",
         USE_BATCH_SIZE,
         "and there are ",
@@ -243,6 +248,7 @@ export default async function batchTranslateSubtitles(
                 // update cached translations
                 setAllCachedTranslations(newSentences)
                 console.log(
+                    `LANG [${targetLanguage}] SHOW [${showId}]`,
                     "FINAL # of sentences translated: ",
                     Object.keys(newSentences).length,
                     "# sentences remaining: ",

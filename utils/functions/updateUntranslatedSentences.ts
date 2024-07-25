@@ -24,6 +24,7 @@ export default async function updateUntranslatedSentences(
     window.untranslatedSentencesCache = {
         ...window.untranslatedSentencesCache,
         [showId]: {
+            ...window.untranslatedSentencesCache?.[showId],
             [targetLanguage]: Array.from(
                 snapshotSet.difference(
                     new Set(Object.keys(alreadyTranslatedSentences))
