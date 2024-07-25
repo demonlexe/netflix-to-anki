@@ -76,9 +76,8 @@ async function getAllCachedTranslations(): Promise<TranslationsCache> {
         Object.keys(window.translatedSentencesCache).length === 0
     ) {
         // initialize
-        window.translatedSentencesCache = await getData(
-            "NETFLIX_TO_ANKI_TRANSLATIONS_BY_ID"
-        )
+        window.translatedSentencesCache =
+            (await getData("NETFLIX_TO_ANKI_TRANSLATIONS_BY_ID")) ?? {}
     }
 
     for (const [id, langStruct] of Object.entries(
