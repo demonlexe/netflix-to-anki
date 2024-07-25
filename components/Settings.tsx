@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 
 import { sendToBackground } from "@plasmohq/messaging"
 
+import styles from "~styles/settings.module.css"
 import { getData, setData } from "~utils/localData"
 
 enum API_KEY_STATUS {
@@ -44,7 +45,7 @@ const Settings = () => {
                     gap: "8px",
                     flexDirection: "column"
                 }}>
-                <div>
+                <div className={styles.flexRow}>
                     <label htmlFor="api-key-input">Gemini API Key</label>
                     {apiKeyStatus === API_KEY_STATUS.INVALID && (
                         <h4>INVALID - Check your API Key</h4>
@@ -55,7 +56,7 @@ const Settings = () => {
                         value={apiKey}
                     />
                 </div>
-                <div>
+                <div className={styles.flexRow}>
                     <label htmlFor="target-lang-input">
                         I'm Learning To Speak
                     </label>
