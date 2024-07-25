@@ -25,7 +25,11 @@ export default async function pollSettings() {
                 "TARGET_LANGUAGE Settings changed: ",
                 window.polledSettings[key],
                 " became ",
-                newValue
+                newValue,
+                " and window.cachedNetflixSentences.length is ",
+                window.cachedNetflixSentences.length,
+                " and window.cachedNextEpisodeNetflixSentences.length is ",
+                window.cachedNextEpisodeNetflixSentences.length
             )
             if (window.cachedNetflixSentences.length > 0) {
                 batchTranslateSubtitles(

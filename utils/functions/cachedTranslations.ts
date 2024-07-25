@@ -4,7 +4,9 @@ import { getData, type TranslationsCacheShowLanguage } from "~utils/localData"
 import { setData, type TranslationsCache } from "../localData"
 
 // update the sentences for the current show.
-export async function setAllCachedTranslations(allSentences: object) {
+export async function setAllCachedTranslations(
+    allSentences: Record<string, string>
+) {
     const cache = await getAllCachedTranslations()
     const fixedSentences = {}
 
