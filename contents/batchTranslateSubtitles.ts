@@ -135,13 +135,14 @@ export default async function batchTranslateSubtitles(
     )
 
     console.log(
-        "Before translating: ",
+        `LANG [${targetLanguage}] SHOW [${showId}]`,
+        "Before translating: #",
         Object.keys(alreadyTranslatedSentences).length,
         "already translated sentences",
-        "and ",
+        "and #",
         untranslatedSentences.length,
         "untranslated sentences",
-        "And retries: ",
+        "On retry #",
         retries,
         "And full cache object: ",
         window.untranslatedSentencesCache
