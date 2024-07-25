@@ -10,6 +10,7 @@ Currently tested languages include:
 - German
 - Dutch
 - Pig Latin
+- Latin
 - Japanese
 - Chinese
 - More to come!

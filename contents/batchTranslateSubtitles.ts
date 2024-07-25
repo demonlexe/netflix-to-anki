@@ -106,11 +106,13 @@ export default async function batchTranslateSubtitles(
 ) {
     // take more time between intervals if it's not the current language
     const BATCH_INTERVAL =
-        targetLanguage === window.polledSettings?.TARGET_LANGUAGE
+        targetLanguage === window.polledSettings?.TARGET_LANGUAGE ||
+        retries === 0
             ? BATCH_TRANSLATE_RETRY_INTERVAL
             : BATCH_TRANSLATE_RETRY_INTERVAL * 4
     const BATCH_MINI_INTERVAL =
-        targetLanguage === window.polledSettings?.TARGET_LANGUAGE
+        targetLanguage === window.polledSettings?.TARGET_LANGUAGE ||
+        retries === 0
             ? BATCH_TRANSLATE_DELAY_TIME
             : BATCH_TRANSLATE_DELAY_TIME * 4
     if (retries === 0) {
