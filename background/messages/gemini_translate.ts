@@ -35,9 +35,8 @@ const handler: PlasmoMessaging.MessageHandler<
     GeminiSingleRequestBody,
     GeminiSingleRequestResponse
 > = async (req, res) => {
-    const [API_KEY, TARGET_LANGUAGE, NATIVE_LANGUAGE] = await Promise.all([
+    const [API_KEY, NATIVE_LANGUAGE] = await Promise.all([
         getData("API_KEY"),
-        getData("TARGET_LANGUAGE"),
         getData("NATIVE_LANGUAGE")
     ])
 
@@ -59,13 +58,13 @@ const handler: PlasmoMessaging.MessageHandler<
             (await getCurrentLanguageFromModel(
                 handlerState.model,
                 phrases,
-                TARGET_LANGUAGE
+                req.body.targetLanguage
             ))
 
         const TRANSLATE_TO_LANGUAGE =
-            sentencesLocale.match(TARGET_LANGUAGE)?.length > 0
+            sentencesLocale.match(req.body.targetLanguage)?.length > 0
                 ? NATIVE_LANGUAGE
-                : TARGET_LANGUAGE
+                : req.body.targetLanguage
 
         const prompt = TranslationRequirements(TRANSLATE_TO_LANGUAGE).join("\n")
 

@@ -9,6 +9,9 @@ Currently tested languages include:
 - French
 - German
 - Dutch
+- Pig Latin
+- Japanese
+- Chinese
 - More to come!
 
 ## "pay what you want"
