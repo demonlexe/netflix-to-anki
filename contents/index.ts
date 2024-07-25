@@ -18,7 +18,7 @@ import watchTimedText from "~utils/watchers/watchTimedText"
 import catchNetflixSubtitles from "./catchNetflixSubtitles"
 
 export const config: PlasmoCSConfig = {
-    matches: ["https://www.netflix.com/watch/*"]
+    matches: ["https://www.netflix.com/*"]
 }
 
 initData()
