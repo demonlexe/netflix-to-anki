@@ -20,16 +20,12 @@ export async function setAllCachedTranslations(
         cache[showId] = {}
     }
 
-    const currentShowAndLang: TranslationsCacheShowLanguage = cache?.[showId]?.[
-        targetLanguage
-    ] || {
-        sentences: {},
-        lastUpdated: Date.now()
-    }
+    const currentCachedTranslations =
+        cache?.[showId]?.[targetLanguage]?.sentences || {}
     cache[showId][targetLanguage] = {
         sentences: {
             // save previous sentences and new sentences.
-            ...(currentShowAndLang?.sentences ?? {}),
+            ...currentCachedTranslations,
             ...fixedSentences
         },
         lastUpdated: Date.now()
