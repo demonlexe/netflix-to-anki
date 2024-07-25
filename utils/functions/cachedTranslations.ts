@@ -5,6 +5,8 @@ import { setData, type TranslationsCache } from "../localData"
 
 // update the sentences for the current show.
 export async function setAllCachedTranslations(
+    showId: string,
+    targetLanguage: string,
     allSentences: Record<string, string>
 ) {
     const cache = await getAllCachedTranslations()
@@ -14,17 +16,17 @@ export async function setAllCachedTranslations(
         fixedSentences[sentence?.trim()] = translation?.trim()
     }
 
-    if (!cache[window.currentShowId]) {
-        cache[window.currentShowId] = {}
+    if (!cache[showId]) {
+        cache[showId] = {}
     }
 
-    const currentShowAndLang: TranslationsCacheShowLanguage = cache?.[
-        window.currentShowId
-    ]?.[window.polledSettings.TARGET_LANGUAGE] || {
+    const currentShowAndLang: TranslationsCacheShowLanguage = cache?.[showId]?.[
+        targetLanguage
+    ] || {
         sentences: {},
         lastUpdated: Date.now()
     }
-    cache[window.currentShowId][window.polledSettings.TARGET_LANGUAGE] = {
+    cache[showId][targetLanguage] = {
         sentences: {
             // save previous sentences and new sentences.
             ...(currentShowAndLang?.sentences ?? {}),

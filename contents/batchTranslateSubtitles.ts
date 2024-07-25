@@ -79,7 +79,11 @@ const batchPromise = (
                     Object.keys(collectedSentences).length >=
                     previousCollectedSentencesCount
                 ) {
-                    setAllCachedTranslations(collectedSentences)
+                    setAllCachedTranslations(
+                        showId,
+                        targetLanguage,
+                        collectedSentences
+                    )
                     resolve({ newSentences: collectedSentences })
                 } else {
                     throw new Error("No new sentences translated.")
@@ -245,7 +249,7 @@ export default async function batchTranslateSubtitles(
                     }
                 }
                 // update cached translations
-                setAllCachedTranslations(newSentences)
+                setAllCachedTranslations(showId, targetLanguage, newSentences)
                 console.log(
                     `LANG [${targetLanguage}] SHOW [${showId}]`,
                     "FINAL # of sentences translated: ",
