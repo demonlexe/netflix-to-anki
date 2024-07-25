@@ -3,13 +3,20 @@ Chrome extension allowing users to translate Netflix subtitles by clicking, and 
 
 It also supports the automatic translation while watching, if applicable.
 
-Currently tested languages include:
+## Supported Languages
+
+Note: Any language you desire may work, since we directly use your "Learning Language" text input. This is not a comprehensive list of languages that can work.
+
+Currently tested languages include (but are not limited to):
 - English
 - Spanish
 - French
 - German
 - Dutch
-- More to come!
+- Pig Latin
+- Latin
+- Japanese
+- Chinese
 
 ## "pay what you want"
 Hi there!

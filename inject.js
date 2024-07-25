@@ -1,5 +1,5 @@
 // inject.js
-;(function () {
+; (function () {
     const originalXhrOpen = XMLHttpRequest.prototype.open
     XMLHttpRequest.prototype.open = function (method, url, ...rest) {
         this.addEventListener("load", function () {

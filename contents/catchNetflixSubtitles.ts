@@ -4,7 +4,7 @@ import type { CatchNetflixSubtitlesRequest } from "~background/types/CatchNetfli
 import type { CatchNetflixSubtitlesResponse } from "~background/types/CatchNetflixSubtitlesResponse"
 import batchTranslateSubtitles from "~contents/batchTranslateSubtitles"
 import extractIdFromUrl from "~utils/functions/extractMovieFromNetflixUrl"
-import resetNetflixContext from "~utils/functions/resetNetflixContext"
+import { getData } from "~utils/localData"
 
 export default function catchNetflixSubtitles() {
     window.addEventListener("message", async (event) => {
@@ -28,15 +28,33 @@ export default function catchNetflixSubtitles() {
                     response.error
                 )
             } else if (response.netflix_sentences) {
-                resetNetflixContext()
-                window.untranslatedSentences = response.netflix_sentences
-                window.allNetflixSentences = response.netflix_sentences
-                console.log(
-                    "This movie/episode's sentences: #",
-                    window.untranslatedSentences.length
-                )
                 const showId = extractIdFromUrl(window.location.href)
-                batchTranslateSubtitles(showId)
+                const targetLanguage = await getData("TARGET_LANGUAGE")
+
+                // Already translating for this show and language, which means we have already caught the subtitles for this episode.
+                // Thus, store result for the next episode!
+                if (
+                    window.cachedNetflixSentences.length > 0 &&
+                    showId === window.currentShowId
+                ) {
+                    window.cachedNextEpisodeNetflixSentences =
+                        response.netflix_sentences
+                    window.cachedNetflixSentences = []
+                } else {
+                    window.cachedNextEpisodeNetflixSentences = []
+                    window.cachedNetflixSentences = response.netflix_sentences
+                }
+
+                batchTranslateSubtitles(
+                    window.untranslatedSentencesCache?.[showId]?.[
+                        targetLanguage
+                    ] && showId === window.currentShowId
+                        ? "" + (Number(showId.trim()) + 1)
+                        : showId,
+                    targetLanguage,
+                    response.netflix_sentences,
+                    0
+                )
             }
         }
     })

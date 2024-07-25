@@ -31,6 +31,8 @@ export const READABLE_BOOLEAN_SETTINGS: Record<
         title: "Pause Video When Clicking to Translate"
     }
 }
+
+export const POLLING_TRANSLATIONS_CACHE_INTERVAL = 5000
 // every x seconds
 export const BATCH_TRANSLATE_RETRY_INTERVAL = 10000
 // every x seconds

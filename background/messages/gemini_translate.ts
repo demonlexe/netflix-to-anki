@@ -9,6 +9,7 @@ import initModel, {
     type HandlerState
 } from "~background/utils/functions/initModel"
 import processGeminiResponse from "~background/utils/functions/processGeminiResponse"
+import logDev from "~utils/functions/logDev"
 import { getData } from "~utils/localData"
 
 const handlerState: HandlerState = {
@@ -35,16 +36,15 @@ const handler: PlasmoMessaging.MessageHandler<
     GeminiSingleRequestBody,
     GeminiSingleRequestResponse
 > = async (req, res) => {
-    const [API_KEY, TARGET_LANGUAGE, NATIVE_LANGUAGE] = await Promise.all([
+    const [API_KEY, NATIVE_LANGUAGE] = await Promise.all([
         getData("API_KEY"),
-        getData("TARGET_LANGUAGE"),
         getData("NATIVE_LANGUAGE")
     ])
 
     try {
         await initModel(handlerState, API_KEY)
 
-        console.log("Request received: ", req.body)
+        logDev("Request received: ", req.body)
         const { phrases } = req.body
 
         if (!phrases || phrases.length <= 0) {
@@ -59,13 +59,13 @@ const handler: PlasmoMessaging.MessageHandler<
             (await getCurrentLanguageFromModel(
                 handlerState.model,
                 phrases,
-                TARGET_LANGUAGE
+                req.body.targetLanguage
             ))
 
         const TRANSLATE_TO_LANGUAGE =
-            sentencesLocale.match(TARGET_LANGUAGE)?.length > 0
+            sentencesLocale.match(req.body.targetLanguage)?.length > 0
                 ? NATIVE_LANGUAGE
-                : TARGET_LANGUAGE
+                : req.body.targetLanguage
 
         const prompt = TranslationRequirements(TRANSLATE_TO_LANGUAGE).join("\n")
 

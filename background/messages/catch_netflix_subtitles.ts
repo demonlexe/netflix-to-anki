@@ -6,6 +6,7 @@ import { type CatchNetflixSubtitlesRequest } from "~background/types/CatchNetfli
 import type { CatchNetflixSubtitlesResponse } from "~background/types/CatchNetflixSubtitlesResponse"
 import replaceXmlBreakTags from "~background/utils/functions/replaceXmlBreakTags"
 import { BREAK_TAG_RENAME } from "~utils/constants"
+import logDev from "~utils/functions/logDev"
 
 type XMLText = {
     $: any
@@ -43,7 +44,7 @@ const handler: PlasmoMessaging.MessageHandler<
         message.url.includes("nflxvideo.net") &&
         message.response?.length > 0
     ) {
-        console.log("Caught netflix subtitles: ", message)
+        logDev("Caught netflix subtitles: ", message)
         const responseReplaced = replaceXmlBreakTags(message.response)
         parseString(
             responseReplaced,

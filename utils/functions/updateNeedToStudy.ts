@@ -1,5 +1,7 @@
 import { getData, setData } from "~utils/localData"
 
+import logDev from "./logDev"
+
 export default async function updateNeedToStudy(
     textOne: string,
     textTwo: string
@@ -13,5 +15,5 @@ export default async function updateNeedToStudy(
 
     needToStudy[textOne] = textTwo
     await setData("NEED_TO_STUDY", needToStudy)
-    console.log("NEW need to study: ", needToStudy)
+    logDev("NEW need to study: ", needToStudy)
 }

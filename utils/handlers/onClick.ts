@@ -8,6 +8,7 @@ import type {
 } from "~background/types"
 import extractTextFromHTML from "~utils/functions/extractTextFromHtml"
 import getLiveElement from "~utils/functions/getLiveElement"
+import logDev from "~utils/functions/logDev"
 import translatePhraseLocal from "~utils/functions/translatePhraseLocal"
 import updateNeedToStudy from "~utils/functions/updateNeedToStudy"
 import updateTranslations from "~utils/functions/updateTranslations"
@@ -23,18 +24,18 @@ export default async function onClick() {
         allTexts.push({ container: $(el), text: textOfElement })
     })
 
-    console.log("All texts!: ", allTexts)
+    logDev("All texts!: ", allTexts)
     // if there is no need to do the grouped translation, return early
     if (allTexts.length === 0) return false
 
     const localTranslateResults: { text: string; isYellow: boolean }[] = []
-    allTexts.forEach((curr) => {
-        const tryTranslateLocal = translatePhraseLocal(
+    for (const curr of allTexts) {
+        const tryTranslateLocal = await translatePhraseLocal(
             curr.text,
             curr.container
         )
         localTranslateResults.push(tryTranslateLocal)
-    })
+    }
 
     const allTextsAsString = allTexts
         .map((obj) => obj.text)
@@ -44,10 +45,11 @@ export default async function onClick() {
         const openResult: GeminiSingleRequestResponse = await sendToBackground({
             name: "gemini_translate",
             body: {
-                phrases: allTexts.map((elem) => elem.text)
+                phrases: allTexts.map((elem) => elem.text),
+                targetLanguage: window.polledSettings.TARGET_LANGUAGE
             } as GeminiSingleRequestBody
         })
-        console.log("On-Click Untranslated API Result: ", openResult)
+        logDev("On-Click Untranslated API Result: ", openResult)
         if (openResult.error) {
             console.error("Error while translating: ", openResult.error)
             return true

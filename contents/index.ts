@@ -3,19 +3,22 @@ import type { PlasmoCSConfig } from "plasmo"
 
 import { observeSection } from "~utils"
 import { USER_SETTINGS_DEFAULTS } from "~utils/constants"
+import { pollCachedTranslations } from "~utils/functions/cachedTranslations"
 import extractIdFromUrl from "~utils/functions/extractMovieFromNetflixUrl"
-import initBatchTranslatedSentences from "~utils/functions/initBatchTranslatedSentences"
 import initData from "~utils/functions/initData"
-import resetNetflixContext from "~utils/functions/resetNetflixContext"
 import handleUrlChange from "~utils/handlers/handleUrlChange"
 import { waitForElement } from "~utils/index"
-import { type UserSettings } from "~utils/localData"
+import type {
+    TranslationsCache,
+    UntranslatedCache,
+    UserSettings
+} from "~utils/localData"
 import watchTimedText from "~utils/watchers/watchTimedText"
 
 import catchNetflixSubtitles from "./catchNetflixSubtitles"
 
 export const config: PlasmoCSConfig = {
-    matches: ["https://www.netflix.com/watch/*"]
+    matches: ["https://www.netflix.com/*"]
 }
 
 initData()
@@ -24,13 +27,12 @@ declare global {
     interface Window {
         localTranslations: Record<string, string>
         reverseTranslations: Record<string, string>
-        batchTranslatedSentences: Record<string, string>
-        reverseBatchTranslatedSentences: Record<string, string>
         doNotTouchSentences: Record<string, boolean>
         polledSettings: UserSettings
-        allNetflixSentences: string[]
-        untranslatedSentences: string[]
-        batchTranslateRetries: number
+        cachedNetflixSentences: string[]
+        cachedNextEpisodeNetflixSentences: string[]
+        untranslatedSentencesCache: UntranslatedCache
+        translatedSentencesCache: TranslationsCache
         watchingTimedText: HTMLElement
         currentShowId: string
     }
@@ -38,12 +40,16 @@ declare global {
 
 window.localTranslations = {}
 window.reverseTranslations = {}
-window.batchTranslatedSentences = {}
-window.reverseBatchTranslatedSentences = {}
 window.doNotTouchSentences = {}
-window.polledSettings = USER_SETTINGS_DEFAULTS
+window.untranslatedSentencesCache = {}
+window.translatedSentencesCache = {}
+window.cachedNetflixSentences = []
+window.cachedNextEpisodeNetflixSentences = []
+window.polledSettings = {
+    ...USER_SETTINGS_DEFAULTS,
+    TARGET_LANGUAGE: undefined
+}
 window.currentShowId = extractIdFromUrl(window.location.href)
-resetNetflixContext()
 
 const script = document.createElement("script")
 script.setAttribute("type", "text/javascript")
@@ -51,8 +57,8 @@ script.setAttribute("src", chrome.runtime.getURL("inject.js"))
 
 document.documentElement.appendChild(script)
 
-initBatchTranslatedSentences()
 catchNetflixSubtitles()
+pollCachedTranslations()
 
 window.addEventListener("load", () => {
     waitForElement("#appMountPoint").then(async (mountedElem) => {
