@@ -35,7 +35,8 @@ const batchPromise = (
             name: "gemini_translate",
             body: {
                 phrases: phrases,
-                sentencesLocale: locale
+                sentencesLocale: locale,
+                targetLanguage: targetLanguage
             } as GeminiSingleRequestBody
         }).then(async (response: GeminiSingleRequestResponse) => {
             try {

@@ -28,13 +28,13 @@ export default async function onClick() {
     if (allTexts.length === 0) return false
 
     const localTranslateResults: { text: string; isYellow: boolean }[] = []
-    allTexts.forEach((curr) => {
-        const tryTranslateLocal = translatePhraseLocal(
+    for (const curr of allTexts) {
+        const tryTranslateLocal = await translatePhraseLocal(
             curr.text,
             curr.container
         )
         localTranslateResults.push(tryTranslateLocal)
-    })
+    }
 
     const allTextsAsString = allTexts
         .map((obj) => obj.text)
@@ -44,7 +44,8 @@ export default async function onClick() {
         const openResult: GeminiSingleRequestResponse = await sendToBackground({
             name: "gemini_translate",
             body: {
-                phrases: allTexts.map((elem) => elem.text)
+                phrases: allTexts.map((elem) => elem.text),
+                targetLanguage: window.polledSettings.TARGET_LANGUAGE
             } as GeminiSingleRequestBody
         })
         console.log("On-Click Untranslated API Result: ", openResult)
