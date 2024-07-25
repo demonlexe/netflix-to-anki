@@ -1,25 +1,11 @@
-
-.flexRow {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 8px;
-}
-
 .container {
     display: flex;
     flex-direction: column;
     padding: 16px;
-    gap: 4px;
+    gap: 8px;
     width: 300px;
 }
 
-.githubButton {
-    width: 24px;
-    height: 24px;
-    background: transparent;
-    border: none;
-}
-.githubButton:hover {
-    cursor: pointer;
+.redirectButton {
+    height: 2rem;
 }
