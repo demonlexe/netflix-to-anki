@@ -7,6 +7,7 @@ import extractIdFromUrl from "~utils/functions/extractMovieFromNetflixUrl"
 import { getData, type UserSettings } from "~utils/localData"
 
 import getUntranslatedSentences from "./getUntranslatedSentences"
+import logDev from "./logDev"
 
 // refetch settings every 8 seconds
 export default async function pollSettings() {
@@ -24,7 +25,7 @@ export default async function pollSettings() {
             key === "TARGET_LANGUAGE" &&
             currentUntranslatedSentences.length <= 0
         ) {
-            console.log(
+            logDev(
                 "TARGET_LANGUAGE Settings changed: ",
                 window.polledSettings[key],
                 " became ",

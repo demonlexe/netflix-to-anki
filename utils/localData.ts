@@ -1,6 +1,8 @@
 /* eslint-disable no-console */
 import { Storage } from "@plasmohq/storage"
 
+import logDev from "./functions/logDev"
+
 export type LocalData = {
     NATIVE_LANGUAGE: string
     NETFLIX_TO_ANKI_TRANSLATIONS_BY_ID: TranslationsCache
@@ -57,21 +59,21 @@ export function getData<Key extends keyof LocalData, Value = LocalData[Key]>(
             try {
                 if (mode && mode === "local") {
                     localStorage.get("" + key).then((result) => {
-                        // console.log("Fetching data: returning ",result[key]);
+                        // logDev("Fetching data: returning ",result[key]);
                         const res = result
-                        // console.log("Response is ", res)
+                        // logDev("Response is ", res)
                         resolve(res as Value)
                     })
                 } else {
                     storage.get("" + key).then((result) => {
-                        // console.log("Fetching data: returning ",result[key]);
+                        // logDev("Fetching data: returning ",result[key]);
                         const res = result
-                        // console.log("Response is ", res)
+                        // logDev("Response is ", res)
                         resolve(res as Value)
                     })
                 }
             } catch (err) {
-                console.log("Error getting data: " + err)
+                logDev("Error getting data: " + err)
                 reject(false)
             }
         }
@@ -98,17 +100,17 @@ export function setData<Key extends keyof LocalData, Value = LocalData[Key]>(
         try {
             if (mode && mode === "local") {
                 localStorage.set("" + key, value).then(function () {
-                    // console.log(key,' is set succesfully to ',value);
+                    // logDev(key,' is set succesfully to ',value);
                     resolve(true)
                 })
             } else {
                 storage.set("" + key, value).then(function () {
-                    // console.log(key,' is set succesfully to ',value);
+                    // logDev(key,' is set succesfully to ',value);
                     resolve(true)
                 })
             }
         } catch (err) {
-            console.log("Error setting data: " + err)
+            logDev("Error setting data: " + err)
             reject(false)
         }
     })

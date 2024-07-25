@@ -9,6 +9,7 @@ import initModel, {
     type HandlerState
 } from "~background/utils/functions/initModel"
 import processGeminiResponse from "~background/utils/functions/processGeminiResponse"
+import logDev from "~utils/functions/logDev"
 import { getData } from "~utils/localData"
 
 const handlerState: HandlerState = {
@@ -43,7 +44,7 @@ const handler: PlasmoMessaging.MessageHandler<
     try {
         await initModel(handlerState, API_KEY)
 
-        console.log("Request received: ", req.body)
+        logDev("Request received: ", req.body)
         const { phrases } = req.body
 
         if (!phrases || phrases.length <= 0) {

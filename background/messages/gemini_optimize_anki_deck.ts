@@ -5,6 +5,7 @@ import type { GeminiOptimizeAnkiDeckResponse } from "~background/types/GeminiOpt
 import initModel, {
     type HandlerState
 } from "~background/utils/functions/initModel"
+import logDev from "~utils/functions/logDev"
 import optimizeAnkiDeck from "~utils/functions/optimizeAnkiDeck"
 import { getData } from "~utils/localData"
 
@@ -29,7 +30,7 @@ const handler: PlasmoMessaging.MessageHandler<
     GeminiOptimizeAnkiDeckResponse
 > = async (req, res) => {
     try {
-        console.log(
+        logDev(
             "Deck before optimization: ",
             req.body.deck,
             "Total phrases: ",
@@ -48,7 +49,7 @@ const handler: PlasmoMessaging.MessageHandler<
         const optimizedDeckWithDuplicatedRemoved =
             optimizeAnkiDeck(optimizedDeck)
 
-        console.log(
+        logDev(
             "Deck after optimization: ",
             optimizedDeckWithDuplicatedRemoved,
             "Total phrases: ",
@@ -63,7 +64,7 @@ const handler: PlasmoMessaging.MessageHandler<
         ).union(new Set(Object.keys(optimizedDeckWithDuplicatedRemoved)))
         const missingPhrasesSet =
             allPhrasesOriginal.difference(allPhrasesOptimized)
-        console.log(
+        logDev(
             "Missing phrases set:",
             missingPhrasesSet,
             "Missing phrases set count:",
@@ -72,7 +73,7 @@ const handler: PlasmoMessaging.MessageHandler<
 
         res.send({ deck: optimizedDeckWithDuplicatedRemoved })
     } catch (e) {
-        console.log("ERROR: ", e)
+        logDev("ERROR: ", e)
         res.send({ error: e?.message })
         return
     }

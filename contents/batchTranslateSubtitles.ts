@@ -19,6 +19,7 @@ import {
     getMiniBatchWaitTime
 } from "~utils/functions/getBatchWaitTimes"
 import getUntranslatedSentences from "~utils/functions/getUntranslatedSentences"
+import logDev from "~utils/functions/logDev"
 import updateUntranslatedSentences from "~utils/functions/updateUntranslatedSentences"
 
 type BatchPromise = {
@@ -73,7 +74,7 @@ const batchPromise = (
                     targetLanguage,
                     Object.keys(collectedSentences)
                 )
-                console.log(
+                logDev(
                     `LANG [${targetLanguage}] SHOW [${showId}]`,
                     "ASYNC FORK # of sentences translated this time: ",
                     Object.keys(response.translatedPhrases).length
@@ -110,13 +111,13 @@ export default async function batchTranslateSubtitles(
         // this is being initialized. check if we are already translating for this combination of showId and targetLanguage.
         if (window.untranslatedSentencesCache?.[showId]?.[targetLanguage]) {
             // already translating
-            console.log(
+            logDev(
                 `LANG [${targetLanguage}] SHOW [${showId}]`,
                 `Already translating for this ${showId} and ${targetLanguage}`
             )
             return
         } else {
-            console.log(
+            logDev(
                 `LANG [${targetLanguage}] SHOW [${showId}]`,
                 "Begin translating for ",
                 showId,
@@ -144,7 +145,7 @@ export default async function batchTranslateSubtitles(
         targetLanguage
     )
 
-    console.log(
+    logDev(
         `LANG [${targetLanguage}] SHOW [${showId}]`,
         "Before translating: #",
         Object.keys(alreadyTranslatedSentences).length,
@@ -212,7 +213,7 @@ export default async function batchTranslateSubtitles(
     // Split into BATCH_SIZE sentences from the untranslatedSentences
     const allPromises = []
 
-    console.log(
+    logDev(
         `LANG [${targetLanguage}] SHOW [${showId}]`,
         "Allocating batches of size ",
         USE_BATCH_SIZE,
@@ -255,7 +256,7 @@ export default async function batchTranslateSubtitles(
                 }
                 // update cached translations
                 setAllCachedTranslations(showId, targetLanguage, newSentences)
-                console.log(
+                logDev(
                     `LANG [${targetLanguage}] SHOW [${showId}]`,
                     "FINAL # of sentences translated: ",
                     Object.keys(newSentences).length,
