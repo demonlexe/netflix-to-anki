@@ -8,14 +8,16 @@ import type { GeminiGetLocaleRequest } from "~background/types/GeminiGetLocaleRe
 import type { GeminiGetLocaleResponse } from "~background/types/GeminiGetLocaleResponse"
 import {
     BATCH_SIZE,
-    BATCH_TRANSLATE_DELAY_TIME,
-    BATCH_TRANSLATE_RETRY_INTERVAL,
     MAX_TRANSLATE_RETRIES,
     MIN_UNTRANSLATED_SENTENCES
 } from "~utils/constants"
 import { setAllCachedTranslations } from "~utils/functions/cachedTranslations"
 import delay from "~utils/functions/delay"
 import getAlreadyTranslatedSentences from "~utils/functions/getAlreadyTranslatedSentences"
+import {
+    getBatchWaitTime,
+    getMiniBatchWaitTime
+} from "~utils/functions/getBatchWaitTimes"
 import getUntranslatedSentences from "~utils/functions/getUntranslatedSentences"
 import updateUntranslatedSentences from "~utils/functions/updateUntranslatedSentences"
 
@@ -104,17 +106,6 @@ export default async function batchTranslateSubtitles(
     netflixSentences: string[],
     retries: number
 ) {
-    // take more time between intervals if it's not the current language
-    const BATCH_INTERVAL =
-        targetLanguage === window.polledSettings?.TARGET_LANGUAGE ||
-        retries === 0
-            ? BATCH_TRANSLATE_RETRY_INTERVAL
-            : BATCH_TRANSLATE_RETRY_INTERVAL * 4
-    const BATCH_MINI_INTERVAL =
-        targetLanguage === window.polledSettings?.TARGET_LANGUAGE ||
-        retries === 0
-            ? BATCH_TRANSLATE_DELAY_TIME
-            : BATCH_TRANSLATE_DELAY_TIME * 4
     if (retries === 0) {
         // this is being initialized. check if we are already translating for this combination of showId and targetLanguage.
         if (window.untranslatedSentencesCache?.[showId]?.[targetLanguage]) {
@@ -180,7 +171,7 @@ export default async function batchTranslateSubtitles(
                     netflixSentences,
                     retries
                 ),
-            BATCH_INTERVAL * 2
+            getBatchWaitTime(targetLanguage, retries) * 2
         )
         return // stop looping
     }
@@ -213,7 +204,7 @@ export default async function batchTranslateSubtitles(
                     netflixSentences,
                     retries
                 ),
-            BATCH_INTERVAL * 2
+            getBatchWaitTime(targetLanguage, retries) * 2
         )
         return
     }
@@ -230,7 +221,9 @@ export default async function batchTranslateSubtitles(
         "untranslated sentences"
     )
     for (let i = 0; i < untranslatedSentences.length; i += USE_BATCH_SIZE) {
-        await delay(BATCH_MINI_INTERVAL * ((retries + 1) / 2))
+        await delay(
+            getMiniBatchWaitTime(targetLanguage, retries) * ((retries + 1) / 2)
+        )
         allPromises.push(
             batchPromise(
                 untranslatedSentences.slice(i, i + USE_BATCH_SIZE),
@@ -281,7 +274,8 @@ export default async function batchTranslateSubtitles(
                             netflixSentences,
                             retries
                         ),
-                    BATCH_INTERVAL * (hadCheckQuotaExceeded ? 2 : 1)
+                    getBatchWaitTime(targetLanguage, retries) *
+                        (hadCheckQuotaExceeded ? 2 : 1)
                 )
             })
     })
