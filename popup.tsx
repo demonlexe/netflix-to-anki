@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 
 import BooleanSettings from "~components/BooleanSettings"
+import DisplayTranslationStatus from "~components/DisplayTranslationStatus"
 import DownloadAnkiDeck from "~components/DownloadAnkiDeck"
 import ResetAnkiDeck from "~components/ResetAnkiDeck"
 import Settings from "~components/Settings"
@@ -63,6 +64,7 @@ function IndexPopup() {
                 disabled={!numberToStudy}
             />
             <BooleanSettings />
+            <DisplayTranslationStatus />
         </div>
     )
 }
