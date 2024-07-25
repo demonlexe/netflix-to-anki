@@ -27,7 +27,8 @@ const batchPromise = (
     phrases: string[],
     locale: string,
     showId: string,
-    targetLanguage: string
+    targetLanguage: string,
+    netflixSentences: string[]
 ) =>
     new Promise<BatchPromise>((resolve) => {
         sendToBackground({
@@ -38,13 +39,14 @@ const batchPromise = (
             } as GeminiSingleRequestBody
         }).then(async (response: GeminiSingleRequestResponse) => {
             try {
-                if (response?.error || showId !== window.currentShowId) {
+                if (response?.error) {
                     throw response.error
                 }
-                // Initialize to include members of window.allNetflixSentences that are in NETFLIX_TO_ANKI_TRANSLATIONS
+                // Initialize to include members of netflixSentences that are in NETFLIX_TO_ANKI_TRANSLATIONS
                 const collectedSentences = await getAlreadyTranslatedSentences(
                     showId,
-                    targetLanguage
+                    targetLanguage,
+                    netflixSentences
                 )
                 const previousCollectedSentencesCount =
                     Object.keys(collectedSentences).length
@@ -93,6 +95,7 @@ const batchPromise = (
 export default async function batchTranslateSubtitles(
     showId: string,
     targetLanguage: string,
+    netflixSentences: string[],
     retries: number
 ) {
     if (retries === 0) {
@@ -108,13 +111,13 @@ export default async function batchTranslateSubtitles(
                 "Begin translating for ",
                 showId,
                 targetLanguage,
-                "# allNetflixSentences: ",
-                window.allNetflixSentences.length
+                "# netflixSentences: ",
+                netflixSentences.length
             )
             await updateUntranslatedSentences(
                 showId,
                 targetLanguage,
-                window.allNetflixSentences
+                netflixSentences
             )
         }
     }
@@ -122,7 +125,8 @@ export default async function batchTranslateSubtitles(
 
     const alreadyTranslatedSentences = await getAlreadyTranslatedSentences(
         showId,
-        targetLanguage
+        targetLanguage,
+        netflixSentences
     )
 
     const untranslatedSentences = getUntranslatedSentences(
@@ -138,7 +142,9 @@ export default async function batchTranslateSubtitles(
         untranslatedSentences.length,
         "untranslated sentences",
         "And retries: ",
-        retries
+        retries,
+        "And full cache object: ",
+        window.untranslatedSentencesCache
     )
     // don't do looping if nothing to translate or too many retries
     if (
@@ -147,7 +153,13 @@ export default async function batchTranslateSubtitles(
         untranslatedSentences.length <= MIN_UNTRANSLATED_SENTENCES
     ) {
         setTimeout(
-            () => batchTranslateSubtitles(showId, targetLanguage, retries),
+            () =>
+                batchTranslateSubtitles(
+                    showId,
+                    targetLanguage,
+                    netflixSentences,
+                    retries
+                ),
             BATCH_TRANSLATE_RETRY_INTERVAL * 2
         )
         return // stop looping
@@ -174,7 +186,13 @@ export default async function batchTranslateSubtitles(
     if (!sentencesLocale?.locale || sentencesLocale?.error) {
         console.error("Error getting locale: ", sentencesLocale?.error)
         setTimeout(
-            () => batchTranslateSubtitles(showId, targetLanguage, retries),
+            () =>
+                batchTranslateSubtitles(
+                    showId,
+                    targetLanguage,
+                    netflixSentences,
+                    retries
+                ),
             BATCH_TRANSLATE_RETRY_INTERVAL * 2
         )
         return
@@ -197,14 +215,15 @@ export default async function batchTranslateSubtitles(
                 untranslatedSentences.slice(i, i + USE_BATCH_SIZE),
                 sentencesLocale.locale,
                 showId,
-                targetLanguage
+                targetLanguage,
+                netflixSentences
             )
         )
     }
 
     let hadCheckQuotaExceeded = false
     await Promise.all(allPromises).then((results: BatchPromise[]) => {
-        getAlreadyTranslatedSentences(showId, targetLanguage)
+        getAlreadyTranslatedSentences(showId, targetLanguage, netflixSentences)
             .then((allTranslations: Record<string, string>) => {
                 let newSentences = allTranslations
 
@@ -228,16 +247,16 @@ export default async function batchTranslateSubtitles(
                     "# sentences remaining: ",
                     untranslatedSentences.length,
                     "of total sentences ",
-                    window.allNetflixSentences.length
+                    netflixSentences.length
                 )
             })
             .finally(() => {
-                if (showId !== window.currentShowId) return // stop iterating, show's sentences have changed
                 setTimeout(
                     () =>
                         batchTranslateSubtitles(
                             showId,
                             targetLanguage,
+                            netflixSentences,
                             retries
                         ),
                     BATCH_TRANSLATE_RETRY_INTERVAL *

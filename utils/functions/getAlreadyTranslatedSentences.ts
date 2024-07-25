@@ -2,10 +2,10 @@ import { getShowCachedTranslations } from "~utils/functions/cachedTranslations"
 
 export default async function getAlreadyTranslatedSentences(
     showId: string,
-    targetLanguage: string
+    targetLanguage: string,
+    netflixSentences: string[]
 ): Promise<Record<string, string>> {
     // Figure out what has already been translated.
-    if (showId !== window.currentShowId) return {}
     const NETFLIX_TO_ANKI_TRANSLATIONS = await getShowCachedTranslations(
         showId,
         targetLanguage
@@ -19,8 +19,8 @@ export default async function getAlreadyTranslatedSentences(
     const translatedFromThisShow = {}
     for (const sentence of allTranslatedKeys) {
         if (
-            window.allNetflixSentences.includes(sentence) ||
-            window.allNetflixSentences.includes(sentence?.trim())
+            netflixSentences.includes(sentence) ||
+            netflixSentences.includes(sentence?.trim())
         ) {
             translatedFromThisShow[sentence] =
                 NETFLIX_TO_ANKI_TRANSLATIONS[sentence]

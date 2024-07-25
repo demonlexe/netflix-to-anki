@@ -31,8 +31,30 @@ export default function catchNetflixSubtitles() {
                 const showId = extractIdFromUrl(window.location.href)
                 const targetLanguage = await getData("TARGET_LANGUAGE")
 
-                window.allNetflixSentences = response.netflix_sentences
-                batchTranslateSubtitles(showId, targetLanguage, 0)
+                // Already translating for this show and language, which means we have already caught the subtitles for this episode.
+                // Thus, store result for the next episode!
+                if (
+                    window.cachedNetflixSentences.length > 0 &&
+                    showId === window.currentShowId
+                ) {
+                    window.cachedNextEpisodeNetflixSentences =
+                        response.netflix_sentences
+                    window.cachedNetflixSentences = []
+                } else {
+                    window.cachedNextEpisodeNetflixSentences = []
+                    window.cachedNetflixSentences = response.netflix_sentences
+                }
+
+                batchTranslateSubtitles(
+                    window.untranslatedSentencesCache?.[showId]?.[
+                        targetLanguage
+                    ]
+                        ? "" + (Number(showId.trim()) + 1)
+                        : showId,
+                    targetLanguage,
+                    response.netflix_sentences,
+                    0
+                )
             }
         }
     })

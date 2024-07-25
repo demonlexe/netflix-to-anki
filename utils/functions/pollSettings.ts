@@ -19,7 +19,6 @@ export default async function pollSettings() {
             newValue !== undefined &&
             window.polledSettings[key] !== newValue &&
             key === "TARGET_LANGUAGE" &&
-            window.allNetflixSentences.length > 0 &&
             currentUntranslatedSentences.length <= 0
         ) {
             console.log(
@@ -28,7 +27,22 @@ export default async function pollSettings() {
                 " became ",
                 newValue
             )
-            batchTranslateSubtitles(showId, "" + newValue, 0)
+            if (window.cachedNetflixSentences.length > 0) {
+                batchTranslateSubtitles(
+                    showId,
+                    "" + newValue,
+                    window.cachedNetflixSentences,
+                    0
+                )
+            }
+            if (window.cachedNextEpisodeNetflixSentences.length > 0) {
+                batchTranslateSubtitles(
+                    "" + (Number(showId.trim()) + 1),
+                    "" + newValue,
+                    window.cachedNextEpisodeNetflixSentences,
+                    0
+                )
+            }
         }
         window.polledSettings[key] = newValue
     })

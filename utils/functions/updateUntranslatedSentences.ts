@@ -4,11 +4,12 @@ import getUntranslatedSentences from "~utils/functions/getUntranslatedSentences"
 export default async function updateUntranslatedSentences(
     showId: string,
     targetLanguage: string,
-    sentences: string[]
+    netflixSentences: string[]
 ) {
     const alreadyTranslatedSentences = await getAlreadyTranslatedSentences(
         showId,
-        targetLanguage
+        targetLanguage,
+        netflixSentences
     )
     const savedUntranslatedSentences = getUntranslatedSentences(
         showId,
@@ -17,7 +18,7 @@ export default async function updateUntranslatedSentences(
     const snapshotSet = new Set<string>(
         savedUntranslatedSentences.length > 0
             ? savedUntranslatedSentences
-            : sentences
+            : netflixSentences
     )
 
     window.untranslatedSentencesCache = {
