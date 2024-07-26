@@ -39,6 +39,5 @@ export const BATCH_TRANSLATE_RETRY_INTERVAL = 10000
 export const BATCH_TRANSLATE_DELAY_TIME = 2000
 // Stop translating after x retries
 export const MAX_TRANSLATE_RETRIES = 8
-export const MIN_UNTRANSLATED_SENTENCES = 10
 
 export const BREAK_TAG_RENAME = "NetflixToAnki_60981144762"
