@@ -3,7 +3,7 @@
     flex-direction: column;
     padding: 16px;
     gap: 8px;
-    width: 300px;
+    width: 150px;
 }
 
 .flexRow {
@@ -15,7 +15,7 @@
 
 .settingsButton {
     height: 2rem;
-    width: 2rem;
+    width: 100%;
     font-size: 2em;
     display: flex;
     text-align: center;
