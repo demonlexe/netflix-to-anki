@@ -24,7 +24,9 @@ const handler: PlasmoMessaging.MessageHandler<
         return
     }
     try {
-        await initModel(handlerState, await getData("API_KEY"))
+        const apiKey = await getData("API_KEY")
+        if (!apiKey) throw new Error("API key not found")
+        await initModel(handlerState, apiKey)
         const sentencesLocale = await getCurrentLanguageFromModel(
             handlerState.model,
             sentences,
