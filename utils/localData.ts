@@ -3,15 +3,24 @@ import { Storage } from "@plasmohq/storage"
 
 import logDev from "./functions/logDev"
 
-export type LocalData = {
-    NATIVE_LANGUAGE: string
-    NETFLIX_TO_ANKI_TRANSLATIONS_BY_ID: TranslationsCache
-    NEED_TO_STUDY: Record<string, string>
-    TRANSLATION_STATUS: {
+export type LocalData = NetflixToAnkiData & UserSettings
+
+export type NetflixToAnkiData = {
+    NATIVE_LANGUAGE?: string
+    NETFLIX_TO_ANKI_TRANSLATIONS_BY_ID?: TranslationsCache
+    NEED_TO_STUDY?: Record<string, string>
+    TRANSLATION_STATUS?: {
         TRANSLATED_CURRENT: number
         TOTAL_SENTENCES: number
     }
-} & UserSettings
+}
+
+export type UserSettings = {
+    TARGET_LANGUAGE?: string
+    API_KEY?: string
+    AUTO_TRANSLATE_WHILE_PLAYING?: boolean
+    PAUSE_WHEN_TRANSLATING?: boolean
+}
 
 // {"243534233": {"french": {"lastUpdated": 1234234, "sentences": {"sentence": "translation"}}}}
 export type TranslationsCache = Record<
@@ -31,13 +40,6 @@ export type TranslationsCacheShowLanguage = {
 // {"243534233": {"french": {"lastUpdated": 1234234, "sentences": ["sentence1", "sentence2"]}}}
 export type UntranslatedCache = Record<string, UntranslatedCacheShow>
 export type UntranslatedCacheShow = Record<string, string[]>
-
-export type UserSettings = {
-    TARGET_LANGUAGE: string
-    API_KEY: string
-    AUTO_TRANSLATE_WHILE_PLAYING: boolean
-    PAUSE_WHEN_TRANSLATING: boolean
-}
 
 export type BooleanKeys<T> = {
     [K in keyof T]: T[K] extends boolean ? K : never

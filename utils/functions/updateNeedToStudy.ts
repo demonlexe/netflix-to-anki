@@ -8,10 +8,7 @@ export default async function updateNeedToStudy(
 ) {
     textOne = textOne?.trim()
     textTwo = textTwo?.trim()
-    let [needToStudy] = await Promise.all([getData("NEED_TO_STUDY")])
-    if (!needToStudy) {
-        needToStudy = {}
-    }
+    const needToStudy = (await getData("NEED_TO_STUDY")) ?? {}
 
     needToStudy[textOne] = textTwo
     await setData("NEED_TO_STUDY", needToStudy)
