@@ -1,5 +1,4 @@
 export * from "./GeminiSingleRequestResponse"
-export * from "./SupportedLocale"
 export * from "./GeminiSingleRequestBody"
 export * from "./CatchNetflixSubtitlesRequest"
 export * from "./CatchNetflixSubtitlesResponse"
