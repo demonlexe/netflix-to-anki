@@ -6,6 +6,24 @@
     width: 300px;
 }
 
-.redirectButton {
+.flexRow {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
+}
+
+.settingsButton {
     height: 2rem;
+    width: 2rem;
+    font-size: 2em;
+    display: flex;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+}
+
+.spaceBetween {
+    justify-content: space-between;
 }
