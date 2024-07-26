@@ -7,8 +7,10 @@ export type LocalData = {
     NATIVE_LANGUAGE: string
     NETFLIX_TO_ANKI_TRANSLATIONS_BY_ID: TranslationsCache
     NEED_TO_STUDY: Record<string, string>
-    TRANSLATED_CURRENT: number
-    TOTAL_SENTENCES: number
+    TRANSLATION_STATUS: {
+        TRANSLATED_CURRENT: number
+        TOTAL_SENTENCES: number
+    }
 } & UserSettings
 
 // {"243534233": {"french": {"lastUpdated": 1234234, "sentences": {"sentence": "translation"}}}}
