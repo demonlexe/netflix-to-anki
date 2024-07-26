@@ -32,6 +32,7 @@ export const READABLE_BOOLEAN_SETTINGS: Record<
     }
 }
 
+export const POLLING_STATUS_INTERVAL = 2500
 export const POLLING_TRANSLATIONS_CACHE_INTERVAL = 5000
 // every x seconds
 export const BATCH_TRANSLATE_RETRY_INTERVAL = 10000
@@ -39,6 +40,5 @@ export const BATCH_TRANSLATE_RETRY_INTERVAL = 10000
 export const BATCH_TRANSLATE_DELAY_TIME = 2000
 // Stop translating after x retries
 export const MAX_TRANSLATE_RETRIES = 8
-export const MIN_UNTRANSLATED_SENTENCES = 10
 
 export const BREAK_TAG_RENAME = "NetflixToAnki_60981144762"

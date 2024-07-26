@@ -5,14 +5,15 @@ import changeText from "~utils/functions/changeText"
 import checkForExistingTranslation from "~utils/functions/checkForExistingTranslation"
 import extractTextFromHTML from "~utils/functions/extractTextFromHtml"
 import pollSettings from "~utils/functions/pollSettings"
+import pollStatus from "~utils/functions/pollStatus"
 
 export default async function watchTimedText(timedText: HTMLElement) {
     if (window.watchingTimedText === timedText) {
         return //already watching this block.
     }
     window.watchingTimedText = timedText
-
     pollSettings()
+    pollStatus()
     left_right_click($(".watch-video"))
 
     const doOnMutation = async (mutation: MutationRecord) => {

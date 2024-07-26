@@ -1,3 +1,4 @@
+import DisplayTranslationStatus from "~components/DisplayTranslationStatus"
 import styles from "~styles/popup.module.css"
 import getCurrentYear from "~utils/functions/getCurrentYear"
 
@@ -18,6 +19,7 @@ function IndexPopup() {
                 <div>{`NetflixToAnki ${getCurrentYear()}`}</div>
                 <div>v{manifestData.version}</div>
             </div>
+            <DisplayTranslationStatus />
         </div>
     )
 }

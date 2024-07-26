@@ -8,14 +8,14 @@ import optimizeAnkiDeck from "./optimizeAnkiDeck"
 export default async function createAnkiDeck(
     useOptimized: boolean
 ): Promise<File> {
-    const [NEED_TO_STUDY] = await Promise.all([getData("NEED_TO_STUDY")])
-    let deckToUse = NEED_TO_STUDY ?? {}
+    const [needToStudy] = await Promise.all([getData("NEED_TO_STUDY")])
+    let deckToUse = needToStudy ?? {}
     if (useOptimized) {
         // optimize with Gemini
         const optimizedDeckResponse: GeminiOptimizeAnkiDeckResponse =
             await sendToBackground({
                 name: "gemini_optimize_anki_deck",
-                body: { deck: NEED_TO_STUDY }
+                body: { deck: needToStudy }
             })
         if (!optimizedDeckResponse || optimizedDeckResponse.error) {
             return null
