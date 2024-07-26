@@ -42,6 +42,8 @@ const handler: PlasmoMessaging.MessageHandler<
     ])
 
     try {
+        if (!API_KEY || !NATIVE_LANGUAGE)
+            throw new Error("API Key or Native Language not found.")
         await initModel(handlerState, API_KEY)
 
         logDev("Request received: ", req.body)

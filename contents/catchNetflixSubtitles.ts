@@ -30,6 +30,7 @@ export default function catchNetflixSubtitles() {
             } else if (response.netflix_sentences) {
                 const showId = extractIdFromUrl(window.location.href)
                 const targetLanguage = await getData("TARGET_LANGUAGE")
+                if (!targetLanguage) return // missing setting
 
                 // Already translating for this show and language, which means we have already caught the subtitles for this episode.
                 // Thus, store result for the next episode!

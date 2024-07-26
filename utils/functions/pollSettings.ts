@@ -15,10 +15,9 @@ export default async function pollSettings() {
     Object.keys(USER_SETTINGS_DEFAULTS).forEach(async (key) => {
         const showId = extractIdFromUrl(window.location.href)
         const newValue = await getData(key as keyof UserSettings)
-        const currentUntranslatedSentences = getUntranslatedSentences(
-            showId,
-            targetLanguage
-        )
+        const currentUntranslatedSentences = targetLanguage
+            ? getUntranslatedSentences(showId, targetLanguage)
+            : []
         if (
             newValue !== undefined &&
             window.polledSettings[key] !== newValue &&

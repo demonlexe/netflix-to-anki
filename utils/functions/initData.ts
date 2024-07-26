@@ -5,7 +5,7 @@ import logDev from "./logDev"
 
 export default async function initData() {
     logDev("NTA: Initializing data")
-    const [needToStudy] = await Promise.all([getData("NEED_TO_STUDY")])
+    const needToStudy = (await getData("NEED_TO_STUDY")) ?? {}
 
     if (!needToStudy) {
         logDev("NTA: NEED_TO_STUDY is null, setting to default value")

@@ -36,7 +36,9 @@ const handler: PlasmoMessaging.MessageHandler<
             "Total phrases: ",
             Object.keys(req.body.deck).length
         )
-        await initModel(handlerState, await getData("API_KEY"))
+        const apiKey = await getData("API_KEY")
+        if (!apiKey) throw new Error("API key not found")
+        await initModel(handlerState, apiKey)
         const newDeck = await handlerState.model.generateContent([
             geminiPrompt(req.body.deck)
         ])
