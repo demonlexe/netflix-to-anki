@@ -39,7 +39,7 @@ const Settings = () => {
 
     return (
         <div>
-            <div
+            <form
                 style={{
                     display: "flex",
                     gap: "8px",
@@ -54,6 +54,7 @@ const Settings = () => {
                         id="api-key-input"
                         onChange={(e) => setApiKey(e.target.value)}
                         value={apiKey}
+                        required
                     />
                 </div>
                 <div className={styles.flexRow}>
@@ -64,10 +65,12 @@ const Settings = () => {
                         id="target-lang-input"
                         onChange={(e) => setLanguage(e.target.value)}
                         value={language}
+                        required
                     />
                 </div>
-            </div>
+            </form>
             <button
+                type="submit"
                 style={{ width: "100%", color: "green", marginTop: "8px" }}
                 onClick={async () => {
                     const testResult = await sendToBackground({
