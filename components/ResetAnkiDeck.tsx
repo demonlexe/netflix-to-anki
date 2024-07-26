@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from "react"
+import { useState } from "react"
 
+import styles from "~styles/shared.module.css"
 import { setData } from "~utils/localData"
 
 enum ConfirmStatus {
@@ -17,7 +18,7 @@ export default function ResetAnkiDeck(props: ResetAnkiDeckProps) {
     const { onReset, disabled } = props
     const [confirm, setConfirm] = useState(ConfirmStatus.NOT_CLICKED)
     return (
-        <>
+        <div className={styles.flexCol}>
             <button
                 disabled={disabled}
                 onClick={() => {
@@ -43,7 +44,7 @@ export default function ResetAnkiDeck(props: ResetAnkiDeckProps) {
                         return
                     }
                 }}>
-                Click me to RESET Anki Cache.
+                RESET Anki Deck.
             </button>
             {confirm === ConfirmStatus.NOT_CONFIRMED && (
                 <p style={{ color: "red" }}>
@@ -53,6 +54,6 @@ export default function ResetAnkiDeck(props: ResetAnkiDeckProps) {
             {confirm === ConfirmStatus.RESET && (
                 <p style={{ color: "green" }}>Anki Cache has been RESET!</p>
             )}
-        </>
+        </div>
     )
 }

@@ -1,0 +1,10 @@
+.githubButton {
+    width: 24px;
+    height: 24px;
+    background: transparent;
+    border: none;
+}
+
+.githubButton:hover {
+    cursor: pointer;
+}

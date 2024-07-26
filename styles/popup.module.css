@@ -1,25 +1,29 @@
-
-.flexRow {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 8px;
-}
-
 .container {
     display: flex;
     flex-direction: column;
     padding: 16px;
-    gap: 4px;
-    width: 300px;
+    gap: 8px;
+    width: 250px;
 }
 
-.githubButton {
-    width: 24px;
-    height: 24px;
-    background: transparent;
-    border: none;
+.flexRow {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
 }
-.githubButton:hover {
-    cursor: pointer;
+
+.settingsButton {
+    height: 2rem;
+    width: 100%;
+    font-size: 2em;
+    display: flex;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+}
+
+.spaceBetween {
+    justify-content: space-between;
 }
