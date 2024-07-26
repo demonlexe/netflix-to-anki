@@ -28,7 +28,7 @@ export default function DisplayTranslationStatus() {
                         color: "green"
                     }}>{`${translatedCt}/${allSentencesCt}`}</p>
             ) : (
-                <p style={{ color: "yellow" }}>Waiting to translate...</p>
+                <p>Waiting to translate...</p>
             )}
         </div>
     )
