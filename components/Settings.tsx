@@ -46,7 +46,9 @@ const Settings = () => {
                     flexDirection: "column"
                 }}>
                 <div className={styles.flexRow}>
-                    <label htmlFor="api-key-input">Gemini API Key</label>
+                    <label htmlFor="api-key-input">
+                        Gemini API Key [REQUIRED]
+                    </label>
                     {apiKeyStatus === API_KEY_STATUS.INVALID && (
                         <h4>INVALID - Check your API Key</h4>
                     )}

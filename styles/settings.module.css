@@ -7,9 +7,9 @@
 }
 
 .flexRow > label {
-    flex: 2;
+    flex: 3;
 }
 
 .flexRow > input {
-    flex: 3;
+    flex: 4;
 }
