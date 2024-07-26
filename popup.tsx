@@ -1,8 +1,22 @@
+import { useEffect, useState } from "react"
+
 import DisplayTranslationStatus from "~components/DisplayTranslationStatus"
+import DownloadAnkiDeck from "~components/DownloadAnkiDeck"
+import ResetAnkiDeck from "~components/ResetAnkiDeck"
 import styles from "~styles/popup.module.css"
 import getCurrentYear from "~utils/functions/getCurrentYear"
+import getNeedToStudyLength from "~utils/functions/getNeedToStudyLength"
 
 function IndexPopup() {
+    const [numberToStudy, setNumberToStudy] = useState<number>()
+    const updateNumberToStudy = () => {
+        getNeedToStudyLength().then((length) => {
+            setNumberToStudy(length)
+        })
+    }
+    useEffect(() => {
+        updateNumberToStudy()
+    }, [])
     const manifestData = chrome.runtime.getManifest()
     return (
         <div className={styles.container}>
@@ -16,6 +30,20 @@ function IndexPopup() {
                     }}>
                     <span>⚙</span>
                 </button>
+            </div>
+            <div className={styles.flexRow}>
+                <DownloadAnkiDeck
+                    numberToStudy={numberToStudy}
+                    useOptimized={false}
+                />
+                <DownloadAnkiDeck
+                    numberToStudy={numberToStudy}
+                    useOptimized={true}
+                />
+                <ResetAnkiDeck
+                    onReset={updateNumberToStudy}
+                    disabled={!numberToStudy}
+                />
             </div>
             <DisplayTranslationStatus />
             <div style={{ display: "flex", justifyContent: "space-between" }}>
