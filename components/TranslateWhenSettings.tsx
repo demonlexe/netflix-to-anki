@@ -3,6 +3,8 @@ import { useEffect, useState } from "react"
 import { READABLE_DROPDOWN_SETTINGS } from "~utils/constants"
 import { getData, setData, type UserSettings } from "~utils/localData"
 
+// TODO: IMPLEMENT CUSTOM KEY SELECTION
+
 export default function TranslateWhenSettings<T>() {
     const [currentSelected, setCurrentSelected] =
         useState<UserSettings["TRANSLATE_WHEN"]>("on_pause")
