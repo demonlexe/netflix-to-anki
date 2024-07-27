@@ -18,8 +18,7 @@ export type NetflixToAnkiData = {
 export type UserSettings = {
     TARGET_LANGUAGE?: string
     API_KEY?: string
-    AUTO_TRANSLATE_WHILE_PLAYING?: boolean
-    PAUSE_WHEN_TRANSLATING?: boolean
+    TRANSLATE_WHEN: "always" | "on_pause" | "custom_key"
 }
 
 // {"243534233": {"french": {"lastUpdated": 1234234, "sentences": {"sentence": "translation"}}}}

@@ -74,31 +74,6 @@ export function removeNoPointerEvents(
     $(element).css("z-index", 1000)
 }
 
-export function left_right_click(element: JQuery<Node>) {
-    return element.each(function () {
-        $(element).on("click", function (event) {
-            const insideDiv = insideWhichDiv(event)
-            if (insideDiv) {
-                if (!isVideoPaused()) {
-                    $("video").trigger("pause")
-                }
-                checkStopPropagation(event)
-                onClick().then((shouldPlay) => {
-                    if (
-                        shouldPlay ||
-                        !window.polledSettings?.PAUSE_WHEN_TRANSLATING
-                    ) {
-                        $("video").trigger("play")
-                    }
-                })
-            }
-        })
-        $(element).on("contextmenu", function () {
-            // FIXME; What should we do here?
-        })
-    })
-}
-
 export function insideWhichDiv(
     event: JQuery.ClickEvent | JQuery.ContextMenuEvent
 ) {
