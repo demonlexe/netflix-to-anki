@@ -10,7 +10,7 @@ export default function PressAnyKey(props: PressAnyKeyProps) {
 
     const handleKeyDown = (event) => {
         if (capturing) {
-            console.log("KEY PRESSED: ", event.key)
+            if (event.key === " ") return // do nothing if pausing video, already handled lol
             setKeyRecorded(event.key)
             setCapturing(false)
         }
