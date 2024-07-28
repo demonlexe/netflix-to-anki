@@ -36,7 +36,10 @@ export default function BooleanSettings() {
                 flexDirection: "column"
             }}>
             {Object.entries(READABLE_BOOLEAN_SETTINGS).map(
-                ([key, { title }]) => (
+                ([key, { title }]: [
+                    key: keyof typeof READABLE_BOOLEAN_SETTINGS,
+                    { title: string }
+                ]) => (
                     <div key={key}>
                         <label htmlFor={key}>{title}</label>
                         <input

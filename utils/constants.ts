@@ -6,29 +6,31 @@ import type {
 
 export const BATCH_SIZE = 80
 
-export const BOOLEAN_USER_SETTINGS_DEFAULTS: BooleanUserSettings = {
-    AUTO_TRANSLATE_WHILE_PLAYING: true,
-    PAUSE_WHEN_TRANSLATING: true
-}
+export const BOOLEAN_USER_SETTINGS_DEFAULTS: BooleanUserSettings = {}
 
 export const USER_SETTINGS_DEFAULTS: UserSettings = {
     TARGET_LANGUAGE: "",
     API_KEY: "",
-    AUTO_TRANSLATE_WHILE_PLAYING:
-        BOOLEAN_USER_SETTINGS_DEFAULTS["AUTO_TRANSLATE_WHILE_PLAYING"],
-    PAUSE_WHEN_TRANSLATING:
-        BOOLEAN_USER_SETTINGS_DEFAULTS["PAUSE_WHEN_TRANSLATING"]
+    TRANSLATE_WHEN: "on_pause",
+    CUSTOM_TRANSLATE_KEY: ""
 }
 
 export const READABLE_BOOLEAN_SETTINGS: Record<
     BooleanKeys<UserSettings>,
     { title: string }
+> = {}
+
+export const READABLE_DROPDOWN_SETTINGS: Record<
+    keyof Pick<UserSettings, "TRANSLATE_WHEN">,
+    { title: string; options: Record<UserSettings["TRANSLATE_WHEN"], string> }
 > = {
-    AUTO_TRANSLATE_WHILE_PLAYING: {
-        title: "Auto Translate While Watching"
-    },
-    PAUSE_WHEN_TRANSLATING: {
-        title: "Pause Video When Clicking to Translate"
+    TRANSLATE_WHEN: {
+        title: "Translate When",
+        options: {
+            always: "video playing",
+            on_pause: "video paused",
+            custom_key: "custom key"
+        }
     }
 }
 

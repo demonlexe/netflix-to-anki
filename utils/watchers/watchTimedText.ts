@@ -1,9 +1,11 @@
 import $ from "jquery"
 
-import { isYellow, left_right_click, observeSection } from "~utils"
+import { isYellow, observeSection } from "~utils"
 import changeText from "~utils/functions/changeText"
 import checkForExistingTranslation from "~utils/functions/checkForExistingTranslation"
 import extractTextFromHTML from "~utils/functions/extractTextFromHtml"
+import onCustomKey from "~utils/functions/onCustomKey"
+import onVideoPaused from "~utils/functions/onVideoPaused"
 import pollSettings from "~utils/functions/pollSettings"
 import pollStatus from "~utils/functions/pollStatus"
 
@@ -14,7 +16,8 @@ export default async function watchTimedText(timedText: HTMLElement) {
     window.watchingTimedText = timedText
     pollSettings()
     pollStatus()
-    left_right_click($(".watch-video"))
+    onVideoPaused($("video"))
+    onCustomKey()
 
     const doOnMutation = async (mutation: MutationRecord) => {
         if (mutation?.addedNodes?.length > 0) {
@@ -38,7 +41,7 @@ export default async function watchTimedText(timedText: HTMLElement) {
                         window.localTranslations[currentText]
                     )
                 } else if (
-                    window.polledSettings.AUTO_TRANSLATE_WHILE_PLAYING &&
+                    window.polledSettings.TRANSLATE_WHEN === "always" &&
                     existingTranslation &&
                     !isYellow(parentSpan)
                 ) {
