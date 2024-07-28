@@ -4,6 +4,7 @@ import { isYellow, observeSection } from "~utils"
 import changeText from "~utils/functions/changeText"
 import checkForExistingTranslation from "~utils/functions/checkForExistingTranslation"
 import extractTextFromHTML from "~utils/functions/extractTextFromHtml"
+import onCustomKey from "~utils/functions/onCustomKey"
 import onVideoPaused from "~utils/functions/onVideoPaused"
 import pollSettings from "~utils/functions/pollSettings"
 import pollStatus from "~utils/functions/pollStatus"
@@ -16,6 +17,7 @@ export default async function watchTimedText(timedText: HTMLElement) {
     pollSettings()
     pollStatus()
     onVideoPaused($("video"))
+    onCustomKey()
 
     const doOnMutation = async (mutation: MutationRecord) => {
         if (mutation?.addedNodes?.length > 0) {
