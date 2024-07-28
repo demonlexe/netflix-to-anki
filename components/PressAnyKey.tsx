@@ -10,7 +10,7 @@ export default function PressAnyKey(props: PressAnyKeyProps) {
 
     const handleKeyDown = (event) => {
         if (capturing) {
-            if (event.key === " ") return // do nothing if pausing video, already handled lol
+            if (event.key === " ") return // do not allow space as a key
             setKeyRecorded(event.key)
             setCapturing(false)
         }
