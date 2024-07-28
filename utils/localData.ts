@@ -16,9 +16,10 @@ export type NetflixToAnkiData = {
 }
 
 export type UserSettings = {
-    TARGET_LANGUAGE?: string
-    API_KEY?: string
+    TARGET_LANGUAGE: string
+    API_KEY: string
     TRANSLATE_WHEN: "always" | "on_pause" | "custom_key"
+    CUSTOM_TRANSLATE_KEY: string // only used when TRANSLATE_WHEN is custom_key
 }
 
 // {"243534233": {"french": {"lastUpdated": 1234234, "sentences": {"sentence": "translation"}}}}

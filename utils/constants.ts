@@ -11,7 +11,8 @@ export const BOOLEAN_USER_SETTINGS_DEFAULTS: BooleanUserSettings = {}
 export const USER_SETTINGS_DEFAULTS: UserSettings = {
     TARGET_LANGUAGE: "",
     API_KEY: "",
-    TRANSLATE_WHEN: "on_pause"
+    TRANSLATE_WHEN: "on_pause",
+    CUSTOM_TRANSLATE_KEY: ""
 }
 
 export const READABLE_BOOLEAN_SETTINGS: Record<

@@ -1,17 +1,22 @@
 import { useEffect, useState } from "react"
 
+import PressAnyKey from "~components/PressAnyKey"
+import styles from "~styles/shared.module.css"
 import { READABLE_DROPDOWN_SETTINGS } from "~utils/constants"
 import { getData, setData, type UserSettings } from "~utils/localData"
-
-// TODO: IMPLEMENT CUSTOM KEY SELECTION
 
 export default function TranslateWhenSettings<T>() {
     const [currentSelected, setCurrentSelected] =
         useState<UserSettings["TRANSLATE_WHEN"]>("on_pause")
+    const [customTranslateKey, setCustomTranslateKey] = useState<string>("")
+    console.log("Re-render: ", customTranslateKey)
 
     useEffect(() => {
         getData("TRANSLATE_WHEN").then((data) => {
             if (data) setCurrentSelected(data)
+        })
+        getData("CUSTOM_TRANSLATE_KEY").then((data) => {
+            if (data) setCustomTranslateKey(data)
         })
     }, [])
 
@@ -19,9 +24,13 @@ export default function TranslateWhenSettings<T>() {
         setData("TRANSLATE_WHEN", currentSelected)
     }, [currentSelected])
 
+    useEffect(() => {
+        setData("CUSTOM_TRANSLATE_KEY", customTranslateKey)
+    }, [customTranslateKey])
+
     return (
-        <div>
-            <div>
+        <div className={styles.flexRow}>
+            <div className={styles.flexRow}>
                 <label htmlFor="translateWhen">
                     {READABLE_DROPDOWN_SETTINGS.TRANSLATE_WHEN.title}
                 </label>
@@ -47,6 +56,14 @@ export default function TranslateWhenSettings<T>() {
                     )}
                 </select>
             </div>
+            {currentSelected === "custom_key" && (
+                <div>
+                    <PressAnyKey
+                        keyRecorded={customTranslateKey}
+                        setKeyRecorded={setCustomTranslateKey}
+                    />
+                </div>
+            )}
         </div>
     )
 }
