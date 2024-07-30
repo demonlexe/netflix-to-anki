@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 
 import { sendToBackground } from "@plasmohq/messaging"
 
@@ -20,6 +20,29 @@ const Settings = () => {
         getData("API_KEY").then((apiKey) => setApiKey(apiKey ?? ""))
         getData("TARGET_LANGUAGE").then((lang) => setLanguage(lang ?? ""))
     }, [])
+
+    const onSubmit = useCallback(async () => {
+        if (!apiKey || !language) {
+            return false
+        }
+        await setData("TARGET_LANGUAGE", language)
+        if ((await getData("TARGET_LANGUAGE")) !== language) {
+            return false
+        }
+
+        const testResult = await sendToBackground({
+            name: "test_gemini_key",
+            body: { key: apiKey }
+        })
+
+        console.log("Test result", testResult)
+        if (testResult && !testResult.error) {
+            await setData("API_KEY", apiKey)
+            return true
+        } else {
+            return false
+        }
+    }, [apiKey, language])
 
     return (
         <div>
@@ -51,29 +74,7 @@ const Settings = () => {
 
                 <div
                     className={`${styles.w100} ${styles.flexCol} ${styles.gap4}`}>
-                    <SubmitButton
-                        onSubmit={async () => {
-                            if (!apiKey || !language) {
-                                return false
-                            }
-                            await setData("TARGET_LANGUAGE", language)
-                            if (
-                                (await getData("TARGET_LANGUAGE")) !== language
-                            ) {
-                                return false
-                            }
-                            const testResult = await sendToBackground({
-                                name: "test_gemini_key",
-                                body: { key: apiKey }
-                            })
-                            if (testResult && !testResult.error) {
-                                setData("API_KEY", apiKey)
-                                return true
-                            } else {
-                                return false
-                            }
-                        }}
-                    />
+                    <SubmitButton onSubmit={onSubmit} />
                     <h4>
                         Don't have an API Key? Generate one at{" "}
                         <a
