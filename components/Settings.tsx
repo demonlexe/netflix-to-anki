@@ -18,9 +18,7 @@ const Settings = () => {
 
         // Get Data
         getData("API_KEY").then((apiKey) => setApiKey(apiKey))
-        getData("TARGET_LANGUAGE").then((lang) =>
-            setLanguage(lang ?? navigator.language)
-        )
+        getData("TARGET_LANGUAGE").then((lang) => setLanguage(lang))
     }, [])
 
     return (
