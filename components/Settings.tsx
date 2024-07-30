@@ -33,6 +33,7 @@ const Settings = () => {
                         onChange={(e) => setApiKey(e.target.value)}
                         value={apiKey}
                         required
+                        placeholder="e.g. AIzaSyD8Qj4hu3nklkjn23..."
                     />
                 </div>
                 <div className={styles.flexRow}>
@@ -44,6 +45,7 @@ const Settings = () => {
                         onChange={(e) => setLanguage(e.target.value)}
                         value={language}
                         required
+                        placeholder="e.g. French"
                     />
                 </div>
                 <SubmitButton
