@@ -11,15 +11,22 @@
 }
 
 .flexRow > input {
-    flex: 4;
+    flex: 6;
 }
 
 .flexCol {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 16px;
     width: 100%;
+}
+
+.gap16 {
+    gap: 16px;
+}
+
+.gap4 {
+    gap: 4px;
 }
 
 button {
