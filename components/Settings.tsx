@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 
 import { sendToBackground } from "@plasmohq/messaging"
 
+import Required from "~components/Required"
 import styles from "~styles/settings.module.css"
 import { getData, setData } from "~utils/localData"
 
@@ -27,7 +28,7 @@ const Settings = () => {
             <form className={styles.flexCol}>
                 <div className={styles.flexRow}>
                     <label htmlFor="api-key-input">
-                        Gemini API Key <span style={{ color: "red" }}>*</span>
+                        Gemini API Key <Required />
                     </label>
                     <input
                         id="api-key-input"
@@ -38,8 +39,7 @@ const Settings = () => {
                 </div>
                 <div className={styles.flexRow}>
                     <label htmlFor="target-lang-input">
-                        I'm Learning To Speak{" "}
-                        <span style={{ color: "red" }}>*</span>
+                        I'm Learning To Speak <Required />
                     </label>
                     <input
                         id="target-lang-input"
