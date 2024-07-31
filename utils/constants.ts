@@ -44,3 +44,16 @@ export const BATCH_TRANSLATE_DELAY_TIME = 2000
 export const MAX_TRANSLATE_RETRIES = 8
 
 export const BREAK_TAG_RENAME = "NetflixToAnki_60981144762"
+
+export const SITE_WATCHERS = {
+    netflix: {
+        mountPoint: "#appMountPoint",
+        captionElement: ".player-timedtext-text-container",
+        captionParentElement: ".player-timedtext"
+    },
+    hulu: {
+        mountPoint: "#__player__",
+        captionElement: ".CaptionBox",
+        captionParentElement: ".ClosedCaption__outband"
+    }
+}

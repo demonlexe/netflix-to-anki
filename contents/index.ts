@@ -3,7 +3,7 @@ import type { PlasmoCSConfig } from "plasmo"
 
 import catchHuluSubtitles from "~contents/catchHuluSubtitles"
 import { observeSection } from "~utils"
-import { USER_SETTINGS_DEFAULTS } from "~utils/constants"
+import { SITE_WATCHERS, USER_SETTINGS_DEFAULTS } from "~utils/constants"
 import { pollCachedTranslations } from "~utils/functions/cachedTranslations"
 import extractIdFromUrl from "~utils/functions/extractIdFromUrl"
 import initData from "~utils/functions/initData"
@@ -36,6 +36,7 @@ declare global {
         translatedSentencesCache: TranslationsCache
         watchingTimedText: HTMLElement
         currentShowId: string
+        usingSite: string
     }
 }
 
@@ -51,6 +52,7 @@ window.polledSettings = {
     TARGET_LANGUAGE: undefined
 }
 window.currentShowId = extractIdFromUrl(window.location.href)
+window.usingSite = window.location.href.includes("netflix") ? "netflix" : "hulu"
 
 const script = document.createElement("script")
 script.setAttribute("type", "text/javascript")
@@ -63,26 +65,27 @@ catchHuluSubtitles()
 pollCachedTranslations()
 
 window.addEventListener("load", () => {
-    waitForElement("#appMountPoint").then(async (mountedElem) => {
+    const { mountPoint, captionElement, captionParentElement } =
+        SITE_WATCHERS[window.usingSite]
+    waitForElement(mountPoint).then(async (mountedElem) => {
         const doOnMountMutate = (mutation: MutationRecord) => {
             handleUrlChange()
             if (mutation.addedNodes.length > 0) {
                 mutation.addedNodes.forEach(async (node) => {
-                    // if the node is .player-timedtext
-                    if ($(node).hasClass("player-timedtext-text-container")) {
+                    if ($(node).hasClass(captionElement)) {
                         if (!window.location.href.includes("watch")) {
                             // don't care about home page
                             return
                         }
                         const timedText =
-                            await waitForElement(".player-timedtext")
+                            await waitForElement(captionParentElement)
                         watchTimedText(timedText)
                     }
                 })
             }
         }
         observeSection(mountedElem, doOnMountMutate)
-        const firstTimedText = await waitForElement(".player-timedtext")
+        const firstTimedText = await waitForElement(captionParentElement)
         watchTimedText(firstTimedText)
     })
 })

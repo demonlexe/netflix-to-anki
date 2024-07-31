@@ -6,6 +6,7 @@ import type {
     GeminiSingleRequestBody,
     GeminiSingleRequestResponse
 } from "~background/types"
+import { SITE_WATCHERS } from "~utils/constants"
 import extractTextFromHTML from "~utils/functions/extractTextFromHtml"
 import getLiveElement from "~utils/functions/getLiveElement"
 import logDev from "~utils/functions/logDev"
@@ -15,9 +16,9 @@ import updateTranslations from "~utils/functions/updateTranslations"
 
 // Translate all the text currently on the screen and update the cache.
 export default async function onClick() {
-    // get array of all texts stored in .player-timedtext-text-container
+    const { captionElement } = SITE_WATCHERS[window.usingSite]
     const allTexts: { container: JQuery<HTMLElement>; text: string }[] = []
-    $(".player-timedtext-text-container").each((_, el) => {
+    $(captionElement).each((_, el) => {
         const liveElement = getLiveElement("", $(el))
         const textOfElement = extractTextFromHTML($(liveElement).html())
         allTexts.push({ container: $(el), text: textOfElement })
