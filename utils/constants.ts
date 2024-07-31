@@ -49,11 +49,13 @@ export const SITE_WATCHERS = {
     netflix: {
         mountPoint: "#appMountPoint",
         captionElement: ".player-timedtext-text-container",
-        captionParentElement: ".player-timedtext"
+        captionParentElement: ".player-timedtext",
+        lookFor: "span"
     },
     hulu: {
         mountPoint: "#__player__",
         captionElement: ".CaptionBox",
-        captionParentElement: ".ClosedCaption__outband"
+        captionParentElement: ".ClosedCaption__outband",
+        lookFor: "p"
     }
 }
