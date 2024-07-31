@@ -3,7 +3,7 @@ import { sendToBackground } from "@plasmohq/messaging"
 import type { CatchNetflixSubtitlesRequest } from "~background/types/CatchNetflixSubtitlesRequest"
 import type { CatchNetflixSubtitlesResponse } from "~background/types/CatchNetflixSubtitlesResponse"
 import batchTranslateSubtitles from "~contents/batchTranslateSubtitles"
-import extractIdFromUrl from "~utils/functions/extractMovieFromNetflixUrl"
+import extractIdFromUrl from "~utils/functions/extractIdFromUrl"
 import { getData } from "~utils/localData"
 
 export default function catchNetflixSubtitles() {

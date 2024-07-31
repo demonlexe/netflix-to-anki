@@ -3,7 +3,7 @@ import { sendToBackground } from "@plasmohq/messaging"
 import type { CatchHuluSubtitlesRequest } from "~background/types/CatchHuluSubtitlesRequest"
 import type { CatchHuluSubtitlesResponse } from "~background/types/CatchHuluSubtitlesResponse"
 import batchTranslateSubtitles from "~contents/batchTranslateSubtitles"
-import extractIdFromUrl from "~utils/functions/extractMovieFromNetflixUrl"
+import extractIdFromUrl from "~utils/functions/extractIdFromUrl"
 import { getData } from "~utils/localData"
 
 export default function catchHuluSubtitles() {
