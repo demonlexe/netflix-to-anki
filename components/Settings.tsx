@@ -1,112 +1,91 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 
 import { sendToBackground } from "@plasmohq/messaging"
 
+import Required from "~components/Required"
 import styles from "~styles/settings.module.css"
 import { getData, setData } from "~utils/localData"
 
-enum API_KEY_STATUS {
-    INVALID = "INVALID",
-    VALID = "VALID",
-    NOT_TESTED = "NOT_TESTED",
-    SUCCESS = "SUCCESS"
-}
+import SubmitButton from "./SubmitButton"
 
 const Settings = () => {
     const [apiKey, setApiKey] = useState("")
     const [language, setLanguage] = useState("")
-    const [apiKeyStatus, setApiKeyStatus] = useState<API_KEY_STATUS>(
-        API_KEY_STATUS.NOT_TESTED
-    )
-
-    const updateSettings = async () => {
-        await Promise.all([
-            setData("API_KEY", apiKey),
-            setData("TARGET_LANGUAGE", language)
-        ])
-    }
 
     useEffect(() => {
         // Set Data
         setData("NATIVE_LANGUAGE", navigator.language)
 
         // Get Data
-        getData("API_KEY").then((apiKey) => setApiKey(apiKey))
-        getData("TARGET_LANGUAGE").then((lang) =>
-            setLanguage(lang ?? navigator.language)
-        )
+        getData("API_KEY").then((apiKey) => setApiKey(apiKey ?? ""))
+        getData("TARGET_LANGUAGE").then((lang) => setLanguage(lang ?? ""))
     }, [])
 
+    const onSubmit = useCallback(async () => {
+        if (!apiKey) {
+            return "API Key is a required field."
+        } else if (!language) {
+            return "Target language is a required field."
+        }
+        await setData("TARGET_LANGUAGE", language)
+        if ((await getData("TARGET_LANGUAGE")) !== language) {
+            return "Couldn't update target language"
+        }
+
+        const testResult = await sendToBackground({
+            name: "test_gemini_key",
+            body: { key: apiKey }
+        })
+
+        console.log("Test result", testResult)
+        if (testResult && !testResult.error) {
+            await setData("API_KEY", apiKey)
+            return null
+        } else {
+            return "Invalid API Key"
+        }
+    }, [apiKey, language])
+
     return (
-        <div>
-            <form
-                style={{
-                    display: "flex",
-                    gap: "8px",
-                    flexDirection: "column"
-                }}>
+        <div className={`${styles.flexCol} ${styles.gap16}`}>
+            <form className={`${styles.flexCol} ${styles.gap16}`}>
                 <div className={styles.flexRow}>
                     <label htmlFor="api-key-input">
-                        Gemini API Key [REQUIRED]
+                        Gemini API Key <Required />
                     </label>
-                    {apiKeyStatus === API_KEY_STATUS.INVALID && (
-                        <h4>INVALID - Check your API Key</h4>
-                    )}
                     <input
                         id="api-key-input"
                         onChange={(e) => setApiKey(e.target.value)}
                         value={apiKey}
                         required
+                        placeholder="e.g. AIzaSyD8Qj4hu3nklkjn23..."
                     />
                 </div>
                 <div className={styles.flexRow}>
                     <label htmlFor="target-lang-input">
-                        I'm Learning To Speak
+                        I'm Learning To Speak <Required />
                     </label>
                     <input
                         id="target-lang-input"
                         onChange={(e) => setLanguage(e.target.value)}
                         value={language}
                         required
+                        placeholder="e.g. French"
                     />
                 </div>
             </form>
-            <button
-                type="submit"
-                style={{ width: "100%", color: "green", marginTop: "8px" }}
-                onClick={async () => {
-                    const testResult = await sendToBackground({
-                        name: "test_gemini_key",
-                        body: { key: apiKey }
-                    })
-                    if (testResult && !testResult.error) {
-                        setApiKeyStatus(API_KEY_STATUS.SUCCESS)
-                        await updateSettings()
-                        setTimeout(() => {
-                            setApiKeyStatus(API_KEY_STATUS.VALID)
-                        }, 2000)
-                    } else {
-                        setApiKeyStatus(API_KEY_STATUS.INVALID)
-                        setTimeout(() => {
-                            setApiKeyStatus(API_KEY_STATUS.NOT_TESTED)
-                        }, 2000)
-                    }
-                }}>
-                {apiKeyStatus === API_KEY_STATUS.NOT_TESTED
-                    ? "Apply"
-                    : apiKeyStatus === API_KEY_STATUS.SUCCESS
-                      ? "SUCCESS!"
-                      : "Update"}
-            </button>
-            <h5>
-                Don't have an API Key? Generate one at{" "}
-                <a
-                    href="https://ai.google.dev/gemini-api/docs/api-key"
-                    target="_blank"
-                    rel="noreferrer">
-                    Gemini API
-                </a>
-            </h5>
+            <div className={`${styles.w100} ${styles.flexCol} ${styles.gap4}`}>
+                <SubmitButton onSubmit={onSubmit} />
+                <h4>
+                    Don't have an API Key? Generate one at{" "}
+                    <a
+                        href="https://ai.google.dev/gemini-api/docs/api-key"
+                        target="_blank"
+                        rel="noreferrer">
+                        Gemini API
+                    </a>
+                </h4>
+            </div>
         </div>
     )
 }
