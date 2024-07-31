@@ -43,15 +43,15 @@ export default function catchHuluSubtitles() {
                 // Already translating for this show and language, which means we have already caught the subtitles for this episode.
                 // Thus, store result for the next episode!
                 if (
-                    window.cachedNetflixSentences.length > 0 &&
+                    window.cachedVideoSentences.length > 0 &&
                     showId === window.currentShowId
                 ) {
-                    window.cachedNextEpisodeNetflixSentences =
+                    window.cachedNextEpisodeVideoSentences =
                         response.hulu_sentences
-                    window.cachedNetflixSentences = []
+                    window.cachedVideoSentences = []
                 } else {
-                    window.cachedNextEpisodeNetflixSentences = []
-                    window.cachedNetflixSentences = response.hulu_sentences
+                    window.cachedNextEpisodeVideoSentences = []
+                    window.cachedVideoSentences = response.hulu_sentences
                 }
 
                 batchTranslateSubtitles(

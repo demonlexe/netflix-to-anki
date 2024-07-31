@@ -29,24 +29,24 @@ export default async function pollSettings() {
                 window.polledSettings[key],
                 " became ",
                 newValue,
-                " and window.cachedNetflixSentences.length is ",
-                window.cachedNetflixSentences.length,
-                " and window.cachedNextEpisodeNetflixSentences.length is ",
-                window.cachedNextEpisodeNetflixSentences.length
+                " and window.cachedVideoSentences.length is ",
+                window.cachedVideoSentences.length,
+                " and window.cachedNextEpisodeVideoSentences.length is ",
+                window.cachedNextEpisodeVideoSentences.length
             )
-            if (window.cachedNetflixSentences.length > 0) {
+            if (window.cachedVideoSentences.length > 0) {
                 batchTranslateSubtitles(
                     showId,
                     "" + newValue,
-                    window.cachedNetflixSentences,
+                    window.cachedVideoSentences,
                     0
                 )
             }
-            if (window.cachedNextEpisodeNetflixSentences.length > 0) {
+            if (window.cachedNextEpisodeVideoSentences.length > 0) {
                 batchTranslateSubtitles(
                     "" + (Number(showId.trim()) + 1),
                     "" + newValue,
-                    window.cachedNextEpisodeNetflixSentences,
+                    window.cachedNextEpisodeVideoSentences,
                     0
                 )
             }

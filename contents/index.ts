@@ -30,8 +30,8 @@ declare global {
         reverseTranslations: Record<string, string>
         doNotTouchSentences: Record<string, boolean>
         polledSettings: UserSettings
-        cachedNetflixSentences: string[]
-        cachedNextEpisodeNetflixSentences: string[]
+        cachedVideoSentences: string[]
+        cachedNextEpisodeVideoSentences: string[]
         untranslatedSentencesCache: UntranslatedCache
         translatedSentencesCache: TranslationsCache
         watchingTimedText: HTMLElement
@@ -44,8 +44,8 @@ window.reverseTranslations = {}
 window.doNotTouchSentences = {}
 window.untranslatedSentencesCache = {}
 window.translatedSentencesCache = {}
-window.cachedNetflixSentences = []
-window.cachedNextEpisodeNetflixSentences = []
+window.cachedVideoSentences = []
+window.cachedNextEpisodeVideoSentences = []
 window.polledSettings = {
     ...USER_SETTINGS_DEFAULTS,
     TARGET_LANGUAGE: undefined
