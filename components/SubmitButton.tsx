@@ -47,7 +47,7 @@ export default function SubmitButton(props: SubmitButtonProps) {
                             }
                             return prevErr
                         })
-                    }, 4000)
+                    }, 10000)
                 }
             }}>
             {status === SubmitButtonStatus.FAILED ? (
