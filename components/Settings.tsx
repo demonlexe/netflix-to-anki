@@ -22,12 +22,14 @@ const Settings = () => {
     }, [])
 
     const onSubmit = useCallback(async () => {
-        if (!apiKey || !language) {
-            return false
+        if (!apiKey) {
+            return "API Key is a required field."
+        } else if (!language) {
+            return "Target language is a required field."
         }
         await setData("TARGET_LANGUAGE", language)
         if ((await getData("TARGET_LANGUAGE")) !== language) {
-            return false
+            return "Couldn't update target language"
         }
 
         const testResult = await sendToBackground({
@@ -38,9 +40,9 @@ const Settings = () => {
         console.log("Test result", testResult)
         if (testResult && !testResult.error) {
             await setData("API_KEY", apiKey)
-            return true
+            return null
         } else {
-            return false
+            return "Invalid API Key"
         }
     }, [apiKey, language])
 

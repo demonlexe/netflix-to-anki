@@ -3,15 +3,15 @@ import { useState } from "react"
 import styles from "~styles/shared.module.css"
 
 type SubmitButtonProps = {
-    onSubmit: () => Promise<boolean>
+    onSubmit: () => Promise<string>
 }
 
 enum SubmitButtonStatus {
     INITIAL = "Apply",
     SUCCESS = "SUCCESS!",
-    FAILED = "FAILED",
     UPDATE = "Update",
-    LOADING = "Loading..."
+    LOADING = "Loading...",
+    FAILED = "FAILED"
 }
 
 export default function SubmitButton(props: SubmitButtonProps) {
@@ -19,31 +19,47 @@ export default function SubmitButton(props: SubmitButtonProps) {
     const [status, setStatus] = useState<SubmitButtonStatus>(
         SubmitButtonStatus.INITIAL
     )
+    const [error, setError] = useState<string | null>(null)
 
     return (
         <button
-            type="submit"
             onClick={async () => {
                 setStatus(SubmitButtonStatus.LOADING)
-                if (await onSubmit()) {
+                const err = await onSubmit()
+                if (!err) {
                     setStatus(SubmitButtonStatus.SUCCESS)
                     setTimeout(() => {
                         setStatus(SubmitButtonStatus.UPDATE)
                     }, 2000)
                 } else {
+                    setError(err)
                     setStatus(SubmitButtonStatus.FAILED)
                     setTimeout(() => {
-                        setStatus(SubmitButtonStatus.INITIAL)
-                    }, 2000)
+                        setStatus((prevStatus) => {
+                            if (prevStatus === SubmitButtonStatus.FAILED) {
+                                return SubmitButtonStatus.INITIAL
+                            }
+                            return prevStatus
+                        })
+                        setError((prevErr) => {
+                            if (prevErr === err) {
+                                return null
+                            }
+                            return prevErr
+                        })
+                    }, 4000)
                 }
             }}>
-            <span
-                style={{
-                    color:
-                        status === SubmitButtonStatus.FAILED ? "red" : "green"
-                }}>
-                {status}
-            </span>
+            {status === SubmitButtonStatus.FAILED ? (
+                <span
+                    style={{
+                        color: "red"
+                    }}>
+                    {status}: {error}
+                </span>
+            ) : (
+                <span style={{ color: "green" }}>{status}</span>
+            )}
         </button>
     )
 }
