@@ -1,5 +1,5 @@
 # netflix-to-anki
-Chrome extension allowing users to translate Netflix subtitles by clicking, and these clicks can be exported to Anki decks.
+Chrome extension allowing users to translate Netflix + Hulu subtitles by clicking, and these clicks can be exported to Anki decks.
 
 It also supports the automatic translation while watching, if applicable.
 
