@@ -45,7 +45,7 @@ const Settings = () => {
     }, [apiKey, language])
 
     return (
-        <div>
+        <div className={`${styles.flexCol} ${styles.gap16}`}>
             <form className={`${styles.flexCol} ${styles.gap16}`}>
                 <div className={styles.flexRow}>
                     <label htmlFor="api-key-input">
@@ -71,21 +71,19 @@ const Settings = () => {
                         placeholder="e.g. French"
                     />
                 </div>
-
-                <div
-                    className={`${styles.w100} ${styles.flexCol} ${styles.gap4}`}>
-                    <SubmitButton onSubmit={onSubmit} />
-                    <h4>
-                        Don't have an API Key? Generate one at{" "}
-                        <a
-                            href="https://ai.google.dev/gemini-api/docs/api-key"
-                            target="_blank"
-                            rel="noreferrer">
-                            Gemini API
-                        </a>
-                    </h4>
-                </div>
             </form>
+            <div className={`${styles.w100} ${styles.flexCol} ${styles.gap4}`}>
+                <SubmitButton onSubmit={onSubmit} />
+                <h4>
+                    Don't have an API Key? Generate one at{" "}
+                    <a
+                        href="https://ai.google.dev/gemini-api/docs/api-key"
+                        target="_blank"
+                        rel="noreferrer">
+                        Gemini API
+                    </a>
+                </h4>
+            </div>
         </div>
     )
 }
