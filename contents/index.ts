@@ -30,7 +30,7 @@ declare global {
         doNotTouchSentences: Record<string, boolean>
         polledSettings: UserSettings
         cachedSiteSentences: string[]
-        cachedNextEpisodeNetflixSentences: string[]
+        cachedNextEpisodeSiteSentences: string[]
         untranslatedSentencesCache: UntranslatedCache
         translatedSentencesCache: TranslationsCache
         watchingTimedText: HTMLElement
@@ -44,7 +44,7 @@ window.doNotTouchSentences = {}
 window.untranslatedSentencesCache = {}
 window.translatedSentencesCache = {}
 window.cachedSiteSentences = []
-window.cachedNextEpisodeNetflixSentences = []
+window.cachedNextEpisodeSiteSentences = []
 window.polledSettings = {
     ...USER_SETTINGS_DEFAULTS,
     TARGET_LANGUAGE: undefined

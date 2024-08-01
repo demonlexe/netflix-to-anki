@@ -31,8 +31,8 @@ export default async function pollSettings() {
                 newValue,
                 " and window.cachedSiteSentences.length is ",
                 window.cachedSiteSentences.length,
-                " and window.cachedNextEpisodeNetflixSentences.length is ",
-                window.cachedNextEpisodeNetflixSentences.length
+                " and window.cachedNextEpisodeSiteSentences.length is ",
+                window.cachedNextEpisodeSiteSentences.length
             )
             if (window.cachedSiteSentences.length > 0) {
                 batchTranslateSubtitles(
@@ -42,11 +42,11 @@ export default async function pollSettings() {
                     0
                 )
             }
-            if (window.cachedNextEpisodeNetflixSentences.length > 0) {
+            if (window.cachedNextEpisodeSiteSentences.length > 0) {
                 batchTranslateSubtitles(
                     "" + (Number(showId.trim()) + 1),
                     "" + newValue,
-                    window.cachedNextEpisodeNetflixSentences,
+                    window.cachedNextEpisodeSiteSentences,
                     0
                 )
             }

@@ -38,11 +38,11 @@ export default function catchNetflixSubtitles() {
                     window.cachedSiteSentences.length > 0 &&
                     showId === window.currentShowId
                 ) {
-                    window.cachedNextEpisodeNetflixSentences =
+                    window.cachedNextEpisodeSiteSentences =
                         response.netflix_sentences
                     window.cachedSiteSentences = []
                 } else {
-                    window.cachedNextEpisodeNetflixSentences = []
+                    window.cachedNextEpisodeSiteSentences = []
                     window.cachedSiteSentences = response.netflix_sentences
                 }
 
