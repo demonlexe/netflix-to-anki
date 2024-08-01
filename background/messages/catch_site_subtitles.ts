@@ -2,8 +2,8 @@ import { parseString } from "xml2js"
 
 import type { PlasmoMessaging } from "@plasmohq/messaging"
 
-import { type CatchNetflixSubtitlesRequest } from "~background/types/CatchNetflixSubtitlesRequest"
-import type { CatchNetflixSubtitlesResponse } from "~background/types/CatchNetflixSubtitlesResponse"
+import { type CatchSiteSubtitlesRequest } from "~background/types/CatchSiteSubtitlesRequest"
+import type { CatchSiteSubtitlesResponse } from "~background/types/CatchSiteSubtitlesResponse"
 import replaceXmlBreakTags from "~background/utils/functions/replaceXmlBreakTags"
 import { BREAK_TAG_RENAME } from "~utils/constants"
 import logDev from "~utils/functions/logDev"
@@ -35,8 +35,8 @@ function getXMLTextContent(text: XMLText): string[] {
 }
 
 const handler: PlasmoMessaging.MessageHandler<
-    CatchNetflixSubtitlesRequest,
-    CatchNetflixSubtitlesResponse
+    CatchSiteSubtitlesRequest,
+    CatchSiteSubtitlesResponse
 > = async (req, res) => {
     const { message } = req.body
     if (
@@ -74,7 +74,7 @@ const handler: PlasmoMessaging.MessageHandler<
                     })
                 }
                 const allSentencesArray: string[] = Array.from(allSentencesSet)
-                res.send({ netflix_sentences: allSentencesArray })
+                res.send({ site_sentences: allSentencesArray })
             }
         )
     } else {
