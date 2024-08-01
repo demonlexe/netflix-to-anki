@@ -27,7 +27,7 @@ const batchPromise = (
     locale: string,
     showId: string,
     targetLanguage: string,
-    netflixSentences: string[]
+    videoSentences: string[]
 ) =>
     new Promise<BatchPromise>((resolve) => {
         sendToBackground({
@@ -42,11 +42,11 @@ const batchPromise = (
                 if (response?.error) {
                     throw response.error
                 }
-                // Initialize to include members of netflixSentences that are in NETFLIX_TO_ANKI_TRANSLATIONS
+                // Initialize to include members of videoSentences that are in NETFLIX_TO_ANKI_TRANSLATIONS
                 const collectedSentences = await getAlreadyTranslatedSentences(
                     showId,
                     targetLanguage,
-                    netflixSentences
+                    videoSentences
                 )
                 const previousCollectedSentencesCount =
                     Object.keys(collectedSentences).length
@@ -100,7 +100,7 @@ const batchPromise = (
 export default async function batchTranslateSubtitles(
     showId: string,
     targetLanguage: string,
-    netflixSentences: string[],
+    videoSentences: string[],
     retries: number
 ) {
     if (retries === 0) {
@@ -118,13 +118,13 @@ export default async function batchTranslateSubtitles(
                 "Begin translating for ",
                 showId,
                 targetLanguage,
-                "# netflixSentences: ",
-                netflixSentences.length
+                "# videoSentences: ",
+                videoSentences.length
             )
             await updateUntranslatedSentences(
                 showId,
                 targetLanguage,
-                netflixSentences
+                videoSentences
             )
         }
     }
@@ -133,7 +133,7 @@ export default async function batchTranslateSubtitles(
     const alreadyTranslatedSentences = await getAlreadyTranslatedSentences(
         showId,
         targetLanguage,
-        netflixSentences
+        videoSentences
     )
 
     const untranslatedSentences = getUntranslatedSentences(
@@ -161,7 +161,7 @@ export default async function batchTranslateSubtitles(
                 batchTranslateSubtitles(
                     showId,
                     targetLanguage,
-                    netflixSentences,
+                    videoSentences,
                     retries
                 ),
             getBatchWaitTime(targetLanguage, retries) * 2
@@ -194,7 +194,7 @@ export default async function batchTranslateSubtitles(
                 batchTranslateSubtitles(
                     showId,
                     targetLanguage,
-                    netflixSentences,
+                    videoSentences,
                     retries
                 ),
             getBatchWaitTime(targetLanguage, retries) * 2
@@ -223,14 +223,14 @@ export default async function batchTranslateSubtitles(
                 sentencesLocale.locale,
                 showId,
                 targetLanguage,
-                netflixSentences
+                videoSentences
             )
         )
     }
 
     let hadCheckQuotaExceeded = false
     await Promise.all(allPromises).then((results: BatchPromise[]) => {
-        getAlreadyTranslatedSentences(showId, targetLanguage, netflixSentences)
+        getAlreadyTranslatedSentences(showId, targetLanguage, videoSentences)
             .then((allTranslations: Record<string, string>) => {
                 let newSentences = allTranslations
 
@@ -255,7 +255,7 @@ export default async function batchTranslateSubtitles(
                     "# sentences remaining: ",
                     untranslatedSentences.length,
                     "of total sentences ",
-                    netflixSentences.length
+                    videoSentences.length
                 )
             })
             .finally(() => {
@@ -264,7 +264,7 @@ export default async function batchTranslateSubtitles(
                         batchTranslateSubtitles(
                             showId,
                             targetLanguage,
-                            netflixSentences,
+                            videoSentences,
                             retries
                         ),
                     getBatchWaitTime(targetLanguage, retries) *
