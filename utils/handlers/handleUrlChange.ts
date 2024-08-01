@@ -10,13 +10,13 @@ export default function handleUrlChange() {
             Number(newShowId?.trim() ?? 0)
         ) {
             // we went back to the previous episode
-            window.cachedNextEpisodeVideoSentences = []
-            window.cachedVideoSentences = []
+            window.cachedNextEpisodeSiteSentences = []
+            window.cachedSiteSentences = []
             logDev("RETREATED TO PREVIOUS EPISODE")
         } else {
-            window.cachedVideoSentences =
-                window.cachedNextEpisodeVideoSentences ?? []
-            window.cachedNextEpisodeVideoSentences = []
+            window.cachedSiteSentences =
+                window.cachedNextEpisodeSiteSentences ?? []
+            window.cachedNextEpisodeSiteSentences = []
             logDev("MOVED TO NEXT EPISODE OR OTHER SHOW")
         }
     }

@@ -7,11 +7,11 @@ export default function pollStatus() {
         const alreadyTranslatedSentences = await getAlreadyTranslatedSentences(
             window.currentShowId,
             window.polledSettings.TARGET_LANGUAGE,
-            window.cachedVideoSentences
+            window.cachedSiteSentences
         )
         await setData("TRANSLATION_STATUS", {
             TRANSLATED_CURRENT: Object.keys(alreadyTranslatedSentences).length,
-            TOTAL_SENTENCES: window.cachedVideoSentences.length
+            TOTAL_SENTENCES: window.cachedSiteSentences.length
         })
         pollStatus()
     }, POLLING_STATUS_INTERVAL)

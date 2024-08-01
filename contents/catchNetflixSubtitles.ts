@@ -35,15 +35,15 @@ export default function catchNetflixSubtitles() {
                 // Already translating for this show and language, which means we have already caught the subtitles for this episode.
                 // Thus, store result for the next episode!
                 if (
-                    window.cachedVideoSentences.length > 0 &&
+                    window.cachedSiteSentences.length > 0 &&
                     showId === window.currentShowId
                 ) {
-                    window.cachedNextEpisodeVideoSentences =
+                    window.cachedNextEpisodeSiteSentences =
                         response.netflix_sentences
-                    window.cachedVideoSentences = []
+                    window.cachedSiteSentences = []
                 } else {
-                    window.cachedNextEpisodeVideoSentences = []
-                    window.cachedVideoSentences = response.netflix_sentences
+                    window.cachedNextEpisodeSiteSentences = []
+                    window.cachedSiteSentences = response.netflix_sentences
                 }
 
                 batchTranslateSubtitles(
