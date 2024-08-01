@@ -3,7 +3,7 @@ import { parseString } from "xml2js"
 import type { PlasmoMessaging } from "@plasmohq/messaging"
 
 import { type CatchSiteSubtitlesRequest } from "~background/types/CatchSiteSubtitlesRequest"
-import { type CatchSiteSubtitlesResponse } from "~background/types/CatchSiteSubtitlesResponse"
+import type { CatchSiteSubtitlesResponse } from "~background/types/CatchSiteSubtitlesResponse"
 import replaceXmlBreakTags from "~background/utils/functions/replaceXmlBreakTags"
 import { BREAK_TAG_RENAME } from "~utils/constants"
 import logDev from "~utils/functions/logDev"

@@ -15,12 +15,14 @@ export default function catchNetflixSubtitles() {
             return
         }
         if (event.data.type && event.data.type === "NETWORK_REQUEST") {
-            const response = (await sendToBackground({
-                name: "catch_site_subtitles",
-                body: {
-                    message: event.data
-                } as CatchSiteSubtitlesRequest
-            })) as CatchSiteSubtitlesResponse
+            const response: CatchSiteSubtitlesResponse = await sendToBackground(
+                {
+                    name: "catch_site_subtitles",
+                    body: {
+                        message: event.data
+                    } as CatchSiteSubtitlesRequest
+                }
+            )
             if (response.error) {
                 console.error(
                     "Error getting Netflix subtitles: ",

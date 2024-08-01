@@ -1,4 +1,4 @@
 export * from "./GeminiSingleRequestResponse"
 export * from "./GeminiSingleRequestBody"
-export * from "./CatchNetflixSubtitlesRequest"
-export * from "./CatchNetflixSubtitlesResponse"
+export * from "./CatchSiteSubtitlesRequest"
+export * from "./CatchSiteSubtitlesResponse"
