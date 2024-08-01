@@ -14,7 +14,12 @@ export default function catchNetflixSubtitles() {
             // don't care about subtitles on main netflix page
             return
         }
-        if (event.data.type && event.data.type === "NETWORK_REQUEST") {
+        if (
+            event.data.type &&
+            event.data.type === "NETWORK_REQUEST" &&
+            event.data.url.includes("?o") &&
+            event.data.url.includes("nflxvideo.net")
+        ) {
             const response: CatchSiteSubtitlesResponse = await sendToBackground(
                 {
                     name: "catch_site_subtitles",

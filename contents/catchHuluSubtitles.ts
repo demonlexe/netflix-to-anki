@@ -19,11 +19,6 @@ export default function catchHuluSubtitles() {
             event.data.type === "NETWORK_REQUEST" &&
             event.data.url.match(/.ttml$/)
         ) {
-            console.log(
-                "CAUGHT SUBTITLES: ",
-                event.data,
-                event.data.url.match(/.ttml$/)
-            )
             const response: CatchSiteSubtitlesResponse = await sendToBackground(
                 {
                     name: "catch_site_subtitles",
