@@ -6,8 +6,8 @@ export default function getLiveElement(
     currentText: string = "",
     textContainer?: JQuery<HTMLElement>
 ) {
-    const { captionElement } = SITE_WATCHERS[window.usingSite]
+    const { captionElement, lookFor } = SITE_WATCHERS[window.usingSite]
     return (textContainer ?? $(captionElement))
-        .find(`span:contains("${currentText}")`)
+        .find(`${lookFor}:contains("${currentText}")`)
         .first()
 }
