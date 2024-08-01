@@ -1,7 +1,7 @@
 import $ from "jquery"
 import type { PlasmoCSConfig } from "plasmo"
 
-import catchHuluSubtitles from "~contents/catchHuluSubtitles"
+import catchSiteSubtitles from "~contents/catchSiteSubtitles"
 import { observeSection } from "~utils"
 import { SITE_WATCHERS, USER_SETTINGS_DEFAULTS } from "~utils/constants"
 import { pollCachedTranslations } from "~utils/functions/cachedTranslations"
@@ -15,8 +15,6 @@ import type {
     UserSettings
 } from "~utils/localData"
 import watchTimedText from "~utils/watchers/watchTimedText"
-
-import catchNetflixSubtitles from "./catchNetflixSubtitles"
 
 export const config: PlasmoCSConfig = {
     matches: ["https://www.netflix.com/*", "https://www.hulu.com/*"]
@@ -60,8 +58,7 @@ script.setAttribute("src", chrome.runtime.getURL("inject.js"))
 
 document.documentElement.appendChild(script)
 
-catchNetflixSubtitles()
-catchHuluSubtitles()
+catchSiteSubtitles()
 pollCachedTranslations()
 
 window.addEventListener("load", () => {
