@@ -1,7 +1,7 @@
 import { sendToBackground } from "@plasmohq/messaging"
 
-import type { CatchNetflixSubtitlesRequest } from "~background/types/CatchNetflixSubtitlesRequest"
-import type { CatchNetflixSubtitlesResponse } from "~background/types/CatchNetflixSubtitlesResponse"
+import type { CatchSiteSubtitlesRequest } from "~background/types/CatchSiteSubtitlesRequest"
+import type { CatchSiteSubtitlesResponse } from "~background/types/CatchSiteSubtitlesResponse"
 import batchTranslateSubtitles from "~contents/batchTranslateSubtitles"
 import extractIdFromUrl from "~utils/functions/extractIdFromUrl"
 import { getData } from "~utils/localData"
@@ -15,19 +15,18 @@ export default function catchNetflixSubtitles() {
             return
         }
         if (event.data.type && event.data.type === "NETWORK_REQUEST") {
-            const response: CatchNetflixSubtitlesResponse =
-                await sendToBackground({
-                    name: "catch_netflix_subtitles",
-                    body: {
-                        message: event.data
-                    } as CatchNetflixSubtitlesRequest
-                })
+            const response = (await sendToBackground({
+                name: "catch_site_subtitles",
+                body: {
+                    message: event.data
+                } as CatchSiteSubtitlesRequest
+            })) as CatchSiteSubtitlesResponse
             if (response.error) {
                 console.error(
                     "Error getting Netflix subtitles: ",
                     response.error
                 )
-            } else if (response.netflix_sentences) {
+            } else if (response.site_sentences) {
                 const showId = extractIdFromUrl(window.location.href)
                 const targetLanguage = await getData("TARGET_LANGUAGE")
                 if (!targetLanguage) return // missing setting
@@ -39,11 +38,11 @@ export default function catchNetflixSubtitles() {
                     showId === window.currentShowId
                 ) {
                     window.cachedNextEpisodeSiteSentences =
-                        response.netflix_sentences
+                        response.site_sentences
                     window.cachedSiteSentences = []
                 } else {
                     window.cachedNextEpisodeSiteSentences = []
-                    window.cachedSiteSentences = response.netflix_sentences
+                    window.cachedSiteSentences = response.site_sentences
                 }
 
                 batchTranslateSubtitles(
@@ -53,7 +52,7 @@ export default function catchNetflixSubtitles() {
                         ? "" + (Number(showId.trim()) + 1)
                         : showId,
                     targetLanguage,
-                    response.netflix_sentences,
+                    response.site_sentences,
                     0
                 )
             }

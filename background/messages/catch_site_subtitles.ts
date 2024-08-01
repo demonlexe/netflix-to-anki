@@ -2,10 +2,11 @@ import { parseString } from "xml2js"
 
 import type { PlasmoMessaging } from "@plasmohq/messaging"
 
-import { type CatchHuluSubtitlesRequest } from "~background/types/CatchHuluSubtitlesRequest"
-import type { CatchHuluSubtitlesResponse } from "~background/types/CatchHuluSubtitlesResponse"
+import { type CatchSiteSubtitlesRequest } from "~background/types/CatchSiteSubtitlesRequest"
+import { type CatchSiteSubtitlesResponse } from "~background/types/CatchSiteSubtitlesResponse"
 import replaceXmlBreakTags from "~background/utils/functions/replaceXmlBreakTags"
 import { BREAK_TAG_RENAME } from "~utils/constants"
+import logDev from "~utils/functions/logDev"
 
 type XMLText = {
     $: any
@@ -34,11 +35,12 @@ function getXMLTextContent(text: XMLText): string[] {
 }
 
 const handler: PlasmoMessaging.MessageHandler<
-    CatchHuluSubtitlesRequest,
-    CatchHuluSubtitlesResponse
+    CatchSiteSubtitlesRequest,
+    CatchSiteSubtitlesResponse
 > = async (req, res) => {
     const { message } = req.body
-    if (message.url.includes(".ttml") && message.response?.length > 0) {
+    if (message.response?.length > 0) {
+        logDev("Caught site subtitles: ", message)
         const responseReplaced = replaceXmlBreakTags(message.response)
         parseString(
             responseReplaced,
@@ -50,9 +52,12 @@ const handler: PlasmoMessaging.MessageHandler<
                     console.error("Error parsing XML: ", err)
                     return res.send({ error: "Error parsing XML" })
                 }
-                const allText: XMLText[] = result.tt.body?.[0]?.div.map(
-                    (div: any) => div?.p?.[0]
-                )
+                // might contain multiple divs
+                const parentDiv = result.tt.body?.[0]?.div
+                const allText: XMLText[] =
+                    parentDiv.length > 1
+                        ? parentDiv.map((div: any) => div?.p?.[0])
+                        : parentDiv?.[0]?.p
                 const grouping: Record<string, string[]> = {}
                 allText.forEach((text: XMLText) => {
                     const textContent = getXMLTextContent(text)
@@ -70,7 +75,7 @@ const handler: PlasmoMessaging.MessageHandler<
                     })
                 }
                 const allSentencesArray: string[] = Array.from(allSentencesSet)
-                res.send({ hulu_sentences: allSentencesArray })
+                res.send({ site_sentences: allSentencesArray })
             }
         )
     } else {

@@ -1,4 +1,4 @@
-export type CatchHuluSubtitlesRequest = {
+export type CatchSiteSubtitlesRequest = {
     message: {
         url: string
         response: any
