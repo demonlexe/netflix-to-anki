@@ -26,7 +26,10 @@ export default async function watchTimedText(timedText: HTMLElement) {
         if (mutation?.addedNodes?.length > 0) {
             // loop all added nodes and log if they are clicked.
             for (const node of mutation.addedNodes) {
-                const parentElem = $(node).find(lookFor).first()
+                const parentElem =
+                    $(node).find(lookFor).first().length > 0
+                        ? $(node).find(lookFor).first()
+                        : $(node)
                 if (!parentElem || !parentElem[0]) continue
                 const currentText = extractTextFromHTML(parentElem[0].innerHTML)
                 const existingTranslation =
