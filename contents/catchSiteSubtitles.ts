@@ -6,7 +6,7 @@ import batchTranslateSubtitles from "~contents/batchTranslateSubtitles"
 import extractIdFromUrl from "~utils/functions/extractIdFromUrl"
 import { getData } from "~utils/localData"
 
-export default function catchHuluSubtitles() {
+export default function catchSiteSubtitles() {
     window.addEventListener("message", async (event) => {
         if (event.source !== window) return
 
