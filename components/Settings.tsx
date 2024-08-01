@@ -37,7 +37,6 @@ const Settings = () => {
             body: { key: apiKey }
         })
 
-        console.log("Test result", testResult)
         if (testResult && !testResult.error) {
             await setData("API_KEY", apiKey)
             return null

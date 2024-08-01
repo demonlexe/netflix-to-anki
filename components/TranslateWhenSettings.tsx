@@ -9,7 +9,6 @@ export default function TranslateWhenSettings<T>() {
     const [currentSelected, setCurrentSelected] =
         useState<UserSettings["TRANSLATE_WHEN"]>("on_pause")
     const [customTranslateKey, setCustomTranslateKey] = useState<string>("")
-    console.log("Re-render: ", customTranslateKey)
 
     useEffect(() => {
         getData("TRANSLATE_WHEN").then((data) => {
