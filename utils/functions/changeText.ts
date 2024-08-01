@@ -16,10 +16,7 @@ export default function changeText(
     if (breakOnBefore.length !== breakOnAfter.length) return // do nothing, not matching
 
     // if it's not nested, just change the text
-    if (
-        elem?.[0]?.innerHTML?.replace("<br>", "<br/>") ===
-        currentText?.replace("<br>", "<br/>")
-    ) {
+    if (elem?.[0]?.innerHTML === currentText) {
         doChangeText(elem, newText, color)
         return
     }

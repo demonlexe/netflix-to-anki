@@ -11,7 +11,7 @@ export default function extractTextFromHTML(htmlString: string) {
 
     if (!doc || !spanElements || spanElements.length === 0) {
         // If there are no <span> elements, return the text content of the document
-        return htmlString.replace("<br>", "<br/>")
+        return htmlString
     }
 
     // Iterate through the <span> elements and extract text content
