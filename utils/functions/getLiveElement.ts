@@ -7,7 +7,13 @@ export default function getLiveElement(
     textContainer?: JQuery<HTMLElement>
 ) {
     const { captionElement, lookFor } = SITE_WATCHERS[window.usingSite]
-    return (textContainer ?? $(captionElement))
-        .find(`${lookFor}:contains("${currentText}")`)
-        .first()
+    const using = (textContainer ?? $(captionElement)).find(lookFor)
+    let firstMatch = null
+    using.each((_, el) => {
+        if ($(el).html().trim().match(currentText)) {
+            firstMatch = $(el)
+            return false
+        }
+    })
+    return firstMatch
 }
