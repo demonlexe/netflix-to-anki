@@ -56,18 +56,25 @@ const handler: PlasmoMessaging.MessageHandler<
             return
         }
 
-        const sentencesLocale =
+        const sentencesLocale = (
             req.body.sentencesLocale ??
             (await getCurrentLanguageFromModel(
                 handlerState.model,
                 phrases,
                 req.body.targetLanguage
             ))
+        ).toLowerCase()
 
         const TRANSLATE_TO_LANGUAGE =
             sentencesLocale.match(req.body.targetLanguage)?.length > 0
                 ? NATIVE_LANGUAGE
                 : req.body.targetLanguage
+        logDev(
+            "TRANSLATE_TO_LANGUAGE: ",
+            sentencesLocale,
+            TRANSLATE_TO_LANGUAGE,
+            req.body
+        )
 
         const prompt = TranslationRequirements(TRANSLATE_TO_LANGUAGE).join("\n")
 
