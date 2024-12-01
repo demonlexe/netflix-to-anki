@@ -17,49 +17,35 @@ function fixJSON(
     retries = 0
 ): Record<string, string> | null {
     if (retries > 10) {
-        throw new Error("Too many retries parsing JSON: " + jsonString)
+        throw new Error("Too many retries parsing JSON")
     }
     try {
-        // Attempt to parse the JSON to identify errors
+        // Remove Markdown-style backticks and "json" if present
+        jsonString = jsonString.replace(/```json|```/g, "").trim()
+
+        // Attempt to parse the JSON
         const parsed = JSON.parse(jsonString)
-        return parsed // If no errors, return the original string
+        return parsed // If successful, return the parsed object
     } catch (error) {
-        // Handle missing brackets or extra characters
-        if (error.message) {
-            jsonString = jsonString.trim()
+        // Trim the string to remove extra spaces or newlines
+        jsonString = jsonString.trim()
 
-            // remove leading brackets, braces, useless characters
-            while (
-                jsonString[0] === "{" ||
-                jsonString[0] === "[" ||
-                jsonString[0] === "," ||
-                jsonString[0] === " " ||
-                jsonString[0] === "\n"
-            ) {
-                jsonString = jsonString.slice(1)
-            }
-            // add opening bracket
-            if (jsonString[0] !== "{") {
-                jsonString = "{" + jsonString
-            }
-
-            // remove all trailing brackets, braces, useless characters
-            while (
-                jsonString[jsonString.length - 1] === "}" ||
-                jsonString[jsonString.length - 1] === "]" ||
-                jsonString[jsonString.length - 1] === "," ||
-                jsonString[jsonString.length - 1] === " " ||
-                jsonString[jsonString.length - 1] === "\n"
-            ) {
-                jsonString = jsonString.slice(0, jsonString.length - 1)
-            }
-            // add closing bracket
-            if (jsonString[jsonString.length - 1] !== "}") {
-                jsonString += "}"
-            }
+        // Try to fix common JSON errors
+        if (jsonString[0] !== "{") {
+            jsonString = "{" + jsonString // Add a missing opening brace
+        }
+        if (jsonString[jsonString.length - 1] !== "}") {
+            jsonString += "}" // Add a missing closing brace
         }
 
-        // Attempt to parse again
-        return fixJSON(jsonString, retries + 1) // Recursively attempt to fix the JSON
+        // Remove trailing commas
+        jsonString = jsonString.replace(/,(\s*[}\]])/g, "$1")
+
+        // Handle escaped characters that might cause issues
+        jsonString = jsonString.replace(/\\'/g, "'")
+        jsonString = jsonString.replace(/\\"/g, '"')
+
+        // Recursively retry fixing the JSON
+        return fixJSON(jsonString, retries + 1)
     }
 }
