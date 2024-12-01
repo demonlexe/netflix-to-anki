@@ -90,6 +90,7 @@ const handler: PlasmoMessaging.MessageHandler<
                 }
             })
         }
+        logDev("Processed Sentences: ", processed)
         const response: GeminiSingleRequestResponse = {
             translatedPhrases: processed
         }

@@ -3,13 +3,14 @@ import { useEffect, useState } from "react"
 import PressAnyKey from "~components/PressAnyKey"
 import styles from "~styles/shared.module.css"
 import { READABLE_DROPDOWN_SETTINGS } from "~utils/constants"
+import logDev from "~utils/functions/logDev"
 import { getData, setData, type UserSettings } from "~utils/localData"
 
 export default function TranslateWhenSettings<T>() {
     const [currentSelected, setCurrentSelected] =
         useState<UserSettings["TRANSLATE_WHEN"]>("on_pause")
     const [customTranslateKey, setCustomTranslateKey] = useState<string>("")
-    console.log("Re-render: ", customTranslateKey)
+    logDev("Re-render: ", customTranslateKey)
 
     useEffect(() => {
         getData("TRANSLATE_WHEN").then((data) => {

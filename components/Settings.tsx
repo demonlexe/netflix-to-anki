@@ -4,6 +4,7 @@ import { sendToBackground } from "@plasmohq/messaging"
 
 import Required from "~components/Required"
 import styles from "~styles/settings.module.css"
+import logDev from "~utils/functions/logDev"
 import { getData, setData } from "~utils/localData"
 
 import SubmitButton from "./SubmitButton"
@@ -37,7 +38,7 @@ const Settings = () => {
             body: { key: apiKey }
         })
 
-        console.log("Test result", testResult)
+        logDev("Test result", testResult)
         if (testResult && !testResult.error) {
             await setData("API_KEY", apiKey)
             return null
