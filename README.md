@@ -3,6 +3,11 @@ Chrome extension allowing users to translate Netflix + Hulu subtitles by clickin
 
 It also supports the automatic translation while watching, if applicable.
 
+# Installation
+
+Get the chrome extension here:
+[https://chromewebstore.google.com/detail/netflix-to-anki/nclpenomcdmjiibjgjbibndlckdkmeda?](https://chromewebstore.google.com/detail/netflix-to-anki/nclpenomcdmjiibjgjbibndlckdkmeda?)
+
 ## Supported Languages
 
 Note: Any language you desire may work, since we directly use your "Learning Language" text input. This is not a comprehensive list of languages that can work.
@@ -57,6 +62,8 @@ npm run build
 
 This should create a production bundle for your extension, ready to be zipped and published to the stores.
 
-## Submit to the webstores
+# Installation
 
-The easiest way to deploy your Plasmo extension is to use the built-in [bpp](https://bpp.browser.market) GitHub action. Prior to using this action however, make sure to build your extension and upload the first version to the store to establish the basic credentials. Then, simply follow [this setup instruction](https://docs.plasmo.com/framework/workflows/submit) and you should be on your way for automated submission!
+Get the chrome extension here:
+[https://chromewebstore.google.com/detail/netflix-to-anki/nclpenomcdmjiibjgjbibndlckdkmeda?](https://chromewebstore.google.com/detail/netflix-to-anki/nclpenomcdmjiibjgjbibndlckdkmeda?)
+
