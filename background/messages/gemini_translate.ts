@@ -27,7 +27,8 @@ const TranslationRequirements = (language: string) =>
         "EXPECTED OUTPUT: A mapping of the phrases to their translations. For example: { `phrase 1`: `translated phrase 1`, `phrase 2`: `translated phrase 2` }",
         "Answer with only a valid JSON object in plaintext with the translated phrases mapped to the exact original phrases. ",
         "Make sure all input are translated to the target language. That is, if 50 phrases are given, all 50 should be translated separately.",
-        "Do not combine any phrases. They are intentionally separated."
+        "Do not combine any phrases. They are intentionally separated.",
+        "Make sure to also keep the break tags in the translation in the original format. For example, <br/> should remain as <br/>."
     ].map((line, index) => {
         return `${index + 1}. ${line}`
     })
