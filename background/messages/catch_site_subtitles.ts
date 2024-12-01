@@ -39,12 +39,8 @@ const handler: PlasmoMessaging.MessageHandler<
     CatchSiteSubtitlesResponse
 > = async (req, res) => {
     const { message } = req.body
-    if (
-        message.url.includes("?o") &&
-        message.url.includes("nflxvideo.net") &&
-        message.response?.length > 0
-    ) {
-        logDev("Caught netflix subtitles: ", message)
+    if (message.response?.length > 0) {
+        logDev("Caught site subtitles: ", message)
         const responseReplaced = replaceXmlBreakTags(message.response)
         parseString(
             responseReplaced,
@@ -56,7 +52,12 @@ const handler: PlasmoMessaging.MessageHandler<
                     console.error("Error parsing XML: ", err)
                     return res.send({ error: "Error parsing XML" })
                 }
-                const allText: XMLText[] = result.tt.body?.[0]?.div?.[0]?.p
+                // might contain multiple divs
+                const parentDiv = result.tt.body?.[0]?.div
+                const allText: XMLText[] =
+                    parentDiv.length > 1
+                        ? parentDiv.map((div: any) => div?.p?.[0])
+                        : parentDiv?.[0]?.p
                 const grouping: Record<string, string[]> = {}
                 allText.forEach((text: XMLText) => {
                     const textContent = getXMLTextContent(text)
