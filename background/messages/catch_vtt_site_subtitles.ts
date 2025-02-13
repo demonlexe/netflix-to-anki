@@ -1,7 +1,7 @@
 import type { PlasmoMessaging } from "@plasmohq/messaging"
 
-import type { CatchSiteSubtitlesRequest } from "~background/types/CatchSiteSubtitlesRequest"
 import type { CatchSiteSubtitlesResponse } from "~background/types/CatchSiteSubtitlesResponse"
+import type { CatchVTTSiteSubtitlesRequest } from "~background/types/CatchVTTSiteSubtitlesRequest"
 import logDev from "~utils/functions/logDev"
 
 const vttRegex =
@@ -27,15 +27,17 @@ const parseVTT = (vttText: string): Record<string, string[]> => {
 }
 
 const handler: PlasmoMessaging.MessageHandler<
-    CatchSiteSubtitlesRequest,
+    CatchVTTSiteSubtitlesRequest,
     CatchSiteSubtitlesResponse
 > = async (req, res) => {
     const { message } = req.body
-    if (message.response?.length > 0) {
+    logDev("MSG RECEIVED", req.body.message, req.body)
+    if (message?.response?.length > 0) {
         logDev("Caught site subtitles: ", message)
 
-        const grouping = parseVTT(message.response)
+        const grouping = parseVTT(message?.response)
         const allSentencesSet = new Set<string>()
+        logDev("Grouping: ", grouping)
 
         for (const key in grouping) {
             grouping[key].forEach((sentence: string) => {
@@ -43,6 +45,7 @@ const handler: PlasmoMessaging.MessageHandler<
             })
         }
 
+        console.warn("All setnences: ", allSentencesSet)
         const allSentencesArray: string[] = Array.from(allSentencesSet)
         res.send({ site_sentences: allSentencesArray })
     } else {

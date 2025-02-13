@@ -2,6 +2,7 @@ import { sendToBackground } from "@plasmohq/messaging"
 
 import type { CatchSiteSubtitlesRequest } from "~background/types/CatchSiteSubtitlesRequest"
 import type { CatchSiteSubtitlesResponse } from "~background/types/CatchSiteSubtitlesResponse"
+import { decodeUtfBuffer } from "~background/utils/functions/decodeUtfBuffer"
 import batchTranslateSubtitles from "~contents/batchTranslateSubtitles"
 import extractIdFromUrl from "~utils/functions/extractIdFromUrl"
 import logDev from "~utils/functions/logDev"
@@ -35,12 +36,24 @@ export default function catchSiteSubtitles() {
             return
         }
 
+        let backgroundMsgToSend = null
+        if (isMaxSubtitles) {
+            backgroundMsgToSend = {
+                response: await decodeUtfBuffer(event.data.response),
+                url: event.data.url
+            }
+        } else {
+            backgroundMsgToSend = {
+                response: event.data.response,
+                url: event.data.url
+            }
+        }
         const response: CatchSiteSubtitlesResponse = await sendToBackground({
             name: isMaxSubtitles
                 ? "catch_vtt_site_subtitles"
                 : "catch_site_subtitles",
             body: {
-                message: event.data
+                message: backgroundMsgToSend
             } as CatchSiteSubtitlesRequest
         })
         if (response.error) {
