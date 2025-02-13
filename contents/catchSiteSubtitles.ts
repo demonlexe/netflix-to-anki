@@ -4,8 +4,10 @@ import type { CatchSiteSubtitlesRequest } from "~background/types/CatchSiteSubti
 import type { CatchSiteSubtitlesResponse } from "~background/types/CatchSiteSubtitlesResponse"
 import batchTranslateSubtitles from "~contents/batchTranslateSubtitles"
 import extractIdFromUrl from "~utils/functions/extractIdFromUrl"
+import logDev from "~utils/functions/logDev"
 import { getData } from "~utils/localData"
 
+// This function catches the subtitles from the site and sends them to the background script
 export default function catchSiteSubtitles() {
     window.addEventListener("message", async (event) => {
         if (event.source !== window) return
@@ -24,7 +26,14 @@ export default function catchSiteSubtitles() {
             event.data.url.includes("?o") &&
             event.data.url.includes("nflxvideo.net") &&
             window.usingSite === "netflix"
+        const isMaxSubtitles =
+            event.data.type === "NETWORK_REQUEST" &&
+            event.data.url.match(/.vtt$/) &&
+            window.usingSite === "hbomax"
 
+        if (isMaxSubtitles) {
+            logDev("CAUGHT MAX SUBTITLES")
+        }
         if (isNetflixSubtitles || isHuluSubtitles) {
             const response: CatchSiteSubtitlesResponse = await sendToBackground(
                 {
