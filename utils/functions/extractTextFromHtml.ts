@@ -9,6 +9,11 @@ export default function extractTextFromHTML(htmlString: string) {
     const spanElements = doc.getElementsByTagName("span")
     let result = ""
 
+    if (!doc || !spanElements || spanElements.length === 0) {
+        // If there are no <span> elements, return the text content of the document
+        return htmlString
+    }
+
     // Iterate through the <span> elements and extract text content
     spanElements.forEach((span) => {
         // If there is a <br> element, replace it with <br/> in the result string

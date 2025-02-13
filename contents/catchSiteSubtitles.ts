@@ -3,18 +3,29 @@ import { sendToBackground } from "@plasmohq/messaging"
 import type { CatchSiteSubtitlesRequest } from "~background/types/CatchSiteSubtitlesRequest"
 import type { CatchSiteSubtitlesResponse } from "~background/types/CatchSiteSubtitlesResponse"
 import batchTranslateSubtitles from "~contents/batchTranslateSubtitles"
-import extractIdFromUrl from "~utils/functions/extractMovieFromNetflixUrl"
+import extractIdFromUrl from "~utils/functions/extractIdFromUrl"
 import { getData } from "~utils/localData"
 
-export default function catchNetflixSubtitles() {
+export default function catchSiteSubtitles() {
     window.addEventListener("message", async (event) => {
         if (event.source !== window) return
 
-        if (!window?.location?.href?.includes("netflix.com/watch")) {
-            // don't care about subtitles on main netflix page
+        if (!window?.location?.href?.includes("/watch")) {
+            // don't care about subtitles on main site page
             return
         }
-        if (event.data.type && event.data.type === "NETWORK_REQUEST") {
+
+        const isHuluSubtitles =
+            event.data.type === "NETWORK_REQUEST" &&
+            event.data.url.match(/.ttml$/) &&
+            window.usingSite === "hulu"
+        const isNetflixSubtitles =
+            event.data.type === "NETWORK_REQUEST" &&
+            event.data.url.includes("?o") &&
+            event.data.url.includes("nflxvideo.net") &&
+            window.usingSite === "netflix"
+
+        if (isNetflixSubtitles || isHuluSubtitles) {
             const response: CatchSiteSubtitlesResponse = await sendToBackground(
                 {
                     name: "catch_site_subtitles",
@@ -25,7 +36,7 @@ export default function catchNetflixSubtitles() {
             )
             if (response.error) {
                 console.error(
-                    "Error getting Netflix subtitles: ",
+                    `Error getting the Site subtitles for Site ${window.usingSite}: `,
                     response.error
                 )
             } else if (response.site_sentences) {

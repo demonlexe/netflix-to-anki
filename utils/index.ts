@@ -1,5 +1,7 @@
 import $ from "jquery"
 
+import { SITE_WATCHERS } from "~utils/constants"
+
 import onClick from "./handlers/onClick"
 
 export function observeSection(
@@ -79,10 +81,9 @@ export function insideWhichDiv(
 ) {
     const mouseX = event.clientX
     const mouseY = event.clientY
+    const { captionElement } = SITE_WATCHERS[window.usingSite]
 
-    const divElements = document.querySelectorAll(
-        ".player-timedtext-text-container"
-    )
+    const divElements = document.querySelectorAll(captionElement)
     for (const divElement of divElements) {
         const isInside = isMouseInsideDiv(mouseX, mouseY, divElement)
         if (isInside) {

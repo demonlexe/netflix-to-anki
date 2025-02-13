@@ -1,4 +1,4 @@
-import extractIdFromUrl from "~utils/functions/extractMovieFromNetflixUrl"
+import extractIdFromUrl from "~utils/functions/extractIdFromUrl"
 import logDev from "~utils/functions/logDev"
 
 export default function handleUrlChange() {

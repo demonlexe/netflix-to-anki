@@ -1,6 +1,7 @@
 import $ from "jquery"
 
 import { isYellow, observeSection } from "~utils"
+import { SITE_WATCHERS } from "~utils/constants"
 import changeText from "~utils/functions/changeText"
 import checkForExistingTranslation from "~utils/functions/checkForExistingTranslation"
 import extractTextFromHTML from "~utils/functions/extractTextFromHtml"
@@ -20,12 +21,17 @@ export default async function watchTimedText(timedText: HTMLElement) {
     onCustomKey()
 
     const doOnMutation = async (mutation: MutationRecord) => {
+        const { lookFor } = SITE_WATCHERS[window.usingSite]
+
         if (mutation?.addedNodes?.length > 0) {
             // loop all added nodes and log if they are clicked.
             for (const node of mutation.addedNodes) {
-                const parentSpan = $(node).find("span").first()
-                if (!parentSpan || !parentSpan[0]) continue
-                const currentText = extractTextFromHTML(parentSpan[0].innerHTML)
+                const parentElem =
+                    $(node).find(lookFor).first().length > 0
+                        ? $(node).find(lookFor).first()
+                        : $(node)
+                if (!parentElem || !parentElem[0]) continue
+                const currentText = extractTextFromHTML(parentElem[0].innerHTML)
                 const existingTranslation =
                     await checkForExistingTranslation(currentText)
                 if (window.doNotTouchSentences[currentText]) {
@@ -34,18 +40,18 @@ export default async function watchTimedText(timedText: HTMLElement) {
                 }
                 if (
                     window.localTranslations[currentText] &&
-                    !isYellow(parentSpan)
+                    !isYellow(parentElem)
                 ) {
                     changeText(
-                        parentSpan,
+                        parentElem,
                         window.localTranslations[currentText]
                     )
                 } else if (
                     window.polledSettings.TRANSLATE_WHEN === "always" &&
                     existingTranslation &&
-                    !isYellow(parentSpan)
+                    !isYellow(parentElem)
                 ) {
-                    changeText(parentSpan, existingTranslation)
+                    changeText(parentElem, existingTranslation)
                 }
             }
             $(timedText).css("pointer-events", "auto")

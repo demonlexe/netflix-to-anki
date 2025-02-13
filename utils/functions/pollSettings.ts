@@ -3,7 +3,7 @@ import {
     POLLING_TRANSLATIONS_CACHE_INTERVAL,
     USER_SETTINGS_DEFAULTS
 } from "~utils/constants"
-import extractIdFromUrl from "~utils/functions/extractMovieFromNetflixUrl"
+import extractIdFromUrl from "~utils/functions/extractIdFromUrl"
 import { getData, type UserSettings } from "~utils/localData"
 
 import getUntranslatedSentences from "./getUntranslatedSentences"
