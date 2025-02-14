@@ -5,6 +5,7 @@ import { SITE_WATCHERS } from "~utils/constants"
 import changeText from "~utils/functions/changeText"
 import checkForExistingTranslation from "~utils/functions/checkForExistingTranslation"
 import extractTextFromHTML from "~utils/functions/extractTextFromHtml"
+import getLiveElement from "~utils/functions/getLiveElement"
 import onCustomKey from "~utils/functions/onCustomKey"
 import onVideoPaused from "~utils/functions/onVideoPaused"
 import pollSettings from "~utils/functions/pollSettings"
@@ -25,12 +26,19 @@ export default async function watchTimedText(timedText: HTMLElement) {
 
         if (mutation?.addedNodes?.length > 0) {
             // loop all added nodes and log if they are clicked.
+            const nodesToModify = []
             for (const node of mutation.addedNodes) {
-                const parentElem =
-                    $(node).find(lookFor).first().length > 0
-                        ? $(node).find(lookFor).first()
+                let elems =
+                    $(node).find(lookFor).length > 0
+                        ? $(node).find(lookFor)
                         : $(node)
-                if (!parentElem || !parentElem[0]) continue
+                if (elems.length > 0) {
+                    nodesToModify.push(...elems)
+                }
+            }
+            for (const e of nodesToModify) {
+                if (!e) continue
+                const parentElem = getLiveElement("", e)
                 const currentText = extractTextFromHTML(parentElem[0].innerHTML)
                 const existingTranslation =
                     await checkForExistingTranslation(currentText)

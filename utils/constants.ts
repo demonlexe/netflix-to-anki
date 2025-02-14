@@ -61,7 +61,8 @@ export const SITE_WATCHERS = {
     hbomax: {
         mountPoint: "#app-root",
         captionElement: `div > div:not(".eraxes") > div > div`,
-        captionParentElement: `div[data-testid='caption_renderer_overlay']`
+        captionParentElement: `div[data-testid='caption_renderer_overlay']`,
+        lookFor: "div"
     },
     unknown: {
         mountPoint: "",
