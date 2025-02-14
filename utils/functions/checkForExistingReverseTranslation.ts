@@ -1,4 +1,18 @@
 import { getShowCachedReverseTranslations } from "~utils/functions/cachedTranslations"
+import checkForExistingLocalReverseTranslation from "~utils/functions/checkForExistingLocalReverseTranslation"
+
+function helperFn(reverseTranslations: Record<string, string>, phrase: string) {
+    if (!phrase || phrase.length === 0) return null
+
+    const existingLocalReverseTrans =
+        checkForExistingLocalReverseTranslation(phrase)
+    if (existingLocalReverseTrans) {
+        return existingLocalReverseTrans
+    } else if (reverseTranslations[phrase]) {
+        return reverseTranslations[phrase]
+    }
+    return null
+}
 
 export default async function checkForExistingReverseTranslation(
     phrase: string
@@ -8,13 +22,16 @@ export default async function checkForExistingReverseTranslation(
         window.polledSettings.TARGET_LANGUAGE
     )
     // pre-processing
-    phrase = phrase?.trim()
-    if (!phrase || phrase.length === 0) return null
-
-    if (window.reverseTranslations[phrase]) {
-        return window.reverseTranslations[phrase]
-    } else if (reverseTranslations[phrase]) {
-        return reverseTranslations[phrase]
-    }
-    return null
+    const trimmedPhrase = phrase?.trim()
+    const existingReverseTranslation =
+        helperFn(reverseTranslations, trimmedPhrase) ??
+        helperFn(
+            reverseTranslations,
+            trimmedPhrase.replace(/\<br\>/gi, "<br/>")
+        ) ??
+        helperFn(
+            reverseTranslations,
+            trimmedPhrase.replace(/\<br\/\>/gi, "<br>")
+        )
+    return existingReverseTranslation
 }
