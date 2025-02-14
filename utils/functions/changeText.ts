@@ -48,7 +48,8 @@ const doChangeText = (
     $(span).css("color", color)
     if (window.usingSite === "netflix") {
         $(span).css({
-            "font-size": "19px"
+            "font-size": "19px",
+            "white-space": "normal"
         })
     }
 }
