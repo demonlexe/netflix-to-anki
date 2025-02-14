@@ -3,6 +3,7 @@ import $ from "jquery"
 import { isYellow, observeSection } from "~utils"
 import { SITE_WATCHERS } from "~utils/constants"
 import changeText from "~utils/functions/changeText"
+import checkForExistingLocalTranslation from "~utils/functions/checkForExistingLocalTranslation"
 import checkForExistingTranslation from "~utils/functions/checkForExistingTranslation"
 import extractTextFromHTML from "~utils/functions/extractTextFromHtml"
 import getLiveElement from "~utils/functions/getLiveElement"
@@ -54,18 +55,14 @@ export default async function watchTimedText(timedText: HTMLElement) {
                 const currentText = extractTextFromHTML(parentElem[0].innerHTML)
                 const existingTranslation =
                     await checkForExistingTranslation(currentText)
+                const existingLocalTrans =
+                    checkForExistingLocalTranslation(currentText)
                 if (window.doNotTouchSentences[currentText]) {
                     // do not touch this sentence.
                     continue
                 }
-                if (
-                    window.localTranslations[currentText] &&
-                    !isYellow(parentElem)
-                ) {
-                    changeText(
-                        parentElem,
-                        window.localTranslations[currentText]
-                    )
+                if (existingLocalTrans && !isYellow(parentElem)) {
+                    changeText(parentElem, existingLocalTrans)
                 } else if (
                     window.polledSettings.TRANSLATE_WHEN === "always" &&
                     existingTranslation &&
