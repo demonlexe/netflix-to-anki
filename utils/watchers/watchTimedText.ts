@@ -39,6 +39,7 @@ export default async function watchTimedText(timedText: HTMLElement) {
             for (const e of nodesToModify) {
                 if (!e) continue
                 const parentElem = getLiveElement("", e)
+                if (!parentElem || !parentElem[0]) continue
                 const currentText = extractTextFromHTML(parentElem[0].innerHTML)
                 const existingTranslation =
                     await checkForExistingTranslation(currentText)
