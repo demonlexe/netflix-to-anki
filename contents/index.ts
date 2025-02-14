@@ -79,7 +79,7 @@ window.addEventListener("load", () => {
             handleUrlChange()
             if (mutation.addedNodes.length > 0) {
                 mutation.addedNodes.forEach(async (node) => {
-                    if ($(node).hasClass(captionElement)) {
+                    if ($(node).is(captionElement)) {
                         if (!window.location.href.includes("watch")) {
                             // don't care about home page
                             return

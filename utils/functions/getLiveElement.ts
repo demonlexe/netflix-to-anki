@@ -6,11 +6,14 @@ export default function getLiveElement(
     currentText: string = "",
     textContainer?: JQuery<HTMLElement>
 ) {
-    const { captionElement, lookFor } = SITE_WATCHERS[window.usingSite]
-    const using = (textContainer ?? $(captionElement)).find(lookFor)
+    const { captionElement, lookFor, captionParentElement } =
+        SITE_WATCHERS[window.usingSite]
+    let using = (
+        textContainer ?? $(`${captionParentElement} ${captionElement}`)
+    ).find(lookFor)
 
     // if the textContainer has no children, just return the textContainer
-    if (using.length === 0) return textContainer
+    if (using.length === 0 && textContainer) return textContainer
 
     let firstMatch = null
     using.each((_, el) => {
