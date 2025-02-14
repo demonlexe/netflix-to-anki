@@ -27,18 +27,29 @@ export default async function watchTimedText(timedText: HTMLElement) {
         if (mutation?.addedNodes?.length > 0) {
             // loop all added nodes and log if they are clicked.
             const nodesToModify = []
+
             for (const node of mutation.addedNodes) {
-                let elems =
-                    $(node).find(lookFor).length > 0
-                        ? $(node).find(lookFor)
-                        : $(node)
-                if (elems.length > 0) {
-                    nodesToModify.push(...elems)
+                if (window.usingSite === "hbomax") {
+                    let elems =
+                        $(node).find(lookFor).length > 0
+                            ? $(node).find(lookFor)
+                            : $(node)
+                    if (elems.length > 0) {
+                        for (const elem of elems) {
+                            let liveElem = getLiveElement("", elem)
+                            nodesToModify.push(liveElem)
+                        }
+                    }
+                } else {
+                    const parentElem =
+                        $(node).find(lookFor).first().length > 0
+                            ? $(node).find(lookFor).first()
+                            : $(node)
+                    nodesToModify.push(parentElem)
                 }
             }
-            for (const e of nodesToModify) {
-                if (!e) continue
-                const parentElem = getLiveElement("", e)
+
+            for (const parentElem of nodesToModify) {
                 if (!parentElem || !parentElem[0]) continue
                 const currentText = extractTextFromHTML(parentElem[0].innerHTML)
                 const existingTranslation =
