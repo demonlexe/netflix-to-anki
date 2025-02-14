@@ -57,5 +57,15 @@ export const SITE_WATCHERS = {
         captionElement: ".CaptionBox",
         captionParentElement: ".ClosedCaption__outband",
         lookFor: "p"
+    },
+    hbomax: {
+        mountPoint: "#app-root",
+        captionElement: `div > div:not(".eraxes") > div > div`,
+        captionParentElement: `div[data-testid='caption_renderer_overlay']`
+    },
+    unknown: {
+        mountPoint: "",
+        captionElement: "",
+        captionParentElement: ""
     }
 }

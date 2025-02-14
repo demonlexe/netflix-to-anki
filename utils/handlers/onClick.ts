@@ -16,9 +16,10 @@ import updateTranslations from "~utils/functions/updateTranslations"
 
 // Translate all the text currently on the screen and update the cache.
 export default async function onClick() {
-    const { captionElement } = SITE_WATCHERS[window.usingSite]
+    const { captionElement, captionParentElement } =
+        SITE_WATCHERS[window.usingSite]
     const allTexts: { container: JQuery<HTMLElement>; text: string }[] = []
-    $(captionElement).each((_, el) => {
+    $(`${captionParentElement} ${captionElement}`).each((_, el) => {
         const liveElement = getLiveElement("", $(el))
         const textOfElement = extractTextFromHTML($(liveElement).html())
         allTexts.push({ container: $(el), text: textOfElement })

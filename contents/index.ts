@@ -17,7 +17,11 @@ import type {
 import watchTimedText from "~utils/watchers/watchTimedText"
 
 export const config: PlasmoCSConfig = {
-    matches: ["https://www.netflix.com/*", "https://www.hulu.com/*"]
+    matches: [
+        "https://www.netflix.com/*",
+        "https://www.hulu.com/*",
+        "https://play.max.com/*"
+    ]
 }
 
 initData()
@@ -50,7 +54,13 @@ window.polledSettings = {
     TARGET_LANGUAGE: undefined
 }
 window.currentShowId = extractIdFromUrl(window.location.href)
-window.usingSite = window.location.href.includes("netflix") ? "netflix" : "hulu"
+window.usingSite = window.location.href.includes("netflix")
+    ? "netflix"
+    : window.location.href.includes("hulu")
+      ? "hulu"
+      : window.location.href.includes("max")
+        ? "hbomax"
+        : "unknown"
 
 const script = document.createElement("script")
 script.setAttribute("type", "text/javascript")
@@ -69,7 +79,7 @@ window.addEventListener("load", () => {
             handleUrlChange()
             if (mutation.addedNodes.length > 0) {
                 mutation.addedNodes.forEach(async (node) => {
-                    if ($(node).hasClass(captionElement)) {
+                    if ($(node).is(captionElement)) {
                         if (!window.location.href.includes("watch")) {
                             // don't care about home page
                             return
