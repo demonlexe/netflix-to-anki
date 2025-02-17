@@ -6,19 +6,33 @@ import type {
 
 export const BATCH_SIZE = 80
 
-export const BOOLEAN_USER_SETTINGS_DEFAULTS: BooleanUserSettings = {}
+export const BOOLEAN_USER_SETTINGS_DEFAULTS: BooleanUserSettings = {
+    HULU_ENABLED: true,
+    NETFLIX_ENABLED: true,
+    HBOMAX_ENABLED: true,
+    TUBI_ENABLED: true
+}
 
 export const USER_SETTINGS_DEFAULTS: UserSettings = {
     TARGET_LANGUAGE: "",
     API_KEY: "",
     TRANSLATE_WHEN: "on_pause",
-    CUSTOM_TRANSLATE_KEY: ""
+    CUSTOM_TRANSLATE_KEY: "",
+    HULU_ENABLED: true,
+    NETFLIX_ENABLED: true,
+    HBOMAX_ENABLED: true,
+    TUBI_ENABLED: true
 }
 
 export const READABLE_BOOLEAN_SETTINGS: Record<
     BooleanKeys<UserSettings>,
     { title: string }
-> = {}
+> = {
+    HULU_ENABLED: { title: "Hulu Enabled" },
+    NETFLIX_ENABLED: { title: "Netflix Enabled" },
+    HBOMAX_ENABLED: { title: "HBO Max Enabled" },
+    TUBI_ENABLED: { title: "Tubi Enabled" }
+}
 
 export const READABLE_DROPDOWN_SETTINGS: Record<
     keyof Pick<UserSettings, "TRANSLATE_WHEN">,
