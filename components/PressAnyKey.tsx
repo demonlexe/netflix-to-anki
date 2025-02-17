@@ -1,5 +1,7 @@
 import { useState } from "react"
 
+import { Button } from "~node_modules/react-bootstrap/esm"
+
 type PressAnyKeyProps = {
     keyRecorded: string
     setKeyRecorded: (key: string) => void
@@ -23,13 +25,13 @@ export default function PressAnyKey(props: PressAnyKeyProps) {
     return (
         <div onKeyDown={handleKeyDown} tabIndex={0} style={{ outline: "none" }}>
             <div>
-                <button onClick={startCapturing}>
+                <Button onClick={startCapturing} variant="tertiary">
                     {capturing
-                        ? "Press any key..."
+                        ? "Click me, then press any key..."
                         : keyRecorded
                           ? `Captured Key: ${keyRecorded}`
                           : "Capture Key"}
-                </button>
+                </Button>
             </div>
         </div>
     )
