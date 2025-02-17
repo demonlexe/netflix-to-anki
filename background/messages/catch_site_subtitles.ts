@@ -4,7 +4,6 @@ import type { PlasmoMessaging } from "@plasmohq/messaging"
 
 import { type CatchSiteSubtitlesRequest } from "~background/types/CatchSiteSubtitlesRequest"
 import type { CatchSiteSubtitlesResponse } from "~background/types/CatchSiteSubtitlesResponse"
-import replaceXmlBreakTags from "~background/utils/functions/replaceXmlBreakTags"
 import logDev from "~utils/functions/logDev"
 
 type XMLText = {
