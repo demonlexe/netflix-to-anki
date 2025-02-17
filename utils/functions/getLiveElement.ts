@@ -9,12 +9,15 @@ export default function getLiveElement(
     const { captionElement, lookFor, captionParentElement } =
         SITE_WATCHERS[window.usingSite]
     const usingParent =
-        $(textContainer) ?? $(`${captionParentElement} ${captionElement}`)
+        $(textContainer).length > 0
+            ? $(textContainer)
+            : $(`${captionParentElement} ${captionElement}`).length > 0
+              ? $(`${captionParentElement} ${captionElement}`)
+              : $(captionElement)
     let using =
         usingParent.find(lookFor).length > 0
             ? $(usingParent).find(lookFor)
             : $(usingParent)
-
     // if the textContainer has no children, just return the textContainer
     if (using.length === 0 && textContainer) return textContainer
 
