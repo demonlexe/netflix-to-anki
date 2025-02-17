@@ -10,6 +10,13 @@ function Onboarding() {
             <div className={styles.content}>
                 <Header />
                 <Settings />
+                <hr
+                    style={{
+                        width: "100%",
+                        borderColor: "black"
+                    }}
+                />
+                <h3>Auto-saved Settings</h3>
                 <BooleanSettings />
                 <TranslateWhenSettings />
             </div>

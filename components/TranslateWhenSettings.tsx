@@ -67,7 +67,6 @@ export default function TranslateWhenSettings<T>() {
                     </div>
                 )}
             </div>
-            <div>(Note: this setting automatically saves)</div>
         </div>
     )
 }
