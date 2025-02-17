@@ -21,14 +21,16 @@ export default function DisplayTranslationStatus() {
     }, [])
     return (
         <div className={styles.container}>
-            <h4>Cached Translations</h4>
+            <p style={{ flex: 2, marginBottom: 0 }}>Translation Status:</p>
             {allSentencesCt ? (
                 <p
                     style={{
-                        color: "green"
+                        color: "green",
+                        flex: 1,
+                        marginBottom: "0"
                     }}>{`${translatedCt}/${allSentencesCt}`}</p>
             ) : (
-                <p>Waiting to translate...</p>
+                <p style={{ flex: 1, marginBottom: 0 }}>N/A</p>
             )}
         </div>
     )

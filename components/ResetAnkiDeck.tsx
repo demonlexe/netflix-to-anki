@@ -1,5 +1,6 @@
 import { useState } from "react"
 
+import { Button } from "~node_modules/react-bootstrap/esm"
 import styles from "~styles/shared.module.css"
 import { setData } from "~utils/localData"
 
@@ -12,15 +13,17 @@ enum ConfirmStatus {
 type ResetAnkiDeckProps = {
     onReset: () => void
     disabled: boolean
+    style: React.CSSProperties
 }
 
 export default function ResetAnkiDeck(props: ResetAnkiDeckProps) {
     const { onReset, disabled } = props
     const [confirm, setConfirm] = useState(ConfirmStatus.NOT_CLICKED)
     return (
-        <div className={styles.flexCol}>
-            <button
+        <div className={styles.flexCol} style={props.style}>
+            <Button
                 disabled={disabled}
+                variant="outline-danger"
                 onClick={() => {
                     if (
                         confirm === ConfirmStatus.NOT_CLICKED ||
@@ -45,7 +48,7 @@ export default function ResetAnkiDeck(props: ResetAnkiDeckProps) {
                     }
                 }}>
                 RESET Anki Deck.
-            </button>
+            </Button>
             {confirm === ConfirmStatus.NOT_CONFIRMED && (
                 <p style={{ color: "red" }}>
                     Are you sure you want to RESET? Click again if YES
