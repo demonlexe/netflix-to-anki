@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
+import { Col, Container, Form, Row } from "react-bootstrap"
 
 import PressAnyKey from "~components/PressAnyKey"
-import styles from "~styles/shared.module.css"
 import { READABLE_DROPDOWN_SETTINGS } from "~utils/constants"
 import logDev from "~utils/functions/logDev"
 import { getData, setData, type UserSettings } from "~utils/localData"
@@ -30,44 +30,48 @@ export default function TranslateWhenSettings<T>() {
     }, [customTranslateKey])
 
     return (
-        <div className={styles.flexCol}>
-            <div className={styles.flexRow}>
-                <div className={styles.flexRow}>
-                    <label htmlFor="translateWhen">
-                        {READABLE_DROPDOWN_SETTINGS.TRANSLATE_WHEN.title}
-                    </label>
-                    <select
-                        id="translateWhen"
-                        value={currentSelected}
-                        onChange={(e) =>
-                            setCurrentSelected(
-                                e.target.value as UserSettings["TRANSLATE_WHEN"]
-                            )
-                        }>
-                        {Object.entries(
-                            READABLE_DROPDOWN_SETTINGS.TRANSLATE_WHEN.options
-                        ).map(
-                            ([key, value]: [
-                                UserSettings["TRANSLATE_WHEN"],
-                                string
-                            ]) => (
-                                <option key={key} value={key}>
-                                    {value}
-                                </option>
-                            )
-                        )}
-                    </select>
-                </div>
-                {currentSelected === "custom_key" && (
-                    <div>
-                        <PressAnyKey
-                            keyRecorded={customTranslateKey}
-                            setKeyRecorded={setCustomTranslateKey}
-                        />
-                    </div>
-                )}
-            </div>
-            <div>(Note: this setting automatically saves)</div>
-        </div>
+        <Container>
+            <Form.Group controlId="translateWhen" className="mb-3">
+                <Row className="align-items-center">
+                    <Col xs="auto">
+                        <Form.Label className="mb-0">
+                            {READABLE_DROPDOWN_SETTINGS.TRANSLATE_WHEN.title}
+                        </Form.Label>
+                    </Col>
+                    <Col>
+                        <Form.Select
+                            value={currentSelected}
+                            onChange={(e) =>
+                                setCurrentSelected(
+                                    e.target
+                                        .value as UserSettings["TRANSLATE_WHEN"]
+                                )
+                            }>
+                            {Object.entries(
+                                READABLE_DROPDOWN_SETTINGS.TRANSLATE_WHEN
+                                    .options
+                            ).map(
+                                ([key, value]: [
+                                    UserSettings["TRANSLATE_WHEN"],
+                                    string
+                                ]) => (
+                                    <option key={key} value={key}>
+                                        {value}
+                                    </option>
+                                )
+                            )}
+                        </Form.Select>
+                    </Col>
+                </Row>
+            </Form.Group>
+            {currentSelected === "custom_key" && (
+                <Form.Group controlId="customTranslateKey" className="mb-3">
+                    <PressAnyKey
+                        keyRecorded={customTranslateKey}
+                        setKeyRecorded={setCustomTranslateKey}
+                    />
+                </Form.Group>
+            )}
+        </Container>
     )
 }

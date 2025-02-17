@@ -1,0 +1,39 @@
+// Import Bootstrap's default variables first
+@import '~bootstrap/scss/functions';
+@import '~bootstrap/scss/variables';
+
+// Define your custom colors
+$primary: #81bfb9;
+$secondary: #898989;
+$tertiary: #104F55;
+$grey-500: #525252;
+$grey-400: #737373;
+$grey-300: #D4D4D4;
+
+// Define the new theme colors
+$custom-theme-colors: (
+  "grey-300": $grey-300,
+  "grey-400": $grey-400,
+  "grey-500": $grey-500,
+  "primary": $primary,
+  "secondary": $secondary
+);
+
+// Merge the default theme colors with your custom ones
+$theme-colors: map-merge($theme-colors, $custom-theme-colors);
+
+.btn-tertiary {
+  background-color: $tertiary !important;
+  color: white !important;
+  border-color: $tertiary !important;
+}
+.btn-secondary:hover {
+  background-color: darken($tertiary, 10%) !important;
+}
+
+img {
+  object-fit: contain
+}
+
+// Now import Bootstrap to apply the changes
+@import '~bootstrap/scss/bootstrap';

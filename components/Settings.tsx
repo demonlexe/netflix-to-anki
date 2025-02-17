@@ -77,7 +77,7 @@ const Settings = () => {
             </form>
             <div className={`${styles.w100} ${styles.flexCol} ${styles.gap4}`}>
                 <SubmitButton onSubmit={onSubmit} />
-                <h4>
+                <p>
                     Don't have an API Key? Generate one at{" "}
                     <a
                         href="https://ai.google.dev/gemini-api/docs/api-key"
@@ -85,7 +85,7 @@ const Settings = () => {
                         rel="noreferrer">
                         Gemini API
                     </a>
-                </h4>
+                </p>
             </div>
         </div>
     )

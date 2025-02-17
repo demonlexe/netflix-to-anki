@@ -9,10 +9,11 @@ import extractIdFromUrl from "~utils/functions/extractIdFromUrl"
 import initData from "~utils/functions/initData"
 import handleUrlChange from "~utils/handlers/handleUrlChange"
 import { waitForElement } from "~utils/index"
-import type {
-    TranslationsCache,
-    UntranslatedCache,
-    UserSettings
+import {
+    getData,
+    type TranslationsCache,
+    type UntranslatedCache,
+    type UserSettings
 } from "~utils/localData"
 import watchTimedText from "~utils/watchers/watchTimedText"
 
@@ -38,7 +39,7 @@ declare global {
         translatedSentencesCache: TranslationsCache
         watchingTimedText: HTMLElement
         currentShowId: string
-        usingSite: string
+        usingSite: "netflix" | "hulu" | "hbomax" | "tubi" | "unknown"
     }
 }
 
@@ -71,9 +72,26 @@ document.documentElement.appendChild(script)
 catchSiteSubtitles()
 pollCachedTranslations()
 
-window.addEventListener("load", () => {
+window.addEventListener("load", async () => {
     const { mountPoint, captionElement, captionParentElement } =
         SITE_WATCHERS[window.usingSite]
+    const [HULU_ENABLED, NETFLIX_ENABLED, HBOMAX_ENABLED, TUBI_ENABLED] =
+        await Promise.all([
+            getData("HULU_ENABLED"),
+            getData("NETFLIX_ENABLED"),
+            getData("HBOMAX_ENABLED"),
+            getData("TUBI_ENABLED")
+        ])
+    if (window.usingSite === "hulu" && HULU_ENABLED == false) {
+        return
+    } else if (window.usingSite === "netflix" && NETFLIX_ENABLED == false) {
+        return
+    } else if (window.usingSite === "hbomax" && HBOMAX_ENABLED == false) {
+        return
+    } else if (window.usingSite === "tubi" && TUBI_ENABLED == false) {
+        return
+    }
+
     waitForElement(mountPoint).then(async (mountedElem) => {
         const doOnMountMutate = (mutation: MutationRecord) => {
             handleUrlChange()

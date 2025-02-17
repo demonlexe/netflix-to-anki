@@ -20,6 +20,10 @@ export type UserSettings = {
     API_KEY: string
     TRANSLATE_WHEN: "always" | "on_pause" | "custom_key"
     CUSTOM_TRANSLATE_KEY: string // only used when TRANSLATE_WHEN is custom_key
+    HULU_ENABLED: boolean
+    NETFLIX_ENABLED: boolean
+    HBOMAX_ENABLED: boolean
+    TUBI_ENABLED: boolean
 }
 
 // {"243534233": {"french": {"lastUpdated": 1234234, "sentences": {"sentence": "translation"}}}}
