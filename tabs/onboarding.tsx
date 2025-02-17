@@ -4,6 +4,8 @@ import Settings from "~components/Settings"
 import TranslateWhenSettings from "~components/TranslateWhenSettings"
 import styles from "~styles/onboarding.module.css"
 
+import "~styles/globals.scss"
+
 function Onboarding() {
     return (
         <div className={styles.container}>

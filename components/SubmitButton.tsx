@@ -1,5 +1,6 @@
 import { useState } from "react"
 
+import { Button } from "~node_modules/react-bootstrap/esm"
 import styles from "~styles/shared.module.css"
 
 type SubmitButtonProps = {
@@ -22,7 +23,7 @@ export default function SubmitButton(props: SubmitButtonProps) {
     const [error, setError] = useState<string | null>(null)
 
     return (
-        <button
+        <Button
             onClick={async () => {
                 setStatus(SubmitButtonStatus.LOADING)
                 const err = await onSubmit()
@@ -58,8 +59,8 @@ export default function SubmitButton(props: SubmitButtonProps) {
                     {status}: {error}
                 </span>
             ) : (
-                <span style={{ color: "green" }}>{status}</span>
+                <span>{status}</span>
             )}
-        </button>
+        </Button>
     )
 }
