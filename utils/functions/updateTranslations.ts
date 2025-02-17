@@ -12,11 +12,11 @@ export default function updateTranslations(
     if (!currentText || currentText.length === 0) return
     if (!translatedText || translatedText.length === 0) return
 
-    // update the displayed text
-    const liveElement = getLiveElement(currentText)
-    changeText(liveElement, translatedText)
-
     // update the cache
     window.localTranslations[currentText] = translatedText
     window.reverseTranslations[translatedText] = currentText
+
+    // update the displayed text
+    const liveElement = getLiveElement(currentText)
+    changeText(liveElement, translatedText)
 }

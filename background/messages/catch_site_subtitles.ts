@@ -4,31 +4,35 @@ import type { PlasmoMessaging } from "@plasmohq/messaging"
 
 import { type CatchSiteSubtitlesRequest } from "~background/types/CatchSiteSubtitlesRequest"
 import type { CatchSiteSubtitlesResponse } from "~background/types/CatchSiteSubtitlesResponse"
-import replaceXmlBreakTags from "~background/utils/functions/replaceXmlBreakTags"
-import { BREAK_TAG_RENAME } from "~utils/constants"
 import logDev from "~utils/functions/logDev"
 
 type XMLText = {
     $: any
     _?: string
     span?: XMLText[]
+    br?: ""
 }
 
-const breakTagRegex = new RegExp(`${BREAK_TAG_RENAME}`, "g")
-
-function getXMLTextContent(text: XMLText): string[] {
+function getXMLTextContent(text: XMLText): string {
     const theseStrings: string[] = [text._?.trim() ?? ""]
 
     if (text.span && text.span[0]) {
-        getXMLTextContent(text.span[0]).forEach((spanText: string) => {
-            theseStrings.push(spanText)
-        })
+        // // theseStrings.push(getXMLTextContent(text.span[0]))
+        // theseStrings.unshift(getXMLTextContent(text.span[0]))
+        // // loop all children of text.span
+
+        for (let i = 0; i < text.span.length; i++) {
+            theseStrings.push(getXMLTextContent(text.span[i]))
+            if (text.br && i == 0) {
+                theseStrings.push("<br/>")
+            }
+        }
     }
 
-    const toReturn = []
+    let toReturn = ""
     for (const string of theseStrings) {
         if (string) {
-            toReturn.push(string.replace(breakTagRegex, "<br/>"))
+            toReturn += string
         }
     }
     return toReturn
@@ -41,13 +45,13 @@ const handler: PlasmoMessaging.MessageHandler<
     const { message } = req.body
     if (message.response?.length > 0) {
         logDev("Caught site subtitles: ", message)
-        const responseReplaced = replaceXmlBreakTags(message.response)
         parseString(
-            responseReplaced,
+            message.response,
             {
                 trim: true
             },
             async function (err, result) {
+                logDev("PARSE RESULT: ", result)
                 if (err) {
                     console.error("Error parsing XML: ", err)
                     return res.send({ error: "Error parsing XML" })
@@ -62,9 +66,9 @@ const handler: PlasmoMessaging.MessageHandler<
                 allText.forEach((text: XMLText) => {
                     const textContent = getXMLTextContent(text)
                     if (grouping[text.$.begin]) {
-                        grouping[text.$.begin].push(...textContent)
+                        grouping[text.$.begin].push(textContent)
                     } else {
-                        grouping[text.$.begin] = [...textContent]
+                        grouping[text.$.begin] = [textContent]
                     }
                 })
                 const allSentencesSet = new Set<string>()

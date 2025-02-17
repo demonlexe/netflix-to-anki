@@ -11,7 +11,9 @@ export default function extractIdFromUrl(url: string) {
             ? url.match(/\/watch\/([a-zA-Z0-9-]+)\?/)
             : url.match(/\/video\/watch\/([a-zA-Z0-9-]+)\//)
     if (match && match[1]) {
-        logDev("I have set the current show id to", match[1])
+        if (match[1] !== window.currentShowId) {
+            logDev("I have set the current show id to", match[1])
+        }
         return match[1]
     } else {
         return null // Return null if no match is found
