@@ -4227,6 +4227,11 @@ sax@^1.2.4, sax@>=0.6.0:
   resolved "https://registry.npmjs.org/sax/-/sax-1.4.1.tgz"
   integrity sha512-+aWOz7yVScEGoKNd4PA10LZ8sk0A/z5+nXQG5giUO5rprX9jgYsTdov9qCchZiPIZezbZH+jRut8nPodFAX4Jg==
 
+sax@0.4.x:
+  version "0.4.3"
+  resolved "https://registry.npmjs.org/sax/-/sax-0.4.3.tgz"
+  integrity sha512-WvnHpLKMuEsJFV3LXuvxKY4sLdKev2tIeUxn+ljlQAhpx4ZEmJOW+nEa0uERX7XvfxoimvXvEqeo94p2jXoL6g==
+
 scheduler@^0.23.0:
   version "0.23.2"
   resolved "https://registry.npmjs.org/scheduler/-/scheduler-0.23.2.tgz"
@@ -4850,6 +4855,19 @@ wrappy@1:
   version "1.0.2"
   resolved "https://registry.npmjs.org/wrappy/-/wrappy-1.0.2.tgz"
   integrity sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==
+
+xamel@^0.3.1:
+  version "0.3.1"
+  resolved "https://registry.npmjs.org/xamel/-/xamel-0.3.1.tgz"
+  integrity sha512-gqRkNHHHH8FaQrx6M55C84GkU5jOThrN6SkWgIaqS6yNzsDpax258jdJQbNFTayXBjJdHvXxCHmjBgmNAjU2bg==
+  dependencies:
+    sax "0.4.x"
+    xml-writer "1.4.x"
+
+xml-writer@1.4.x:
+  version "1.4.2"
+  resolved "https://registry.npmjs.org/xml-writer/-/xml-writer-1.4.2.tgz"
+  integrity sha512-7icuC+B1UQ5i4RSp5QXQciwsdM5C8BlZxWG0onYtkUcjmUTGk/8iveNRRaa8htUQ9FWchxRHxw5hijL0yU20xQ==
 
 xml2js@^0.6.2:
   version "0.6.2"
