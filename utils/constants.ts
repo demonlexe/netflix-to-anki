@@ -76,9 +76,16 @@ export const SITE_WATCHERS = {
         captionParentElement: `div[data-testid='caption_renderer_overlay']`,
         lookFor: "div"
     },
+    tubi: {
+        mountPoint: "#app",
+        captionElement: `div[data-id="captionsComponent"]`,
+        captionParentElement: `div[data-id="hls"]`,
+        lookFor: "span"
+    },
     unknown: {
         mountPoint: "",
         captionElement: "",
-        captionParentElement: ""
+        captionParentElement: "",
+        lookFor: ""
     }
 }
