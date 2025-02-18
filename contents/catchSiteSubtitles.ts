@@ -11,13 +11,6 @@ import { getData } from "~utils/localData"
 // This function catches the subtitles from the site and sends them to the background script
 export default function catchSiteSubtitles() {
     window.addEventListener("message", async (event) => {
-        if (event.source !== window) return
-
-        if (!window?.location?.href?.includes("/watch")) {
-            // don't care about subtitles on main site page
-            return
-        }
-
         const isHuluSubtitles =
             event.data.type === "NETWORK_REQUEST" &&
             event.data.url.match(/.ttml$/) &&
@@ -35,6 +28,13 @@ export default function catchSiteSubtitles() {
             event.data.type === "NETWORK_REQUEST" &&
             event.data.url.match(/.srt$/) &&
             window.usingSite === "tubi"
+
+        if (event.source !== window) return
+
+        if (!isTubiSubtitles && !window?.location?.href?.includes("/watch")) {
+            // don't care about subtitles on main site page
+            return
+        }
 
         if (
             !isNetflixSubtitles &&
@@ -60,7 +60,9 @@ export default function catchSiteSubtitles() {
         const response: CatchSiteSubtitlesResponse = await sendToBackground({
             name: isMaxSubtitles
                 ? "catch_vtt_site_subtitles"
-                : "catch_site_subtitles",
+                : isTubiSubtitles
+                  ? "catch_srt_site_subtitles"
+                  : "catch_site_subtitles",
             body: {
                 message: backgroundMsgToSend,
                 usingSite: window.usingSite

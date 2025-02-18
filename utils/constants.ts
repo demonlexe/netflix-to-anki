@@ -80,7 +80,7 @@ export const SITE_WATCHERS = {
         mountPoint: "#app",
         captionElement: `div[data-id="captionsComponent"]`,
         captionParentElement: `div[data-id="hls"]`,
-        lookFor: "span"
+        lookFor: ""
     },
     unknown: {
         mountPoint: "",
