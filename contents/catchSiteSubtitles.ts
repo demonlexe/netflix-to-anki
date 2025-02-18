@@ -53,7 +53,8 @@ export default function catchSiteSubtitles() {
                 ? "catch_vtt_site_subtitles"
                 : "catch_site_subtitles",
             body: {
-                message: backgroundMsgToSend
+                message: backgroundMsgToSend,
+                usingSite: window.usingSite
             } as CatchSiteSubtitlesRequest
         })
         if (response.error) {

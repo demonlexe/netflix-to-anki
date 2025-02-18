@@ -3,4 +3,5 @@ export type CatchSiteSubtitlesRequest = {
         url: string
         response: any
     }
+    usingSite: string
 }
