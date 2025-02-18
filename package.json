@@ -1,7 +1,7 @@
 {
     "name": "netflix-to-anki",
     "displayName": "Netflix To Anki",
-    "version": "0.0.9",
+    "version": "0.1.0",
     "description": "Chrome extension allowing users to translate Netflix subtitles by clicking, and these clicks can be exported to Anki decks.",
     "author": "alexiskaufman@gmail.com",
     "scripts": {
