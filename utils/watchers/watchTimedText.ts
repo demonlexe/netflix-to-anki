@@ -23,11 +23,16 @@ export default async function watchTimedText(timedText: HTMLElement) {
     onCustomKey()
 
     const doOnMutation = async (mutation: MutationRecord) => {
-        const { lookFor } = SITE_WATCHERS[window.usingSite]
+        const { lookFor, captionElement } = SITE_WATCHERS[window.usingSite]
 
         if (mutation?.addedNodes?.length > 0) {
             // loop all added nodes and log if they are clicked.
             const nodesToModify = []
+
+            if (window.usingSite === "tubi") {
+                // just push the parent of the added node
+                nodesToModify.push($(captionElement))
+            }
 
             for (const node of mutation.addedNodes) {
                 if (window.usingSite === "hbomax") {

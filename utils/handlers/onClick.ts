@@ -19,8 +19,10 @@ export default async function onClick() {
     const { captionElement, captionParentElement } =
         SITE_WATCHERS[window.usingSite]
     const allTexts: { container: JQuery<HTMLElement>; text: string }[] = []
+    console.log("RES: ", $(`${captionParentElement} ${captionElement}`))
     $(`${captionParentElement} ${captionElement}`).each((_, el) => {
         const liveElement = getLiveElement("", $(el))
+        console.log("LIVE: ", liveElement)
         const textOfElement = extractTextFromHTML($(liveElement).html())
         allTexts.push({ container: $(el), text: textOfElement })
     })
