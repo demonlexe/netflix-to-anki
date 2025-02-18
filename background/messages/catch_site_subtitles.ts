@@ -39,7 +39,7 @@ const handler: PlasmoMessaging.MessageHandler<
     CatchSiteSubtitlesRequest,
     CatchSiteSubtitlesResponse
 > = async (req, res) => {
-    const { message } = req.body
+    const { message, usingSite } = req.body
     if (message.response?.length > 0) {
         logDev("Caught site subtitles: ", message)
         parse(message.response, (err, xml) => {
@@ -48,11 +48,10 @@ const handler: PlasmoMessaging.MessageHandler<
                     console.error("Error parsing XML: ", err)
                     return res.send({ error: "Error parsing XML" })
                 }
-                const arrayOfRows: { children: Tag[] } = xml
-                    .$("tt/body")
-                    .eq(0)
-                    .$("div")
-                    .eq(0)
+                const arrayOfRows: { children: Tag[] } =
+                    usingSite === "netflix"
+                        ? xml.$("tt/body").eq(0).$("div").eq(0)
+                        : xml.$("tt/body").eq(0)
                 const allText = arrayOfRows.children
                 logDev("Children: ", allText)
                 const allSentencesSet = new Set<string>()
