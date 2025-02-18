@@ -4367,6 +4367,11 @@ srcset@5.0.1:
   resolved "https://registry.npmjs.org/srcset/-/srcset-5.0.1.tgz"
   integrity sha512-/P1UYbGfJVlxZag7aABNRrulEXAwCSDo7fklafOQrantuPTDmYgijJMks2zusPCVzgW9+4P69mq7w6pYuZpgxw==
 
+srt-parser-2@^1.2.3:
+  version "1.2.3"
+  resolved "https://registry.npmjs.org/srt-parser-2/-/srt-parser-2-1.2.3.tgz"
+  integrity sha512-dANP1AyJTI503H0/kXwRza+7QxDB3BqeFvEKTF4MI9lQcBe8JbRUQTKVIGzGABJCwBovEYavZ2Qsdm/s8XKz8A==
+
 stable@^0.1.8:
   version "0.1.8"
   resolved "https://registry.npmjs.org/stable/-/stable-0.1.8.tgz"

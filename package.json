@@ -23,6 +23,7 @@
         "react-bootstrap": "^2.10.9",
         "react-dom": "18.2.0",
         "sass": "^1.85.0",
+        "srt-parser-2": "^1.2.3",
         "xamel": "^0.3.1",
         "xml2js": "^0.6.2"
     },
