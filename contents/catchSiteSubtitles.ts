@@ -31,8 +31,17 @@ export default function catchSiteSubtitles() {
             event.data.type === "NETWORK_REQUEST" &&
             event.data.url.match(/.vtt$/) &&
             window.usingSite === "hbomax"
+        const isTubiSubtitles =
+            event.data.type === "NETWORK_REQUEST" &&
+            event.data.url.match(/.srt$/) &&
+            window.usingSite === "tubi"
 
-        if (!isNetflixSubtitles && !isHuluSubtitles && !isMaxSubtitles) {
+        if (
+            !isNetflixSubtitles &&
+            !isHuluSubtitles &&
+            !isMaxSubtitles &&
+            !isTubiSubtitles
+        ) {
             return
         }
 

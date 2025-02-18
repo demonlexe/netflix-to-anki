@@ -21,7 +21,8 @@ export const config: PlasmoCSConfig = {
     matches: [
         "https://www.netflix.com/*",
         "https://www.hulu.com/*",
-        "https://play.max.com/*"
+        "https://play.max.com/*",
+        "https://tubitv.com/*"
     ]
 }
 
@@ -61,7 +62,9 @@ window.usingSite = window.location.href.includes("netflix")
       ? "hulu"
       : window.location.href.includes("max")
         ? "hbomax"
-        : "unknown"
+        : window.location.href.includes("tubi")
+          ? "tubi"
+          : "unknown"
 
 const script = document.createElement("script")
 script.setAttribute("type", "text/javascript")
