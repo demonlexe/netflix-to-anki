@@ -5,6 +5,7 @@ import { SITE_WATCHERS } from "~utils/constants"
 import changeText from "~utils/functions/changeText"
 import checkForExistingLocalTranslation from "~utils/functions/checkForExistingLocalTranslation"
 import checkForExistingTranslation from "~utils/functions/checkForExistingTranslation"
+import checkIfSentenceIgnored from "~utils/functions/checkIfSentenceIgnored"
 import extractTextFromHTML from "~utils/functions/extractTextFromHtml"
 import getLiveElement from "~utils/functions/getLiveElement"
 import onCustomKey from "~utils/functions/onCustomKey"
@@ -62,7 +63,7 @@ export default async function watchTimedText(timedText: HTMLElement) {
                     await checkForExistingTranslation(currentText)
                 const existingLocalTrans =
                     checkForExistingLocalTranslation(currentText)
-                if (window.doNotTouchSentences[currentText]) {
+                if (checkIfSentenceIgnored(currentText)) {
                     // do not touch this sentence.
                     continue
                 }
