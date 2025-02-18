@@ -37,7 +37,9 @@ const handler: PlasmoMessaging.MessageHandler<
     subtitles.forEach((subtitle) => {
         const text = subtitle.text?.trim()
         if (text) {
-            allSentencesSet.add(text)
+            // Replace new lines with <br/> and combine the full sentence
+            const combinedText = text.replace(/\n/g, "<br/>")
+            allSentencesSet.add(combinedText)
         }
     })
 
