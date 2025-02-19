@@ -6,8 +6,8 @@ export default function extractIdFromUrl(url: string) {
         netflix: /\/watch\/([a-zA-Z0-9-]+)\?/,
         hulu: /\/watch\/([a-zA-Z0-9-]+)/,
         max: /\/video\/watch\/([a-zA-Z0-9-]+)\//,
-        tubiTvShows: /\/tv-shows\/([a-zA-Z0-9-]+)\//,
-        tubiMovies: /\/movies\/([a-zA-Z0-9-]+)\//
+        tubiTvShows: /\/tv-shows\/([^?]+)/,
+        tubiMovies: /\/movies\/([^?]+)/
     }
 
     // Determine which pattern to use based on the site
