@@ -13,3 +13,14 @@ chrome.runtime.onInstalled.addListener((reason) => {
         })
     }
 })
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.type === "GET_WINDOW_VARIABLES") {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            if (tabs[0]?.id) {
+                chrome.tabs.sendMessage(tabs[0].id, request, sendResponse)
+            }
+        })
+        return true // Keep the message channel open for async response
+    }
+})

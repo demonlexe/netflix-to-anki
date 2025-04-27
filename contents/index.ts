@@ -135,3 +135,12 @@ history.replaceState = function (...args) {
     originalReplaceState.apply(this, args)
     handleUrlChange()
 }
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.type === "GET_WINDOW_VARIABLES") {
+        sendResponse({
+            currentShowId: window.currentShowId,
+            polledSettings: window.polledSettings
+        })
+    }
+})

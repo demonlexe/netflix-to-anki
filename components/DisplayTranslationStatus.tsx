@@ -4,7 +4,14 @@ import styles from "~styles/display-translation-status.module.css"
 import { POLLING_STATUS_INTERVAL } from "~utils/constants"
 import { getData } from "~utils/localData"
 
-export default function DisplayTranslationStatus() {
+type DisplayTranslationStatusProps = {
+    showId: string
+    targetLanguage: string
+}
+export default function DisplayTranslationStatus(
+    props: DisplayTranslationStatusProps
+) {
+    const { showId, targetLanguage } = props
     const [allSentencesCt, setAllSentencesCt] = useState<number>()
     const [translatedCt, setTranslatedCt] = useState<number>()
 
@@ -23,7 +30,7 @@ export default function DisplayTranslationStatus() {
 
     const openSentenceBrowser = () => {
         chrome.tabs.create({
-            url: `chrome-extension://${chrome.runtime.id}/tabs/sentence-browser.html`
+            url: `chrome-extension://${chrome.runtime.id}/tabs/sentence-browser.html?showId=${showId}&targetLanguage=${targetLanguage}`
         })
     }
 
