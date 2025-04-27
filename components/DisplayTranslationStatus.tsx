@@ -16,19 +16,32 @@ export default function DisplayTranslationStatus() {
             getTranslationStatus()
         }, POLLING_STATUS_INTERVAL)
     }
+
     useEffect(() => {
         getTranslationStatus()
     }, [])
+
+    const openSentenceBrowser = () => {
+        chrome.tabs.create({
+            url: `chrome-extension://${chrome.runtime.id}/tabs/sentence-browser.html`
+        })
+    }
+
     return (
         <div className={styles.container}>
             <p style={{ flex: 2, marginBottom: 0 }}>Translation Status:</p>
             {allSentencesCt ? (
-                <p
+                <a
+                    onClick={(e) => {
+                        e.preventDefault()
+                        openSentenceBrowser()
+                    }}
+                    href="#"
                     style={{
                         color: "green",
                         flex: 1,
                         marginBottom: "0"
-                    }}>{`${translatedCt}/${allSentencesCt}`}</p>
+                    }}>{`${translatedCt}/${allSentencesCt}`}</a>
             ) : (
                 <p style={{ flex: 1, marginBottom: 0 }}>N/A</p>
             )}
