@@ -15,7 +15,7 @@ const handler: PlasmoMessaging.MessageHandler<
     try {
         const genAI = new GoogleGenerativeAI(req.body.key)
         const model = genAI.getGenerativeModel({
-            model: "gemini-1.5-flash-latest"
+            model: "gemini-2.5-flash"
         })
         await model.generateContent(["Translate this to english\n", "Hola"])
     } catch (e) {
