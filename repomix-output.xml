@@ -1,0 +1,5326 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+.github/
+  workflows/
+    submit.yml
+background/
+  messages/
+    catch_site_subtitles.ts
+    catch_srt_site_subtitles.ts
+    catch_vtt_site_subtitles.ts
+    gemini_get_locale.ts
+    gemini_optimize_anki_deck.ts
+    gemini_translate.ts
+    test_gemini_key.ts
+  types/
+    CatchSiteSubtitlesRequest.ts
+    CatchSiteSubtitlesResponse.ts
+    CatchSRTSiteSubtitlesRequest copy.ts
+    CatchVTTSiteSubtitlesRequest.ts
+    GeminiGetLocaleRequest.ts
+    GeminiGetLocaleResponse.ts
+    GeminiModelResponse.ts
+    GeminiOptimizeAnkiDeckRequest.ts
+    GeminiOptimizeAnkiDeckResponse.ts
+    GeminiSingleRequestBody.ts
+    GeminiSingleRequestResponse.ts
+    index.ts
+    TestGeminiRequest.ts
+    TestGeminiResponse.ts
+  utils/
+    functions/
+      decodeUtfBuffer.ts
+      getCurrentLanguageFromModel.ts
+      initModel.ts
+      parseVTT.ts
+      processGeminiResponse.ts
+  index.ts
+chrome_store_assets/
+  backupDescription.txt
+components/
+  BooleanSettings.tsx
+  DisplayTranslationStatus.tsx
+  Divider.tsx
+  DownloadAnkiDeck.tsx
+  GithubButton.tsx
+  Header.tsx
+  PressAnyKey.tsx
+  Required.tsx
+  ResetAnkiDeck.tsx
+  Settings.tsx
+  SubmitButton.tsx
+  TranslateWhenSettings.tsx
+contents/
+  batchTranslateSubtitles.ts
+  catchSiteSubtitles.ts
+  index.ts
+Example Captions/
+  maxdummysubtitles.vtt
+styles/
+  display-translation-status.module.css
+  github-button.module.css
+  globals.scss
+  header.module.css
+  onboarding.module.css
+  popup.module.css
+  settings.module.css
+  shared.module.css
+tabs/
+  onboarding.tsx
+  sentence-browser.tsx
+utils/
+  functions/
+    cachedTranslations.ts
+    changeText.ts
+    checkForExistingLocalReverseTranslation.ts
+    checkForExistingLocalTranslation.ts
+    checkForExistingReverseTranslation.ts
+    checkForExistingTranslation.ts
+    checkIfSentenceIgnored.ts
+    createAnkiDeck.ts
+    delay.ts
+    extractIdFromUrl.ts
+    extractTextFromHtml.ts
+    getAlreadyTranslatedSentences.ts
+    getBatchWaitTimes.ts
+    getCurrentYear.ts
+    getLiveElement.ts
+    getNeedToStudyLength.ts
+    getUntranslatedSentences.ts
+    initData.ts
+    logDev.ts
+    onCustomKey.ts
+    onVideoPaused.ts
+    optimizeAnkiDeck.ts
+    pollSettings.ts
+    pollStatus.ts
+    translatePhraseLocal.ts
+    updateNeedToStudy.ts
+    updateTranslations.ts
+    updateUntranslatedSentences.ts
+  handlers/
+    handleUrlChange.ts
+    onClick.ts
+  watchers/
+    watchTimedText.ts
+  constants.ts
+  index.ts
+  localData.ts
+.gitignore
+.prettierrc.mjs
+inject.js
+package.json
+popup.tsx
+privacy-policy.md
+README.md
+tsconfig.json
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path=".github/workflows/submit.yml">
+name: "Submit to Web Store"
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Cache pnpm modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-
+      - uses: pnpm/action-setup@v2.2.4
+        with:
+          version: latest
+          run_install: true
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v3.4.1
+        with:
+          node-version: 16.x
+          cache: "pnpm"
+      - name: Build the extension
+        run: pnpm build
+      - name: Package the extension into a zip artifact
+        run: pnpm package
+      - name: Browser Platform Publish
+        uses: PlasmoHQ/bpp@v3
+        with:
+          keys: ${{ secrets.SUBMIT_KEYS }}
+          artifact: build/chrome-mv3-prod.zip
+</file>
+
+<file path="background/messages/gemini_get_locale.ts">
+import type { PlasmoMessaging } from "@plasmohq/messaging"
+
+import { type GeminiGetLocaleRequest } from "~background/types/GeminiGetLocaleRequest"
+import type { GeminiGetLocaleResponse } from "~background/types/GeminiGetLocaleResponse"
+import getCurrentLanguageFromModel from "~background/utils/functions/getCurrentLanguageFromModel"
+import initModel, {
+    type HandlerState
+} from "~background/utils/functions/initModel"
+import { getData } from "~utils/localData"
+
+const handlerState: HandlerState = {
+    usingApiKey: null,
+    model: null
+}
+
+const handler: PlasmoMessaging.MessageHandler<
+    GeminiGetLocaleRequest,
+    GeminiGetLocaleResponse
+> = async (req, res) => {
+    const { sentences, targetLanguage } = req.body
+
+    if (!sentences || !targetLanguage || sentences.length <= 0) {
+        res.send({ error: "Invalid request" })
+        return
+    }
+    try {
+        const apiKey = await getData("API_KEY")
+        if (!apiKey) throw new Error("API key not found")
+        await initModel(handlerState, apiKey)
+        const sentencesLocale = await getCurrentLanguageFromModel(
+            handlerState.model,
+            sentences,
+            targetLanguage
+        )
+        res.send({ locale: sentencesLocale })
+    } catch (e) {
+        console.error("Error in gemini_get_locale.ts", e)
+        res.send({ error: e?.message })
+        return
+    }
+}
+
+export default handler
+</file>
+
+<file path="background/messages/gemini_optimize_anki_deck.ts">
+import type { PlasmoMessaging } from "@plasmohq/messaging"
+
+import type { GeminiOptimizeAnkiDeckRequest } from "~background/types/GeminiOptimizeAnkiDeckRequest"
+import type { GeminiOptimizeAnkiDeckResponse } from "~background/types/GeminiOptimizeAnkiDeckResponse"
+import initModel, {
+    type HandlerState
+} from "~background/utils/functions/initModel"
+import logDev from "~utils/functions/logDev"
+import optimizeAnkiDeck from "~utils/functions/optimizeAnkiDeck"
+import { getData } from "~utils/localData"
+
+const handlerState: HandlerState = {
+    usingApiKey: null,
+    model: null
+}
+
+const geminiPrompt = (deck: Record<string, string>) =>
+    [
+        "Please optimize the following language learning Anki deck and return the optimized deck in the same JSON format. To optimize the deck, please use your own discretion, but also:",
+        "\n",
+        "1. Remove any duplicate phrases.",
+        "2. Do not include ANY formatting markdown such as '```json'",
+        "3. Maintain the standard of mapping the target language to the native language.",
+        "\n",
+        JSON.stringify(deck)
+    ].join("\n")
+
+const handler: PlasmoMessaging.MessageHandler<
+    GeminiOptimizeAnkiDeckRequest,
+    GeminiOptimizeAnkiDeckResponse
+> = async (req, res) => {
+    try {
+        logDev(
+            "Deck before optimization: ",
+            req.body.deck,
+            "Total phrases: ",
+            Object.keys(req.body.deck).length
+        )
+        const apiKey = await getData("API_KEY")
+        if (!apiKey) throw new Error("API key not found")
+        await initModel(handlerState, apiKey)
+        const newDeck = await handlerState.model.generateContent([
+            geminiPrompt(req.body.deck)
+        ])
+        const optimizedDeck: Record<string, string> = JSON.parse(
+            newDeck.response?.text()
+        )
+        if (!optimizedDeck) {
+            throw new Error("Optimized deck is empty.")
+        }
+        const optimizedDeckWithDuplicatedRemoved =
+            optimizeAnkiDeck(optimizedDeck)
+
+        logDev(
+            "Deck after optimization: ",
+            optimizedDeckWithDuplicatedRemoved,
+            "Total phrases: ",
+            Object.keys(optimizedDeckWithDuplicatedRemoved).length
+        )
+
+        const allPhrasesOriginal = new Set(Object.values(req.body.deck)).union(
+            new Set(Object.keys(req.body.deck))
+        )
+        const allPhrasesOptimized = new Set(
+            Object.values(optimizedDeckWithDuplicatedRemoved)
+        ).union(new Set(Object.keys(optimizedDeckWithDuplicatedRemoved)))
+        const missingPhrasesSet =
+            allPhrasesOriginal.difference(allPhrasesOptimized)
+        logDev(
+            "Missing phrases set:",
+            missingPhrasesSet,
+            "Missing phrases set count:",
+            missingPhrasesSet.size
+        )
+
+        res.send({ deck: optimizedDeckWithDuplicatedRemoved })
+    } catch (e) {
+        logDev("ERROR: ", e)
+        res.send({ error: e?.message })
+        return
+    }
+}
+
+export default handler
+</file>
+
+<file path="background/messages/test_gemini_key.ts">
+import { GoogleGenerativeAI } from "@google/generative-ai"
+
+import type { PlasmoMessaging } from "@plasmohq/messaging"
+
+import { type TestGeminiRequest } from "~background/types/TestGeminiRequest"
+import type { TestGeminiResponse } from "~background/types/TestGeminiResponse"
+import logDev from "~utils/functions/logDev"
+
+const handler: PlasmoMessaging.MessageHandler<
+    TestGeminiRequest,
+    TestGeminiResponse
+> = async (req, res) => {
+    logDev("test_gemini_key Request received: ", req.body)
+
+    try {
+        const genAI = new GoogleGenerativeAI(req.body.key)
+        const model = genAI.getGenerativeModel({
+            model: "gemini-2.5-flash"
+        })
+        await model.generateContent(["Translate this to english\n", "Hola"])
+    } catch (e) {
+        logDev("test_gemini_key CAUGHT ERROR: ", e)
+        res.send({ error: e?.message })
+        return
+    }
+    res.send({ response: "Hello from Gemini!" })
+}
+
+export default handler
+</file>
+
+<file path="background/types/GeminiGetLocaleRequest.ts">
+export type GeminiGetLocaleRequest = {
+    sentences: string[]
+    targetLanguage: string
+}
+</file>
+
+<file path="background/types/GeminiGetLocaleResponse.ts">
+export type GeminiGetLocaleResponse =
+    | {
+          locale: string
+          error?: never
+      }
+    | {
+          error: string
+          locale?: never
+      }
+</file>
+
+<file path="background/types/GeminiModelResponse.ts">
+export type GeminiModelResponse = {
+    response: {
+        text: () => string
+    }
+}
+</file>
+
+<file path="background/types/GeminiOptimizeAnkiDeckRequest.ts">
+export type GeminiOptimizeAnkiDeckRequest = {
+    deck: Record<string, string>
+}
+
+// Example:
+// deck: {
+//     "Hola": "Hello",
+//     "Adiós": "Goodbye",
+//     "Gracias": "Thank you",
+// }
+</file>
+
+<file path="background/types/GeminiOptimizeAnkiDeckResponse.ts">
+export type GeminiOptimizeAnkiDeckResponse =
+    | {
+          deck: Record<string, string>
+          error?: never
+      }
+    | {
+          deck?: never
+          error: string
+      }
+
+// Success Example:
+// {
+//   deck: {
+//         "Hello": "Hola",
+//         "Goodbye": "Adiós",
+//         "Thank you": "Gracias",
+//   }
+// }
+
+// Error Example:
+// {
+//    error: "An error occurred while optimizing the deck"
+// }
+</file>
+
+<file path="background/types/GeminiSingleRequestBody.ts">
+export type GeminiSingleRequestBody = {
+    phrases: string[]
+    sentencesLocale?: string
+    targetLanguage: string
+}
+</file>
+
+<file path="background/types/GeminiSingleRequestResponse.ts">
+export type GeminiSingleRequestResponse =
+    | {
+          translatedPhrases: Record<string, string>
+          error?: never
+      }
+    | {
+          error: {
+              message?: string
+              status?: number
+          }
+          translatedPhrases?: never
+      }
+</file>
+
+<file path="background/types/TestGeminiRequest.ts">
+export type TestGeminiRequest = {
+    key: string
+}
+</file>
+
+<file path="background/types/TestGeminiResponse.ts">
+export type TestGeminiResponse =
+    | {
+          error: string
+          response?: never
+      }
+    | {
+          error?: never
+          response: string
+      }
+</file>
+
+<file path="background/utils/functions/initModel.ts">
+import { GoogleGenerativeAI } from "@google/generative-ai"
+
+export type HandlerState = {
+    usingApiKey: any
+    model: any
+}
+
+export default async function initModel(
+    handlerState: HandlerState,
+    API_KEY: string
+) {
+    if (!handlerState.model || handlerState.usingApiKey !== API_KEY) {
+        handlerState.usingApiKey = API_KEY
+        const genAI = new GoogleGenerativeAI(API_KEY)
+        handlerState.model = genAI.getGenerativeModel({
+            model: "gemini-2.5-flash"
+        })
+    }
+}
+</file>
+
+<file path="chrome_store_assets/backupDescription.txt">
+Elevate Your Netflix Experience with Netflix To Anki
+
+**ALPHA Development Stage**
+
+"Netflix To Anki" is a cutting-edge Chrome extension designed to enhance your Netflix experience in ways you never thought possible. By integrating Netflix with Anki Flashcards, you can watch your favorite Netflix show while also studying a new language. Say what??
+
+Why use this extension?
+
+Enhanced Productivity: You no longer need to manually enter data into Anki cards while studying a new language. Simply click on a few subtitles, download the translations by the click of a button, and import the file into Anki.
+
+Join Our Community
+
+Be part of the growing community of Netflix To Anki users. Share feedback, request new features, and get support from our dedicated team. Together, we're making the web a better place, one click at a time. 
+
+Ready to transform your Netflix experience? Install Netflix To Anki from the Chrome Web Store and discover the difference it makes. 
+
+Report Bugs or Suggest Features: 
+- https://forms.gle/4iBmAWWf9WZuwqo8A
+Visit the GitHub:
+- https://github.com/demonlexe/netflix-to-anki
+BuyMeACoffee:
+- https://buymeacoffee.com/demonlexe
+
+
+// Storage Justification
+It utilizes a cache of translations for each movie/show when it batch translates the subtitles. This is saved in local storage and can grow somewhat large if a lot of different shows/episodes/movies are being viewed. Data is stored for 7 days per unique show/movie ID.
+
+// Scripting Justification
+The extension must be able to inject a script into the Netflix page to watch for the API Call to be made for subtitles from the Netflix server. It is then intercepted by the code and sent to the background for processing through Gemini.
+
+// Hosting Justificaiton
+The extension must have access to Netflix in order to perform the duties, such as translating subtitles, or allowing clicks on subtitles to perform the anki-saving action.
+</file>
+
+<file path="components/GithubButton.tsx">
+import styles from "~styles/github-button.module.css"
+
+export default function GithubButton() {
+    return (
+        <a
+            className={styles.githubButton}
+            href="https://github.com/demonlexe/netflix-to-anki"
+            target="_blank"
+            rel="noreferrer">
+            <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg">
+                <path
+                    fillRule="evenodd"
+                    clipRule="evenodd"
+                    d="M8 0C3.58 0 0 3.58 0 8C0 11.54 2.29 14.53 5.47 15.59C5.87 15.66 6.02 15.42 6.02 15.21C6.02 15.02 6.01 14.39 6.01 13.72C4 14.09 3.48 13.23 3.32 12.78C3.23 12.55 2.84 11.84 2.5 11.65C2.22 11.5 1.82 11.13 2.49 11.12C3.12 11.11 3.57 11.7 3.72 11.94C4.44 13.15 5.59 12.81 6.05 12.6C6.12 12.08 6.33 11.73 6.56 11.53C4.78 11.33 2.92 10.64 2.92 7.58C2.92 6.71 3.23 5.99 3.74 5.43C3.66 5.23 3.38 4.41 3.82 3.31C3.82 3.31 4.49 3.1 6.02 4.13C6.66 3.95 7.34 3.86 8.02 3.86C8.7 3.86 9.38 3.95 10.02 4.13C11.55 3.09 12.22 3.31 12.22 3.31C12.66 4.41 12.38 5.23 12.3 5.43C12.81 5.99 13.12 6.7 13.12 7.58C13.12 10.65 11.25 11.33 9.47 11.53C9.76 11.78 10.01 12.26 10.01 13.01C10.01 14.08 10 14.94 10 15.21C10 15.42 10.15 15.67 10.55 15.59C13.71 14.53 16 11.53 16 8C16 3.58 12.42 0 8 0Z"
+                    transform="scale(1.5)"
+                    fill="#1B1F23"
+                />
+            </svg>
+        </a>
+    )
+}
+</file>
+
+<file path="components/Header.tsx">
+import GithubButton from "~components/GithubButton"
+import styles from "~styles/header.module.css"
+
+export default function Header() {
+    return (
+        <div className={styles.flexRow}>
+            <h2>Netflix To Anki</h2>
+            <GithubButton />
+            <a
+                href="https://buymeacoffee.com/demonlexe"
+                target="_blank"
+                rel="noreferrer">
+                Pay What You Want
+            </a>
+        </div>
+    )
+}
+</file>
+
+<file path="styles/display-translation-status.module.css">
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    gap: 5px;
+}
+</file>
+
+<file path="styles/github-button.module.css">
+.githubButton {
+    width: 24px;
+    height: 24px;
+    background: transparent;
+    border: none;
+}
+
+.githubButton:hover {
+    cursor: pointer;
+}
+</file>
+
+<file path="styles/header.module.css">
+.flexRow {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+}
+</file>
+
+<file path="styles/onboarding.module.css">
+.flexRow {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    gap: 24px;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 600px;
+}
+</file>
+
+<file path="styles/popup.module.css">
+.container {
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    gap: 8px;
+    width: 250px;
+}
+
+.flexRow {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
+}
+
+.settingsButton {
+    height: 2rem;
+    width: 100%;
+    font-size: 2em;
+    display: flex;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+}
+
+.spaceBetween {
+    justify-content: space-between;
+}
+</file>
+
+<file path="styles/shared.module.css">
+.flexRow {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+}
+
+.flexCol {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.w100 {
+    width: 100%;
+}
+</file>
+
+<file path="utils/functions/cachedTranslations.ts">
+import { POLLING_TRANSLATIONS_CACHE_INTERVAL } from "~utils/constants"
+import { getData, type TranslationsCacheShowLanguage } from "~utils/localData"
+
+import { setData, type TranslationsCache } from "../localData"
+
+// update the sentences for the current show.
+export async function setAllCachedTranslations(
+    showId: string,
+    targetLanguage: string,
+    allSentences: Record<string, string>
+) {
+    const cache = await getAllCachedTranslations()
+    const fixedSentences = {}
+
+    for (const [sentence, translation] of Object.entries(allSentences)) {
+        fixedSentences[sentence?.trim()] = translation?.trim()
+    }
+
+    if (!cache[showId]) {
+        cache[showId] = {}
+    }
+
+    const currentCachedTranslations =
+        cache?.[showId]?.[targetLanguage]?.sentences || {}
+    cache[showId][targetLanguage] = {
+        sentences: {
+            // save previous sentences and new sentences.
+            ...currentCachedTranslations,
+            ...fixedSentences
+        },
+        lastUpdated: Date.now()
+    }
+
+    window.translatedSentencesCache = cache
+}
+
+export async function getShowCachedTranslations(
+    showId: string,
+    targetLanguage: string
+) {
+    const cache = await getAllCachedTranslations()
+    return cache?.[showId]?.[targetLanguage]?.sentences || {}
+}
+
+export async function getShowCachedReverseTranslations(
+    showId: string,
+    targetLanguage: string
+) {
+    const cache = await getAllCachedTranslations()
+
+    const translations = cache?.[showId]?.[targetLanguage]?.sentences || {}
+    // reverse the translations
+    const reverseTranslations = {}
+    for (const [sentence, translation] of Object.entries(translations)) {
+        reverseTranslations[translation] = sentence
+    }
+    return reverseTranslations
+}
+
+// upload the translations to the local device.
+export async function pollCachedTranslations() {
+    setTimeout(async () => {
+        const cache = await getAllCachedTranslations()
+        await setData("NETFLIX_TO_ANKI_TRANSLATIONS_BY_ID", cache)
+        pollCachedTranslations()
+    }, POLLING_TRANSLATIONS_CACHE_INTERVAL)
+}
+
+// Do not use outside this file
+async function getAllCachedTranslations(): Promise<TranslationsCache> {
+    // all sentences is a map of sentences to other sentences.
+    // split them evenly among the 5 caches.
+    if (
+        !window.translatedSentencesCache ||
+        typeof window.translatedSentencesCache !== "object" ||
+        Object.keys(window.translatedSentencesCache).length === 0
+    ) {
+        // initialize
+        window.translatedSentencesCache =
+            (await getData("NETFLIX_TO_ANKI_TRANSLATIONS_BY_ID")) ?? {}
+    }
+
+    for (const [id, langStruct] of Object.entries(
+        window.translatedSentencesCache
+    )) {
+        for (const [language, record] of Object.entries(langStruct)) {
+            if (
+                !record ||
+                !id ||
+                !record.sentences ||
+                !record.lastUpdated ||
+                Date.now() - record.lastUpdated > 1000 * 60 * 60 * 24 * 7
+            ) {
+                // skip if the record is empty or if the record is older than a week.
+                continue
+            }
+            // trim all key value pairs then return
+            for (const [sentence, translation] of Object.entries(
+                record.sentences
+            )) {
+                window.translatedSentencesCache[id][language].sentences[
+                    sentence?.trim()
+                ] = translation?.trim()
+            }
+            window.translatedSentencesCache[id][language].lastUpdated =
+                record.lastUpdated
+        }
+    }
+
+    return window.translatedSentencesCache
+}
+</file>
+
+<file path="utils/functions/createAnkiDeck.ts">
+import { sendToBackground } from "@plasmohq/messaging"
+
+import type { GeminiOptimizeAnkiDeckResponse } from "~background/types/GeminiOptimizeAnkiDeckResponse"
+import { getData } from "~utils/localData"
+
+import optimizeAnkiDeck from "./optimizeAnkiDeck"
+
+export default async function createAnkiDeck(
+    useOptimized: boolean
+): Promise<File> {
+    const [needToStudy] = await Promise.all([getData("NEED_TO_STUDY")])
+    let deckToUse = needToStudy ?? {}
+    if (useOptimized) {
+        // optimize with Gemini
+        const optimizedDeckResponse: GeminiOptimizeAnkiDeckResponse =
+            await sendToBackground({
+                name: "gemini_optimize_anki_deck",
+                body: { deck: needToStudy }
+            })
+        if (!optimizedDeckResponse || optimizedDeckResponse.error) {
+            return null
+        }
+        deckToUse = optimizedDeckResponse.deck
+    } else {
+        deckToUse = optimizeAnkiDeck(deckToUse)
+    }
+
+    // Then build the file
+    const allCards = []
+    for (const [key, value] of Object.entries(deckToUse)) {
+        const newKey = key
+            ?.replace(/\n/g, " ")
+            ?.replace(/\t/g, " ")
+            ?.replace(/(<br\s*\/>)/g, " ")
+            ?.trim()
+        const newValue = value
+            ?.replace(/\n/g, " ")
+            ?.replace(/\t/g, " ")
+            ?.replace(/(<br\s*\/>)/g, " ")
+            ?.trim()
+        if (!newKey || !newValue) continue
+
+        allCards.push(`${newKey}\t${newValue}`)
+    }
+    const file = new File(
+        [allCards.join("\n")],
+        `NetflixToAnki_${new Date().toISOString()}.txt`,
+        {
+            type: "text/plain"
+        }
+    )
+
+    return file
+}
+</file>
+
+<file path="utils/functions/delay.ts">
+export default function delay(t: number, val?) {
+    return new Promise((resolve) => setTimeout(resolve, t, val))
+}
+</file>
+
+<file path="utils/functions/getBatchWaitTimes.ts">
+import {
+    BATCH_TRANSLATE_DELAY_TIME,
+    BATCH_TRANSLATE_RETRY_INTERVAL
+} from "~utils/constants"
+
+export function getBatchWaitTime(
+    targetLanguage: string,
+    retries: number
+): number {
+    // take more time between intervals if it's not the current language
+    const BATCH_INTERVAL =
+        targetLanguage === window.polledSettings?.TARGET_LANGUAGE ||
+        retries === 0
+            ? BATCH_TRANSLATE_RETRY_INTERVAL
+            : BATCH_TRANSLATE_RETRY_INTERVAL * 4
+
+    return BATCH_INTERVAL
+}
+
+export function getMiniBatchWaitTime(
+    targetLanguage: string,
+    retries: number
+): number {
+    // take more time between intervals if it's not the current language
+
+    const BATCH_MINI_INTERVAL =
+        targetLanguage === window.polledSettings?.TARGET_LANGUAGE ||
+        retries === 0
+            ? BATCH_TRANSLATE_DELAY_TIME
+            : BATCH_TRANSLATE_DELAY_TIME * 4
+
+    return BATCH_MINI_INTERVAL
+}
+</file>
+
+<file path="utils/functions/getCurrentYear.ts">
+export default function getCurrentYear() {
+    const currentYear = new Date().getFullYear()
+    return currentYear || 2024
+}
+</file>
+
+<file path="utils/functions/getNeedToStudyLength.ts">
+import { getData } from "~utils/localData"
+
+import optimizeAnkiDeck from "./optimizeAnkiDeck"
+
+export default async function getNeedToStudyLength() {
+    const needToStudy = optimizeAnkiDeck((await getData("NEED_TO_STUDY")) ?? {})
+    return Object.keys(needToStudy).length
+}
+</file>
+
+<file path="utils/functions/getUntranslatedSentences.ts">
+export default function getUntranslatedSentences(
+    showId: string,
+    targetLanguage: string
+): string[] {
+    return window.untranslatedSentencesCache?.[showId]?.[targetLanguage] || []
+}
+</file>
+
+<file path="utils/functions/initData.ts">
+import { USER_SETTINGS_DEFAULTS } from "~utils/constants"
+import { getData, setData } from "~utils/localData"
+
+import logDev from "./logDev"
+
+export default async function initData() {
+    logDev("NTA: Initializing data")
+    const needToStudy = (await getData("NEED_TO_STUDY")) ?? {}
+
+    if (!needToStudy) {
+        logDev("NTA: NEED_TO_STUDY is null, setting to default value")
+        setData("NEED_TO_STUDY", {})
+    }
+
+    // loop all user defaults and set them if they don't exist
+    for (const [key, value] of Object.entries(USER_SETTINGS_DEFAULTS)) {
+        const data = await getData(key as keyof typeof USER_SETTINGS_DEFAULTS)
+        if (data === undefined || data === null) {
+            logDev(`NTA: ${key} is null, setting to default value`)
+            setData(key as keyof typeof USER_SETTINGS_DEFAULTS, value)
+        }
+    }
+}
+</file>
+
+<file path="utils/functions/logDev.ts">
+export default function logDev(...args: any[]) {
+    if (process.env.NODE_ENV === "development") {
+        console.log(...args)
+    }
+}
+</file>
+
+<file path="utils/functions/onCustomKey.ts">
+import onClick from "~utils/handlers/onClick"
+
+let watchingCustomKey = false
+
+export default function onCustomKey() {
+    if (watchingCustomKey) return
+    watchingCustomKey = true
+
+    document.addEventListener("keydown", async (e) => {
+        if (window.polledSettings.TRANSLATE_WHEN !== "custom_key") return
+        if (window.polledSettings.CUSTOM_TRANSLATE_KEY !== e.key) return
+
+        onClick()
+    })
+}
+</file>
+
+<file path="utils/functions/onVideoPaused.ts">
+import onClick from "~utils/handlers/onClick"
+
+export default function onVideoPaused(videoElement: JQuery<HTMLVideoElement>) {
+    videoElement.on("pause", () => {
+        if (
+            window.polledSettings.TRANSLATE_WHEN !== "on_pause" &&
+            window.polledSettings.TRANSLATE_WHEN !== "always"
+        ) {
+            return
+        }
+        onClick()
+    })
+}
+</file>
+
+<file path="utils/functions/optimizeAnkiDeck.ts">
+export default function optimizeAnkiDeck(
+    deck: Record<string, string>
+): Record<string, string> {
+    const optimizedDeckWithDuplicatedRemoved = {}
+    // iterate optimized deck and manually remove duplicates
+    for (const [key, value] of Object.entries(deck)) {
+        const trimmedKey = key?.trim()
+        const trimmedValue = value?.trim()
+        if (trimmedKey !== trimmedValue) {
+            optimizedDeckWithDuplicatedRemoved[trimmedKey] = trimmedValue
+        }
+    }
+
+    return optimizedDeckWithDuplicatedRemoved
+}
+</file>
+
+<file path="utils/functions/translatePhraseLocal.ts">
+import $ from "jquery"
+
+import { isYellow } from "~utils"
+import checkForExistingReverseTranslation from "~utils/functions/checkForExistingReverseTranslation"
+
+import changeText from "./changeText"
+import checkForExistingTranslation from "./checkForExistingTranslation"
+import getLiveElement from "./getLiveElement"
+import updateTranslations from "./updateTranslations"
+
+// returns boolean, if yes, it means we should play the video.
+export default async function translatePhraseLocal(
+    currentText: string,
+    container?: JQuery<HTMLElement>
+): Promise<{ text: string; isYellow: boolean }> {
+    const liveElement = getLiveElement("", container)
+
+    let translatedPhrase = { text: null, isYellow: false }
+    const existingTranslation = await checkForExistingTranslation(currentText)
+    const existingReverseTranslation =
+        await checkForExistingReverseTranslation(currentText)
+    // const tryChangeText = changeText($(liveElement), currentText, "yellow")
+    if (isYellow($(liveElement)) && existingReverseTranslation) {
+        // Untranslate the text.
+        changeText($(liveElement), existingReverseTranslation, "white")
+        window.doNotTouchSentences[existingReverseTranslation.trim()] = true
+        translatedPhrase = { text: existingReverseTranslation, isYellow: true }
+    } else if (existingTranslation) {
+        updateTranslations(currentText, existingTranslation)
+        window.doNotTouchSentences[currentText.trim()] = false
+        translatedPhrase = { text: existingTranslation, isYellow: false }
+    }
+    return translatedPhrase
+}
+</file>
+
+<file path="utils/functions/updateNeedToStudy.ts">
+import { getData, setData } from "~utils/localData"
+
+import logDev from "./logDev"
+
+export default async function updateNeedToStudy(
+    textOne: string,
+    textTwo: string
+) {
+    textOne = textOne?.trim()
+    textTwo = textTwo?.trim()
+    const needToStudy = (await getData("NEED_TO_STUDY")) ?? {}
+
+    needToStudy[textOne] = textTwo
+    await setData("NEED_TO_STUDY", needToStudy)
+    logDev("NEW need to study: ", needToStudy)
+}
+</file>
+
+<file path=".prettierrc.mjs">
+/**
+ * @type {import('prettier').Options}
+ */
+export default {
+  printWidth: 80,
+  tabWidth: 4,
+  useTabs: false,
+  semi: false,
+  singleQuote: false,
+  trailingComma: "none",
+  bracketSpacing: true,
+  bracketSameLine: true,
+  plugins: ["@ianvs/prettier-plugin-sort-imports"],
+  importOrder: [
+    "<BUILTIN_MODULES>", // Node.js built-in modules
+    "<THIRD_PARTY_MODULES>", // Imports not matched by other special words or groups.
+    "", // Empty line
+    "^@plasmo/(.*)$",
+    "",
+    "^@plasmohq/(.*)$",
+    "",
+    "^~(.*)$",
+    "",
+    "^[./]"
+  ]
+}
+</file>
+
+<file path="inject.js">
+// inject.js
+; (function () {
+    const originalXhrOpen = XMLHttpRequest.prototype.open
+    XMLHttpRequest.prototype.open = function (method, url, ...rest) {
+        this.addEventListener("load", function () {
+            window.postMessage(
+                {
+                    type: "NETWORK_REQUEST",
+                    method,
+                    url,
+                    response: this.response
+                },
+                "*"
+            )
+        })
+        return originalXhrOpen.apply(this, [method, url, ...rest])
+    }
+
+    const originalFetch = window.fetch
+    window.fetch = function (...args) {
+        return originalFetch.apply(this, args).then((response) => {
+            response
+                .clone()
+                .text()
+                .then((body) => {
+                    window.postMessage(
+                        {
+                            type: "NETWORK_REQUEST",
+                            url: response.url,
+                            response: body
+                        },
+                        "*"
+                    )
+                })
+            return response
+        })
+    }
+})()
+</file>
+
+<file path="tsconfig.json">
+{
+  "extends": "plasmo/templates/tsconfig.base",
+  "exclude": [
+    "node_modules"
+  ],
+  "include": [
+    ".plasmo/index.d.ts",
+    "./**/*.ts",
+    "./**/*.tsx"
+  ],
+  "compilerOptions": {
+    "paths": {
+      "~*": [
+        "./*"
+      ]
+    },
+    "baseUrl": "."
+  }
+}
+</file>
+
+<file path="background/types/CatchSRTSiteSubtitlesRequest copy.ts">
+export type CatchVTTSiteSubtitlesRequest = {
+    message: {
+        url: string
+        response: any
+    }
+}
+</file>
+
+<file path="background/types/CatchVTTSiteSubtitlesRequest.ts">
+export type CatchVTTSiteSubtitlesRequest = {
+    message: {
+        url: string
+        response: any
+    }
+}
+</file>
+
+<file path="background/types/index.ts">
+export * from "./GeminiSingleRequestResponse"
+export * from "./GeminiSingleRequestBody"
+export * from "./CatchSiteSubtitlesRequest"
+export * from "./CatchSiteSubtitlesResponse"
+</file>
+
+<file path="background/utils/functions/decodeUtfBuffer.ts">
+export async function decodeUtfBuffer(responseBuffer) {
+    // Convert ArrayBuffer to a string
+    const text = new TextDecoder("utf-8").decode(responseBuffer)
+
+    return text
+}
+</file>
+
+<file path="background/utils/functions/getCurrentLanguageFromModel.ts">
+import type { GeminiModelResponse } from "~background/types/GeminiModelResponse"
+
+export default async function getCurrentLanguageFromModel(
+    model: any,
+    phrases: string[],
+    targetLanguage: string
+): Promise<string> {
+    const promptForLocale = `
+    Consider that "targetLanguage" is ${targetLanguage}.
+    What language are the following phrases in? 
+    However, if the language is the same as targetLanguage, return the exact same input, targetLanguage. 
+    You can consider regional dialects to be the same, such that if the detected locale is "mexican spanish", and the targetLanguage is "spanish", you should return "spanish" as the answer.`
+    const localeResult: GeminiModelResponse = await model.generateContent([
+        promptForLocale,
+        JSON.stringify(phrases)
+    ])
+    return (
+        localeResult?.response?.text()?.match(targetLanguage)?.length > 0
+            ? targetLanguage
+            : localeResult?.response?.text()
+    ).toLowerCase()
+}
+</file>
+
+<file path="background/utils/functions/parseVTT.ts">
+import logDev from "~utils/functions/logDev"
+
+export default function parseVTT(vttText: string): Record<string, string[]> {
+    if (!vttText.trim()) {
+        logDev("parseVTT received an empty or invalid string!")
+        return {}
+    }
+
+    logDev("Parsing VTT content:\n", vttText) // Log full text before parsing
+
+    const vttRegex =
+        /(\d{2}:\d{2}:\d{2}\.\d{3}) --> (\d{2}:\d{2}:\d{2}\.\d{3})(?: .*?)?\n+([\s\S]*?)(?=\n\n|\n\d{2}:\d{2}:\d{2}\.\d{3} -->|\Z)/g
+
+    const matches = [...vttText.matchAll(vttRegex)]
+    const grouping: Record<string, string[]> = {}
+
+    for (const match of matches) {
+        const startTime = match[1] // Capture start time
+        const textContent = match[3]
+            ?.replace(/position:\d+%/g, "") // Remove metadata
+            ?.trim()
+
+        if (!textContent) continue
+
+        // Split lines into separate entries
+        const sentences = textContent
+            .split("\n")
+            .map((line) => line.trim())
+            .filter(Boolean)
+
+        if (grouping[startTime]) {
+            grouping[startTime].push(...sentences)
+        } else {
+            grouping[startTime] = sentences
+        }
+    }
+
+    return grouping
+}
+</file>
+
+<file path="background/index.ts">
+import "@plasmohq/messaging/background"
+
+import { startHub } from "@plasmohq/messaging/pub-sub"
+
+console.log(`Netflix To Anki - Starting Hub`)
+startHub()
+
+chrome.runtime.onInstalled.addListener((reason) => {
+    const reasonStr = reason["reason"] || ""
+    if (reasonStr.includes("install")) {
+        chrome.tabs.create({
+            url: `chrome-extension://${chrome.runtime.id}/tabs/onboarding.html`
+        })
+    }
+})
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.type === "GET_WINDOW_VARIABLES") {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            if (tabs[0]?.id) {
+                chrome.tabs.sendMessage(tabs[0].id, request, sendResponse)
+            }
+        })
+        return true // Keep the message channel open for async response
+    }
+})
+</file>
+
+<file path="components/BooleanSettings.tsx">
+import { useEffect, useState } from "react"
+import { Container, Form } from "react-bootstrap"
+
+import {
+    BOOLEAN_USER_SETTINGS_DEFAULTS,
+    READABLE_BOOLEAN_SETTINGS
+} from "~utils/constants"
+import { getData, setData, type BooleanUserSettings } from "~utils/localData"
+
+export default function BooleanSettings() {
+    const [currentSettings, setCurrentSettings] = useState<BooleanUserSettings>(
+        BOOLEAN_USER_SETTINGS_DEFAULTS
+    )
+
+    useEffect(() => {
+        Promise.all(
+            Object.keys(BOOLEAN_USER_SETTINGS_DEFAULTS).map(
+                async (key: keyof BooleanUserSettings) => getData(key)
+            )
+        ).then((values) => {
+            const newSettings = { ...currentSettings }
+            values.forEach((value, index) => {
+                newSettings[
+                    Object.keys(BOOLEAN_USER_SETTINGS_DEFAULTS)[index]
+                ] = value
+            })
+            setCurrentSettings(newSettings)
+        })
+    }, [])
+
+    return (
+        <Container>
+            {Object.entries(READABLE_BOOLEAN_SETTINGS).map(
+                ([key, { title }]: [
+                    key: keyof typeof READABLE_BOOLEAN_SETTINGS,
+                    { title: string }
+                ]) => (
+                    <Form.Group controlId={key} key={key} className="mb-3">
+                        <Form.Check
+                            type="checkbox"
+                            label={title}
+                            checked={currentSettings[key]}
+                            onChange={(e) => {
+                                setCurrentSettings((oldSettings) => ({
+                                    ...oldSettings,
+                                    [key]: e.target.checked
+                                }))
+                                setData(
+                                    key as keyof typeof READABLE_BOOLEAN_SETTINGS,
+                                    e.target.checked
+                                )
+                            }}
+                        />
+                    </Form.Group>
+                )
+            )}
+        </Container>
+    )
+}
+</file>
+
+<file path="components/Divider.tsx">
+export default function Divider() {
+    return (
+        <hr
+            style={{
+                width: "100%",
+                borderColor: "black"
+            }}
+        />
+    )
+}
+</file>
+
+<file path="components/DownloadAnkiDeck.tsx">
+import { Button } from "~node_modules/react-bootstrap/esm"
+import createAnkiDeck from "~utils/functions/createAnkiDeck"
+import { download } from "~utils/index"
+
+type DownloadAnkiDeckProps = {
+    numberToStudy: number
+    useOptimized: boolean
+}
+
+export default function DownloadAnkiDeck(props: DownloadAnkiDeckProps) {
+    const { numberToStudy, useOptimized } = props
+    return (
+        <Button
+            disabled={!numberToStudy}
+            onClick={async () => {
+                const file = await createAnkiDeck(useOptimized)
+                if (!file) return //FIXME - Show an error here.
+                download(file)
+            }}
+            style={{ fontSize: ".8em" }}>
+            {useOptimized
+                ? `Download Gemini-Optimized Anki deck. [ALPHA]`
+                : `Download Anki deck.${numberToStudy ? ` [${numberToStudy}]` : ""}`}
+        </Button>
+    )
+}
+</file>
+
+<file path="components/PressAnyKey.tsx">
+import { useState } from "react"
+
+import { Button } from "~node_modules/react-bootstrap/esm"
+
+type PressAnyKeyProps = {
+    keyRecorded: string
+    setKeyRecorded: (key: string) => void
+}
+export default function PressAnyKey(props: PressAnyKeyProps) {
+    const { keyRecorded, setKeyRecorded } = props
+    const [capturing, setCapturing] = useState(false)
+
+    const handleKeyDown = (event) => {
+        if (capturing) {
+            if (event.key === " ") return // do not allow space as a key
+            setKeyRecorded(event.key)
+            setCapturing(false)
+        }
+    }
+
+    const startCapturing = () => {
+        setCapturing(true)
+    }
+
+    return (
+        <div onKeyDown={handleKeyDown} tabIndex={0} style={{ outline: "none" }}>
+            <div>
+                <Button onClick={startCapturing} variant="tertiary">
+                    {capturing
+                        ? "Click me, then press any key..."
+                        : keyRecorded
+                          ? `Captured Key: ${keyRecorded}`
+                          : "Capture Key"}
+                </Button>
+            </div>
+        </div>
+    )
+}
+</file>
+
+<file path="components/Required.tsx">
+export default function Required() {
+    return <span style={{ color: "red" }}>*</span>
+}
+</file>
+
+<file path="components/ResetAnkiDeck.tsx">
+import { useState } from "react"
+
+import { Button } from "~node_modules/react-bootstrap/esm"
+import styles from "~styles/shared.module.css"
+import { setData } from "~utils/localData"
+
+enum ConfirmStatus {
+    NOT_CLICKED = 0,
+    NOT_CONFIRMED = 1,
+    RESET = -1
+}
+
+type ResetAnkiDeckProps = {
+    onReset: () => void
+    disabled: boolean
+    style: React.CSSProperties
+}
+
+export default function ResetAnkiDeck(props: ResetAnkiDeckProps) {
+    const { onReset, disabled } = props
+    const [confirm, setConfirm] = useState(ConfirmStatus.NOT_CLICKED)
+    return (
+        <div className={styles.flexCol} style={props.style}>
+            <Button
+                disabled={disabled}
+                variant="outline-danger"
+                onClick={() => {
+                    if (
+                        confirm === ConfirmStatus.NOT_CLICKED ||
+                        confirm === ConfirmStatus.RESET
+                    ) {
+                        setConfirm(ConfirmStatus.NOT_CONFIRMED)
+                        return
+                    } else if (confirm === ConfirmStatus.NOT_CONFIRMED) {
+                        setData("NEED_TO_STUDY", {}).then(() => {
+                            setConfirm(ConfirmStatus.RESET)
+                            // Reset the confirm status after 3 seconds
+                            setTimeout(() => {
+                                setConfirm((currentConfirm) =>
+                                    currentConfirm === ConfirmStatus.RESET
+                                        ? ConfirmStatus.NOT_CLICKED
+                                        : currentConfirm
+                                )
+                            }, 3000)
+                            onReset()
+                        })
+                        return
+                    }
+                }}>
+                RESET Anki Deck.
+            </Button>
+            {confirm === ConfirmStatus.NOT_CONFIRMED && (
+                <p style={{ color: "red" }}>
+                    Are you sure you want to RESET? Click again if YES
+                </p>
+            )}
+            {confirm === ConfirmStatus.RESET && (
+                <p style={{ color: "green" }}>Anki Cache has been RESET!</p>
+            )}
+        </div>
+    )
+}
+</file>
+
+<file path="Example Captions/maxdummysubtitles.vtt">
+WEBVTT
+X-TIMESTAMP-MAP=LOCAL:00:00:00.000,MPEGTS:0
+
+00:19:53.318 --> 00:19:55.153 position:50%
+- So what's the plan?
+
+00:19:55.195 --> 00:19:59.032 position:50%
+- ICU when we can get a bed
+and admit for supportive care.
+
+00:19:59.115 --> 00:20:02.243 position:50%
+Repeat head CT in three hours.
+
+00:20:02.327 --> 00:20:04.412 position:50%
+Or sooner, if he blows a pupil.
+
+00:20:04.496 --> 00:20:06.706 position:50%
+- Want a Keppra load?
+- Order's already in.
+
+00:20:08.333 --> 00:20:09.584 position:50%
+Nice job.
+
+00:20:11.836 --> 00:20:13.713 position:50%
+- Do you think he'll wake up?
+
+00:20:13.797 --> 00:20:15.840 position:50%
+- Maybe.
+
+00:20:15.882 --> 00:20:18.718 position:50%
+Maybe not.
+
+00:20:18.802 --> 00:20:22.847 position:50%
+- No good deed goes unpunished.
+
+00:20:22.931 --> 00:20:25.850 position:50%
+- Oh, has anyone,
+um, notified the family?
+
+00:20:29.771 --> 00:20:31.398 position:50%
+I could try.
+
+00:20:31.481 --> 00:20:33.900 position:50%
+- Otis Williams.
+Healthy 31-year-old.
+
+00:20:33.942 --> 00:20:36.486 position:50%
+V-tach arrest
+two weeks after triathlon.
+
+00:20:36.569 --> 00:20:38.196 position:50%
+NSR with one shock.
+
+00:20:38.238 --> 00:20:40.198 position:50%
+- Pulse 98, BP 110 over 60.
+
+00:20:40.240 --> 00:20:41.241 position:50%
+- He's a little young
+for an MI.
+
+00:20:41.324 --> 00:20:42.742 position:50%
+- Exactly right,
+
+00:20:42.826 --> 00:20:44.202 position:50%
+What's in the differential,
+Dr. Collins?
+
+00:20:44.244 --> 00:20:46.913 position:50%
+- Drug overdose,
+electrolytes, long QT--
+
+00:20:46.955 --> 00:20:48.873 position:50%
+ooh, Brugada syndrome, WPW...
+
+00:20:48.915 --> 00:20:50.583 position:50%
+- How you doing there, Otis?
+
+00:20:50.625 --> 00:20:52.419 position:50%
+- OK.
+What ha--
+
+00:20:52.502 --> 00:20:54.170 position:50%
+[machine flatlines]
+- V-tach again.
+
+00:20:54.254 --> 00:20:55.547 position:50%
+- 200 joules.
+
+00:20:55.630 --> 00:20:58.758 position:50%
+[whirring]
+- Charged, and clear!
+
+00:20:58.842 --> 00:21:00.719 position:50%
+- Back in sinus.
+[steady beeping]
+
+00:21:00.802 --> 00:21:01.928 position:50%
+Otis?
+
+00:21:01.970 --> 00:21:04.431 position:50%
+- [groaning]
+
+00:21:04.472 --> 00:21:06.433 position:50%
+- Otis?
+
+00:21:06.474 --> 00:21:09.561 position:50%
+- Oh, groaning's good.
+5 of nasal O2, CBC,
+
+00:21:09.644 --> 00:21:12.230 position:50%
+CMP, troponin, and D-dimer.
+
+00:21:12.272 --> 00:21:13.606 position:50%
+What are you doing?
+
+00:21:13.648 --> 00:21:15.316 position:50%
+- One gram calcium gluconate,
+IV push.
+
+00:21:15.400 --> 00:21:17.110 position:50%
+- We don't have the labs back.
+- Look at the monitor.
+
+00:21:17.152 --> 00:21:18.445 position:50%
+Widened QRS and PT waves.
+
+00:21:18.528 --> 00:21:19.988 position:50%
+Hyperkalemia.
+- How'd he get that?
+
+00:21:20.071 --> 00:21:21.740 position:50%
+- Intense exercise
+caused muscle breakdown.
+
+00:21:21.781 --> 00:21:23.074 position:50%
+Rhabdomyolysis knocked out
+his kidneys.
+
+00:21:23.158 --> 00:21:24.159 position:50%
+Now he's not
+clearing potassium.
+
+00:21:24.242 --> 00:21:25.577 position:50%
+I bet it's over 7.5.
+
+00:21:25.618 --> 00:21:27.245 position:50%
+- Wait two minutes
+for the i-STAT.
+
+00:21:27.287 --> 00:21:28.747 position:50%
+- If he arrests again,
+we might not get him back.
+
+00:21:28.788 --> 00:21:30.206 position:50%
+- If it's hypercalcemia,
+you could kill him.
+
+00:21:30.290 --> 00:21:32.751 position:50%
+Wait.
+- Oh, it's my ass, not yours.
+
+00:21:34.669 --> 00:21:38.089 position:50%
+- [groaning]
+
+00:21:43.345 --> 00:21:44.721 position:50%
+- Pan scan is negative.
+
+00:21:44.804 --> 00:21:46.389 position:50%
+That means you can admit
+to orthopedics.
+
+00:21:46.473 --> 00:21:48.266 position:50%
+- But there may have been
+a medical etiology
+
+00:21:48.308 --> 00:21:50.101 position:50%
+if she fainted.
+- That's not surgical.
+
+00:21:50.185 --> 00:21:51.728 position:50%
+Get an internal
+medicine consult,
+
+00:21:51.811 --> 00:21:53.980 position:50%
+or admit to medicine
+with ortho consulting.
+
+00:21:54.022 --> 00:21:55.273 position:50%
+Either way, I'm off the case.
+
+00:21:55.315 --> 00:21:57.484 position:50%
+- OK.
+Thanks for nothing.
+
+00:21:57.567 --> 00:22:00.445 position:50%
+- Ancef's in.
+I'll grab the gent.
+
+00:22:00.487 --> 00:22:02.197 position:50%
+- Did we figure out
+what she's speaking?
+
+00:22:02.280 --> 00:22:04.824 position:50%
+- Last interpreter thought
+she might be from Pakistan.
+
+00:22:04.866 --> 00:22:07.452 position:50%
+- There are 77 languages
+in Pakistan.
+
+00:22:07.494 --> 00:22:10.538 position:50%
+- OK, well, I will buy lunch
+for whoever figures it out.
+
+00:22:10.622 --> 00:22:11.998 position:50%
+Good luck.
+
+00:22:12.082 --> 00:22:14.876 position:50%
+If you need me,
+I'll be saving lives.
+
+00:22:14.959 --> 00:22:16.836 position:50%
+- That was wicked.
+
+00:22:16.920 --> 00:22:19.172 position:50%
+- [scoffs] That was gross.
+- Yeah.
+
+00:22:19.255 --> 00:22:21.800 position:50%
+Too much for Little Miss
+Crash and Burn.
+
+00:22:21.883 --> 00:22:23.343 position:50%
+What'd you do with her?
+- Nothing.
+
+00:22:23.385 --> 00:22:25.845 position:50%
+I think she'll be fine.
+- Are you kidding?
+
+00:22:25.887 --> 00:22:27.222 position:50%
+If that took her out,
+she'll be lucky to make it
+
+00:22:27.305 --> 00:22:29.015 position:50%
+through this rotation.
+
+00:22:29.057 --> 00:22:30.767 position:50%
+I got 50 bucks says she doesn't
+last through this shift.
+
+00:22:30.850 --> 00:22:32.519 position:50%
+- [scoffs]
+
+00:22:32.560 --> 00:22:33.853 position:50%
+- Come on.
+
+00:22:33.937 --> 00:22:35.188 position:50%
+Put your money
+where your mouth is.
+
+00:22:35.271 --> 00:22:37.816 position:50%
+- Uh, no.
+I didn't say anything, OK?
+
+00:22:37.899 --> 00:22:40.443 position:50%
+And I sure as hell
+don't have 50 bucks.
+
+00:22:40.527 --> 00:22:41.861 position:50%
+I'll be this lady's age
+by the time
+
+00:22:41.903 --> 00:22:43.113 position:50%
+I pay off my student loans.
+
+00:22:43.196 --> 00:22:44.406 position:50%
+Not that you're--
+
+00:22:45.907 --> 00:22:50.203 position:50%
+- Hey, you want
+to sell a kidney?
+
+00:22:50.286 --> 00:22:53.498 position:50%
+I could get you 30K
+as soon as this weekend.
+
+00:22:53.540 --> 00:22:56.543 position:50%
+That's just between you and me.
+
+00:22:56.626 --> 00:22:57.919 position:50%
+Think about it.
+
+00:23:02.590 --> 00:23:04.718 position:50%
+- How you doing?
+
+00:23:04.801 --> 00:23:06.428 position:50%
+Yeah.
+
+00:23:06.511 --> 00:23:08.346 position:50%
+- QRS has narrowed.
+
+00:23:08.430 --> 00:23:09.389 position:50%
+Much better.
+
+00:23:09.431 --> 00:23:11.224 position:50%
+- Potassium is 7.7.
+
+00:23:11.307 --> 00:23:13.518 position:50%
+Creatinine, 5.6.
+
+00:23:13.560 --> 00:23:15.228 position:50%
+- High potassium
+and renal failure.
+
+00:23:15.311 --> 00:23:16.521 position:50%
+Just what you thought.
+
+00:23:16.604 --> 00:23:18.231 position:50%
+- It must be my lucky day.
+
+00:23:18.314 --> 00:23:20.400 position:50%
+- Ordering 10 units
+of regular insulin
+
+00:23:20.483 --> 00:23:23.737 position:50%
+and 25 grams of glucose.
+
+00:23:23.778 --> 00:23:25.572 position:50%
+- Why insulin and glucose?
+
+00:23:25.655 --> 00:23:27.365 position:50%
+- Shift the potassium
+intracellularly.
+
+00:23:27.407 --> 00:23:29.075 position:50%
+- Exactly, but the definitive
+treatment is...
+
+00:23:29.159 --> 00:23:30.577 position:50%
+- Hemodialysis.
+I'll call renal
+
+00:23:30.660 --> 00:23:32.537 position:50%
+and get a tech down
+with the machine.
+
+00:23:32.579 --> 00:23:35.582 position:50%
+- Have you ever seen
+a dialysis catheter inserted?
+
+00:23:35.665 --> 00:23:37.417 position:50%
+Dr. Collins is gonna place
+a femoral Quinton
+
+00:23:37.459 --> 00:23:38.585 position:50%
+under ultrasound guidance.
+
+00:23:38.626 --> 00:23:39.753 position:50%
+It's an excellent way to learn.
+
+00:23:39.794 --> 00:23:41.921 position:50%
+- [groans]
+Oh, my chest.
+
+00:23:42.005 --> 00:23:43.423 position:50%
+- Yeah, we had to shock you.
+
+00:23:43.465 --> 00:23:45.258 position:50%
+You're gonna be sore
+for a while.
+
+00:23:45.300 --> 00:23:46.843 position:50%
+- You shocked my heart?
+
+00:23:46.926 --> 00:23:49.471 position:50%
+- Long story.
+Dr. Collins will fill you in.
+
+00:23:57.103 --> 00:23:59.356 position:50%
+You got a sec?
+
+00:24:02.025 --> 00:24:03.610 position:50%
+You OK?
+
+00:24:03.693 --> 00:24:05.570 position:50%
+- Why wouldn't I be?
+Are you OK?
+
+00:24:05.653 --> 00:24:07.405 position:50%
+- Why wouldn't I be?
+
+00:24:08.823 --> 00:24:10.408 position:50%
+You seem annoyed with me
+already,
+
+00:24:10.492 --> 00:24:13.119 position:50%
+and I just got here.
+
+00:24:13.161 --> 00:24:15.622 position:50%
+- It's not always
+about you, Robby.
+
+00:24:17.499 --> 00:24:19.334 position:50%
+- Am I gonna be OK?
+
+00:24:19.417 --> 00:24:20.919 position:50%
+- Yeah.
+
+00:24:21.002 --> 00:24:23.088 position:50%
+You just need to take it easy
+on yourself.
+
+00:24:23.171 --> 00:24:26.591 position:50%
+Muscle breakdown and myoglobin
+damaged your kidneys.
+
+00:24:26.633 --> 00:24:28.343 position:50%
+- Why'd you shock my heart?
+
+00:24:28.426 --> 00:24:30.970 position:50%
+- When your kidneys don't work,
+potassium builds up
+
+00:24:31.054 --> 00:24:35.475 position:50%
+and messes with the electrical
+activity in your heart.
+
+00:24:35.558 --> 00:24:37.769 position:50%
+- Can it happen again?
+
+00:24:37.852 --> 00:24:39.729 position:50%
+- We gave you medicine
+to lower your potassium,
+
+00:24:39.813 --> 00:24:42.273 position:50%
+and you'll need dialysis
+to clear it all out.
+
+00:24:42.357 --> 00:24:44.150 position:50%
+- Then I'll be OK?
+
+00:24:44.192 --> 00:24:45.402 position:50%
+- Yeah.
+
+00:24:45.485 --> 00:24:46.820 position:50%
+You might need a week or two
+
+00:24:46.861 --> 00:24:49.447 position:50%
+for your kidneys to recover,
+but yeah.
+
+00:24:49.489 --> 00:24:51.783 position:50%
+You really need
+to hydrate like crazy
+
+00:24:51.866 --> 00:24:54.661 position:50%
+before and after a triathlon.
+
+00:24:54.744 --> 00:24:58.331 position:50%
+- Trust me,
+I won't let this happen again.
+
+00:24:58.415 --> 00:25:01.001 position:50%
+- Good.
+
+00:25:01.042 --> 00:25:03.545 position:50%
+Be kind to yourself.
+
+00:25:11.803 --> 00:25:14.681 position:50%
+- [sighs]
+Oh, hey.
+
+00:25:14.723 --> 00:25:16.516 position:50%
+Abbot's told me that he's got
+a pregnant teen
+
+00:25:16.558 --> 00:25:17.976 position:50%
+coming back today
+for mifepristone.
+
+00:25:18.059 --> 00:25:19.853 position:50%
+Let me know when she gets here.
+- Yep.
+
+00:25:19.894 --> 00:25:21.354 position:50%
+- Bowel obstruction,
+still waiting
+
+00:25:21.396 --> 00:25:23.064 position:50%
+on a surgery consult.
+What about Garcia?
+
+00:25:23.148 --> 00:25:25.066 position:50%
+She was just here
+for the traumas.
+
+00:25:25.150 --> 00:25:29.487 position:50%
+- I think she was waiting
+for her attending to sign off.
+
+00:25:29.571 --> 00:25:31.990 position:50%
+- OK.
+
+00:25:32.073 --> 00:25:34.659 position:50%
+Oh, one of the med students
+took a header.
+
+00:25:34.701 --> 00:25:36.119 position:50%
+I parked her in the lounge
+under the guise
+
+00:25:36.202 --> 00:25:37.537 position:50%
+of a work comp report.
+
+00:25:37.620 --> 00:25:38.705 position:50%
+Will you just go in there,
+eyeball her,
+
+00:25:38.747 --> 00:25:40.165 position:50%
+and make sure she's all right?
+
+00:25:40.248 --> 00:25:41.207 position:50%
+- She's gonna miss
+the morning arrival
+
+00:25:41.291 --> 00:25:42.542 position:50%
+of the living dead.
+
+00:25:42.625 --> 00:25:44.127 position:50%
+- How many are we expecting?
+
+00:25:44.210 --> 00:25:45.879 position:50%
+- We were getting three,
+but one died en route.
+
+00:25:45.920 --> 00:25:47.714 position:50%
+Don't know who's luckier,
+us or them.
+
+00:25:47.797 --> 00:25:49.382 position:50%
+- What's open?
+- 14.
+
+00:25:49.466 --> 00:25:51.051 position:50%
+- 89-year-old woman from a SNF.
+
+00:25:51.092 --> 00:25:53.386 position:50%
+History of emphysema, CHF, MS.
+
+00:25:53.470 --> 00:25:55.221 position:50%
+V-fib, unresponsive
+to three shocks.
+
+00:25:55.305 --> 00:25:57.515 position:50%
+Two rounds of epi.
+- What is that?
+
+00:25:57.557 --> 00:25:59.059 position:50%
+- LUCAS
+chest compression system.
+
+00:25:59.100 --> 00:26:00.560 position:50%
+- Robotic CPR.
+
+00:26:00.602 --> 00:26:03.063 position:50%
+[machine thumping]
+
+00:26:03.146 --> 00:26:05.815 position:50%
+- Everybody get a hold.
+One, two, three.
+
+00:26:08.193 --> 00:26:10.904 position:50%
+- [yells]
+
+00:26:10.987 --> 00:26:12.781 position:50%
+- Students are dropping
+like flies.
+
+00:26:12.864 --> 00:26:14.532 position:50%
+- Take a break.
+Ice the finger.
+
+00:26:14.574 --> 00:26:16.910 position:50%
+- You can count on getting
+a couple elderly patients
+
+00:26:16.951 --> 00:26:19.537 position:50%
+every day around 7:30,
+after the nursing homes
+
+00:26:19.579 --> 00:26:21.915 position:50%
+and assisted living facilities
+do their morning bed checks.
+
+00:26:21.956 --> 00:26:24.084 position:50%
+You can practically
+set your watch.
+
+00:26:24.125 --> 00:26:25.418 position:50%
+- Was there
+an advanced directive?
+
+00:26:25.502 --> 00:26:27.420 position:50%
+- No, full code,
+per the nursing home.
+
+00:26:27.504 --> 00:26:29.714 position:50%
+- Seriously?
+
+00:26:29.798 --> 00:26:32.258 position:50%
+- LUCAS off.
+
+00:26:32.300 --> 00:26:33.718 position:50%
+- Still V-fib.
+
+00:26:33.802 --> 00:26:35.261 position:50%
+- LUCAS on.
+
+00:26:35.303 --> 00:26:37.681 position:50%
+One more round of epi,
+one more shock,
+
+00:26:37.764 --> 00:26:38.848 position:50%
+and then we call it?
+
+00:26:38.932 --> 00:26:41.935 position:50%
+[machine beeping]
+
+00:26:43.311 --> 00:26:44.896 position:50%
+- Joseph Spencer, 79.
+
+00:26:44.938 --> 00:26:46.856 position:50%
+Fever and cough.
+From assisted living.
+
+00:26:46.940 --> 00:26:49.609 position:50%
+He has a history
+of mild Alzheimer's.
+
+00:26:49.651 --> 00:26:52.404 position:50%
+- One, two, three.
+
+00:26:52.487 --> 00:26:54.280 position:50%
+- Pulse 130.
+BP 90 over 60.
+
+00:26:54.364 --> 00:26:56.449 position:50%
+Gave him 500 cc's
+normal saline.
+
+00:26:56.533 --> 00:26:58.243 position:50%
+- Hi, Mr. Spencer.
+I'm Dr. King.
+
+00:26:58.326 --> 00:26:59.744 position:50%
+This is Dr. Collins.
+
+00:26:59.828 --> 00:27:01.287 position:50%
+How are you feeling today?
+
+00:27:01.329 --> 00:27:04.541 position:50%
+- Is it dinnertime?
+I--I'm not really hungry.
+
+00:27:04.624 --> 00:27:06.376 position:50%
+- Do we have any paperwork
+from the facility?
+
+00:27:06.459 --> 00:27:07.627 position:50%
+- He has a POLST.
+
+00:27:07.669 --> 00:27:09.129 position:50%
+IV fluids
+and medications are fine,
+
+00:27:09.170 --> 00:27:11.131 position:50%
+but no intubation
+and no chest compressions.
+
+00:27:11.214 --> 00:27:12.590 position:50%
+- That's helpful.
+
+00:27:12.674 --> 00:27:14.300 position:50%
+- Coarse rhonchi here.
+
+00:27:14.342 --> 00:27:16.636 position:50%
+- Right middle lobe infiltrate.
+
+00:27:16.678 --> 00:27:19.472 position:50%
+- Temp 102.
+Call a code sepsis.
+
+00:27:19.556 --> 00:27:20.974 position:50%
+- Mm-hmm.
+- Code?
+
+00:27:21.057 --> 00:27:22.934 position:50%
+- To make sure
+we check all of our boxes.
+
+00:27:22.976 --> 00:27:25.103 position:50%
+The federal government audits
+our sepsis bundle performance
+
+00:27:25.186 --> 00:27:26.813 position:50%
+and publishes the data online.
+
+00:27:26.855 --> 00:27:28.648 position:50%
+Today, it better be perfect.
+
+00:27:28.732 --> 00:27:31.651 position:50%
+- Two sets of blood cultures,
+lactic acid,
+
+00:27:31.693 --> 00:27:35.030 position:50%
+30 cc's per kilo NS,
+a gram of ceftriaxone,
+
+00:27:35.113 --> 00:27:38.992 position:50%
+500 of azithromycin,
+repeat lactic in three hours.
+
+00:27:39.075 --> 00:27:40.577 position:50%
+- Nice.
+
+00:27:40.660 --> 00:27:44.998 position:50%
+- Charging, and...
+
+00:27:45.040 --> 00:27:46.249 position:50%
+- Stop.
+
+00:27:46.332 --> 00:27:47.584 position:50%
+Call it.
+
+00:27:47.667 --> 00:27:49.336 position:50%
+Nursing home just faxed us
+a DNR.
+
+00:27:49.377 --> 00:27:51.129 position:50%
+- [scoffs]
+Are you kidding me?
+
+00:27:51.171 --> 00:27:52.922 position:50%
+- Power off the defibrillator
+and the LUCAS.
+
+00:27:53.006 --> 00:27:54.257 position:50%
+- Complete waste
+of time and money.
+
+00:27:54.341 --> 00:27:55.675 position:50%
+Who the hell works
+at that place?
+
+00:27:55.717 --> 00:27:56.843 position:50%
+- A nurse taking care
+of 60 patients
+
+00:27:56.885 --> 00:27:58.511 position:50%
+who couldn't find the form.
+
+00:27:58.595 --> 00:28:00.347 position:50%
+- She called 911 so she could
+take care of the others.
+
+00:28:00.430 --> 00:28:01.931 position:50%
+- OK, let's move her
+to the viewing room
+
+00:28:02.015 --> 00:28:04.434 position:50%
+and notify the family.
+- Yep.
+
+00:28:04.517 --> 00:28:07.854 position:50%
+- One of the things we do here
+is to take a moment of silence
+
+00:28:07.937 --> 00:28:11.483 position:50%
+when we lose a patient,
+to respect their humanity
+
+00:28:11.566 --> 00:28:14.027 position:50%
+And also to remember
+that this was somebody's child
+
+00:28:14.110 --> 00:28:18.239 position:50%
+or sibling or parent, friend.
+
+00:28:25.580 --> 00:28:28.500 position:50%
+<i>- â™ª I like the sound</i>
+<i>of funky music â™ª</i>
+
+00:28:28.583 --> 00:28:31.378 position:50%
+- Oh. Ow, ow!
+
+00:28:31.419 --> 00:28:32.379 position:50%
+<i>[music stops]</i>
+
+00:28:32.420 --> 00:28:34.089 position:50%
+I am so sorry.
+
+00:28:34.172 --> 00:28:36.341 position:50%
+- Maybe leave it on vibrate
+while you're working.
+
+00:28:39.594 --> 00:28:41.888 position:50%
+- Later, Doc.
+- You behave yourself now.
+
+00:28:41.930 --> 00:28:43.431 position:50%
+- Always.
+
+00:28:45.558 --> 00:28:48.144 position:50%
+- Your med student's
+back on her feet.
+
+00:28:48.228 --> 00:28:50.522 position:50%
+How old's that kid?
+- I don't know. I didn't ask.
+
+00:28:50.563 --> 00:28:51.898 position:50%
+- What is she,
+some sort of savant?
+
+00:28:51.940 --> 00:28:53.149 position:50%
+- I don't know. Maybe.
+
+00:28:53.233 --> 00:28:54.693 position:50%
+- Dr. Robinavitch, hi.
+
+00:28:54.734 --> 00:28:56.027 position:50%
+I just wanted to apologize
+for any trouble
+
+00:28:56.111 --> 00:28:57.404 position:50%
+my clumsiness
+might have caused.
+
+00:28:57.445 --> 00:28:58.738 position:50%
+I feel ridiculous.
+
+00:28:58.780 --> 00:29:00.073 position:50%
+- Oh, I can't tell
+how many times
+
+00:29:00.115 --> 00:29:01.366 position:50%
+I've hit my head
+on an overhead lamp.
+
+00:29:01.449 --> 00:29:03.243 position:50%
+Twice I needed to get staples.
+
+00:29:03.284 --> 00:29:05.745 position:50%
+Why don't you go work
+with Dr. McKay in triage?
+
+00:29:05.787 --> 00:29:07.539 position:50%
+That would help both of us.
+
+00:29:07.580 --> 00:29:10.041 position:50%
+- Oh, I--I don't need
+special treatment.
+
+00:29:10.083 --> 00:29:11.334 position:50%
+- Good,
+because I don't give it.
+
+00:29:11.418 --> 00:29:12.669 position:50%
+[exhales]
+
+00:29:14.170 --> 00:29:15.588 position:50%
+- Look, I know
+I might look too young,
+
+00:29:15.630 --> 00:29:17.757 position:50%
+but I studied
+my ass off to get here.
+
+00:29:17.799 --> 00:29:19.884 position:50%
+Probably harder
+than the others.
+
+00:29:19.968 --> 00:29:21.302 position:50%
+I earned this.
+
+00:29:21.386 --> 00:29:23.471 position:50%
+- OK, look, I respect
+your dedication
+
+00:29:23.555 --> 00:29:25.390 position:50%
+and your determination,
+but while you're here,
+
+00:29:25.473 --> 00:29:26.766 position:50%
+you're my responsibility.
+
+00:29:26.808 --> 00:29:27.976 position:50%
+And when one
+of my responsibilities
+
+00:29:28.059 --> 00:29:29.644 position:50%
+takes a header--wow!
+
+00:29:29.728 --> 00:29:31.146 position:50%
+Abbot called
+for a surgical consult
+
+00:29:31.229 --> 00:29:32.439 position:50%
+on the SBO three hours ago.
+
+00:29:32.522 --> 00:29:33.732 position:50%
+You're very lucky
+they didn't perf.
+
+00:29:33.815 --> 00:29:35.608 position:50%
+- I'm here to see my daughter.
+
+00:29:35.692 --> 00:29:37.110 position:50%
+- I'm sorry, is that a patient?
+
+00:29:37.152 --> 00:29:38.737 position:50%
+- You're talking to her.
+
+00:29:41.156 --> 00:29:42.574 position:50%
+Am I interrupting?
+
+00:29:42.657 --> 00:29:44.117 position:50%
+- No.
+
+00:29:44.200 --> 00:29:46.286 position:50%
+No, we're done.
+We're good.
+
+00:29:46.369 --> 00:29:48.121 position:50%
+Come find me when you're ready
+to present your next case.
+
+00:29:48.204 --> 00:29:49.330 position:50%
+- Thank you.
+
+00:29:51.041 --> 00:29:53.084 position:50%
+- So how's your
+first day going?
+
+00:29:53.126 --> 00:29:54.377 position:50%
+- It's great.
+- Yeah?
+
+00:29:54.461 --> 00:29:55.754 position:50%
+- Yeah, really great.
+
+00:29:55.837 --> 00:29:57.797 position:50%
+- Hey, Crash,
+they're doing a dialysis
+
+00:29:57.839 --> 00:29:59.591 position:50%
+catheter insertion in North One
+if you want to check it out.
+
+00:29:59.674 --> 00:30:00.967 position:50%
+- Mm-hmm.
+
+00:30:01.051 --> 00:30:02.886 position:50%
+The thing--
+- Did she say Crash?
+
+00:30:02.969 --> 00:30:04.137 position:50%
+- No.
+
+00:30:04.179 --> 00:30:05.805 position:50%
+No, no, it's not crash.
+
+00:30:05.889 --> 00:30:08.433 position:50%
+Um, she said crush,
+'cause I'm always crushing it.
+
+00:30:08.516 --> 00:30:10.977 position:50%
+[chuckles]
+
+00:30:11.019 --> 00:30:12.812 position:50%
+Um, thanks for coming down,
+Mom, but I've--
+
+00:30:12.854 --> 00:30:14.564 position:50%
+I've got a patient.
+
+00:30:14.647 --> 00:30:15.690 position:50%
+Bye.
+
+00:30:25.158 --> 00:30:26.826 position:50%
+- What do you want?
+
+00:30:26.868 --> 00:30:29.662 position:50%
+- Um, I--I just wanted to make
+sure you're comfortable.
+
+00:30:29.704 --> 00:30:34.209 position:50%
+- I am taking a dump
+in a dustpan,
+
+00:30:34.292 --> 00:30:36.169 position:50%
+so what's that
+fucking tell you?
+
+00:30:36.252 --> 00:30:37.796 position:50%
+- Um, I'm--
+
+00:30:37.837 --> 00:30:39.464 position:50%
+I'm clearly--
+I'm clearly in the wrong room.
+
+00:30:39.547 --> 00:30:40.465 position:50%
+- Yeah.
+- I'm sorry.
+
+00:30:40.548 --> 00:30:42.175 position:50%
+- Mm-hmm.
+
+00:30:42.258 --> 00:30:44.719 position:50%
+[grunts, splatters]
+</file>
+
+<file path="utils/functions/checkForExistingLocalReverseTranslation.ts">
+function helperFn(phrase: string) {
+    if (!phrase || phrase.length === 0) return null
+
+    if (window.reverseTranslations[phrase]) {
+        return window.reverseTranslations[phrase]
+    }
+    return null
+}
+export default function checkForExistingLocalReverseTranslation(
+    phrase: string
+) {
+    // pre-processing
+    const trimmedPhrase = (phrase = phrase?.trim())
+    const existingReverseTranslation =
+        helperFn(trimmedPhrase) ??
+        helperFn(trimmedPhrase.replace(/\<br\>/gi, "<br/>")) ??
+        helperFn(trimmedPhrase.replace(/\<br\/\>/gi, "<br>"))
+    return existingReverseTranslation
+}
+</file>
+
+<file path="utils/functions/checkForExistingLocalTranslation.ts">
+function helperFn(phrase: string) {
+    if (!phrase || phrase.length === 0) return null
+
+    if (window.localTranslations[phrase]) {
+        return window.localTranslations[phrase]
+    }
+    return null
+}
+export default function checkForExistingLocalTranslation(phrase: string) {
+    // pre-processing
+    const trimmedPhrase = (phrase = phrase?.trim())
+    const existingTranslation =
+        helperFn(trimmedPhrase) ??
+        helperFn(trimmedPhrase.replace(/\<br\>/gi, "<br/>")) ??
+        helperFn(trimmedPhrase.replace(/\<br\/\>/gi, "<br>"))
+    return existingTranslation
+}
+</file>
+
+<file path="utils/functions/checkForExistingReverseTranslation.ts">
+import { getShowCachedReverseTranslations } from "~utils/functions/cachedTranslations"
+import checkForExistingLocalReverseTranslation from "~utils/functions/checkForExistingLocalReverseTranslation"
+
+function helperFn(reverseTranslations: Record<string, string>, phrase: string) {
+    if (!phrase || phrase.length === 0) return null
+
+    const existingLocalReverseTrans =
+        checkForExistingLocalReverseTranslation(phrase)
+    if (existingLocalReverseTrans) {
+        return existingLocalReverseTrans
+    } else if (reverseTranslations[phrase]) {
+        return reverseTranslations[phrase]
+    }
+    return null
+}
+
+export default async function checkForExistingReverseTranslation(
+    phrase: string
+) {
+    const reverseTranslations = await getShowCachedReverseTranslations(
+        window.currentShowId,
+        window.polledSettings.TARGET_LANGUAGE
+    )
+    // pre-processing
+    const trimmedPhrase = phrase?.trim()
+    const existingReverseTranslation =
+        helperFn(reverseTranslations, trimmedPhrase) ??
+        helperFn(
+            reverseTranslations,
+            trimmedPhrase.replace(/\<br\>/gi, "<br/>")
+        ) ??
+        helperFn(
+            reverseTranslations,
+            trimmedPhrase.replace(/\<br\/\>/gi, "<br>")
+        )
+    return existingReverseTranslation
+}
+</file>
+
+<file path="utils/functions/checkForExistingTranslation.ts">
+import checkForExistingLocalTranslation from "~utils/functions/checkForExistingLocalTranslation"
+
+import { getShowCachedTranslations } from "./cachedTranslations"
+
+function helperFn(translations: Record<string, string>, phrase: string) {
+    if (!phrase || phrase.length === 0) return null
+
+    const existingLocalTrans = checkForExistingLocalTranslation(phrase)
+    if (existingLocalTrans) {
+        return existingLocalTrans
+    } else if (translations[phrase]) {
+        return translations[phrase]
+    }
+    return null
+}
+export default async function checkForExistingTranslation(phrase: string) {
+    const translations = await getShowCachedTranslations(
+        window.currentShowId,
+        window.polledSettings.TARGET_LANGUAGE
+    )
+    // pre-processing
+    const trimmedPhrase = (phrase = phrase?.trim())
+    const existingTranslation =
+        helperFn(translations, trimmedPhrase) ??
+        helperFn(translations, trimmedPhrase.replace(/\<br\>/gi, "<br/>")) ??
+        helperFn(translations, trimmedPhrase.replace(/\<br\/\>/gi, "<br>"))
+    return existingTranslation
+}
+</file>
+
+<file path="utils/functions/checkIfSentenceIgnored.ts">
+function helperFn(phrase: string) {
+    if (!phrase || phrase.length === 0) return false
+
+    if (window.doNotTouchSentences[phrase]) {
+        return true
+    }
+    return false
+}
+export default function checkIfSentenceIgnored(phrase: string) {
+    // pre-processing
+    const trimmedPhrase = phrase?.trim()
+    const testAsIs = helperFn(trimmedPhrase)
+    const testWithBrSlashes = helperFn(
+        trimmedPhrase.replace(/<br\s*\/?>/g, "<br/>")
+    )
+    const testWithBrTags = helperFn(
+        trimmedPhrase.replace(/<br\s*\/?>/g, "<br>")
+    )
+    const testWithBrTagsAndSlashes = helperFn(
+        trimmedPhrase.replace(/<br\s*\/?>/g, "<br>")
+    )
+    const isIgnored =
+        testAsIs ||
+        testWithBrSlashes ||
+        testWithBrTags ||
+        testWithBrTagsAndSlashes
+    return isIgnored
+}
+</file>
+
+<file path="utils/functions/updateTranslations.ts">
+import changeText from "./changeText"
+import getLiveElement from "./getLiveElement"
+
+export default function updateTranslations(
+    currentText: string,
+    translatedText: string
+) {
+    // pre-processing
+    currentText = currentText?.trim()
+    translatedText = translatedText?.trim()
+
+    if (!currentText || currentText.length === 0) return
+    if (!translatedText || translatedText.length === 0) return
+
+    // update the cache
+    window.localTranslations[currentText] = translatedText
+    window.reverseTranslations[translatedText] = currentText
+
+    // update the displayed text
+    const liveElement = getLiveElement(currentText)
+    changeText(liveElement, translatedText)
+}
+</file>
+
+<file path="utils/index.ts">
+import $ from "jquery"
+
+import { SITE_WATCHERS } from "~utils/constants"
+
+import onClick from "./handlers/onClick"
+
+export function observeSection(
+    section: HTMLElement,
+    doOnMutation: (mutation: MutationRecord) => void
+) {
+    // Options for the observer (which mutations to observe)
+    const config = {
+        childList: true,
+        subtree: true
+    }
+
+    // Create an observer instance linked to the callback function
+    const observer = new MutationObserver((mutationList) => {
+        for (const mutation of mutationList) {
+            doOnMutation(mutation)
+        }
+    })
+
+    // Start observing the target node for configured mutations
+    observer.observe(section, config)
+}
+
+export function waitForElement(
+    selector,
+    customDom?: Document
+): Promise<HTMLElement> {
+    if (customDom) {
+        return new Promise((resolve) => {
+            if (customDom.querySelector(selector)) {
+                return resolve(customDom.querySelector(selector))
+            }
+
+            const observer = new MutationObserver(() => {
+                if (customDom.querySelector(selector)) {
+                    resolve(customDom.querySelector(selector))
+                    observer.disconnect()
+                }
+            })
+
+            observer.observe(customDom.body, {
+                childList: true,
+                subtree: true
+            })
+        })
+    }
+    return new Promise((resolve) => {
+        if (document.querySelector(selector)) {
+            return resolve(document.querySelector(selector))
+        }
+
+        const observer = new MutationObserver(() => {
+            if (document.querySelector(selector)) {
+                resolve(document.querySelector(selector))
+                observer.disconnect()
+            }
+        })
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        })
+    })
+}
+
+export function removeNoPointerEvents(
+    element: HTMLElement | JQuery<HTMLElement> | Node
+) {
+    $(element).css("pointer-events", "all")
+    $(element).css("user-select", "auto")
+    $(element).css("zindex", 1000)
+    $(element).css("z-index", 1000)
+}
+
+export function insideWhichDiv(
+    event: JQuery.ClickEvent | JQuery.ContextMenuEvent
+) {
+    const mouseX = event.clientX
+    const mouseY = event.clientY
+    const { captionElement } = SITE_WATCHERS[window.usingSite]
+
+    const divElements = document.querySelectorAll(captionElement)
+    for (const divElement of divElements) {
+        const isInside = isMouseInsideDiv(mouseX, mouseY, divElement)
+        if (isInside) {
+            return divElement
+        }
+    }
+    return null
+}
+
+export function isYellow(elem: JQuery<EventTarget | HTMLElement>) {
+    // if element has children, check those too for isYellow
+    const childIsYellow = () => {
+        let b = false
+        $(elem)
+            .children()
+            .each((_, child) => {
+                if (isYellow($(child))) {
+                    b = true
+                }
+            })
+        return b
+    }
+    return $(elem).children().length > 0 && childIsYellow()
+        ? true
+        : $(elem).css("color") === "yellow" ||
+              $(elem).css("color") === "rgb(255, 255, 0)"
+}
+
+export function isMouseInsideDiv(mouseX, mouseY, divElement) {
+    const rect = divElement.getBoundingClientRect()
+
+    // Check if the mouse coordinates are within the bounds of the div's rectangle
+    if (
+        mouseX >= rect.left &&
+        mouseX <= rect.right &&
+        mouseY >= rect.top &&
+        mouseY <= rect.bottom
+    ) {
+        return true
+    } else {
+        return false
+    }
+}
+
+export function isVideoPaused() {
+    const video = $("video")
+    var videoElement = video.get(0) as HTMLVideoElement
+
+    return videoElement.paused
+}
+
+export function checkStopPropagation(event) {
+    if (isVideoPaused()) {
+        event.stopPropagation()
+        return true
+    }
+}
+
+export function removeElementSiblings(element: HTMLElement) {
+    $(element).siblings().remove()
+}
+
+export function download(file: File) {
+    const link = document.createElement("a")
+    const url = URL.createObjectURL(file)
+
+    link.href = url
+    link.download = file.name
+    document.body.appendChild(link)
+    link.click()
+
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+}
+</file>
+
+<file path="utils/localData.ts">
+/* eslint-disable no-console */
+import { Storage } from "@plasmohq/storage"
+
+import logDev from "./functions/logDev"
+
+export type LocalData = NetflixToAnkiData & UserSettings
+
+export type NetflixToAnkiData = {
+    NATIVE_LANGUAGE?: string
+    NETFLIX_TO_ANKI_TRANSLATIONS_BY_ID?: TranslationsCache
+    NEED_TO_STUDY?: Record<string, string>
+    TRANSLATION_STATUS?: {
+        TRANSLATED_CURRENT: number
+        TOTAL_SENTENCES: number
+    }
+}
+
+export type UserSettings = {
+    TARGET_LANGUAGE: string
+    API_KEY: string
+    TRANSLATE_WHEN: "always" | "on_pause" | "custom_key"
+    CUSTOM_TRANSLATE_KEY: string // only used when TRANSLATE_WHEN is custom_key
+    HULU_ENABLED: boolean
+    NETFLIX_ENABLED: boolean
+    HBOMAX_ENABLED: boolean
+    TUBI_ENABLED: boolean
+}
+
+// {"243534233": {"french": {"lastUpdated": 1234234, "sentences": {"sentence": "translation"}}}}
+export type TranslationsCache = Record<
+    string, // show id
+    TranslationsCacheShow
+>
+
+export type TranslationsCacheShow = Record<
+    string, // language
+    TranslationsCacheShowLanguage
+>
+export type TranslationsCacheShowLanguage = {
+    sentences: Record<string, string>
+    lastUpdated: number // os.time()
+}
+
+// {"243534233": {"french": {"lastUpdated": 1234234, "sentences": ["sentence1", "sentence2"]}}}
+export type UntranslatedCache = Record<string, UntranslatedCacheShow>
+export type UntranslatedCacheShow = Record<string, string[]>
+
+export type BooleanKeys<T> = {
+    [K in keyof T]: T[K] extends boolean ? K : never
+}[keyof T]
+
+export type BooleanUserSettings = Record<BooleanKeys<UserSettings>, boolean>
+
+const storage = new Storage()
+const localStorage = new Storage({
+    area: "local"
+})
+
+export function getData<Key extends keyof LocalData, Value = LocalData[Key]>(
+    key: Key,
+    mode: "local" | "sync" = "local"
+) {
+    if (!key && key === null) {
+        return null
+    }
+
+    const getDataPromise = new Promise(
+        (resolve: (value: Value) => void, reject) => {
+            try {
+                if (mode && mode === "local") {
+                    localStorage.get("" + key).then((result) => {
+                        // logDev("Fetching data: returning ",result[key]);
+                        const res = result
+                        // logDev("Response is ", res)
+                        resolve(res as Value)
+                    })
+                } else {
+                    storage.get("" + key).then((result) => {
+                        // logDev("Fetching data: returning ",result[key]);
+                        const res = result
+                        // logDev("Response is ", res)
+                        resolve(res as Value)
+                    })
+                }
+            } catch (err) {
+                logDev("Error getting data: " + err)
+                reject(false)
+            }
+        }
+    )
+
+    return getDataPromise
+}
+export function setData<Key extends keyof LocalData, Value = LocalData[Key]>(
+    key: Key,
+    value: Value,
+    mode: "local" | "sync" = "local"
+) {
+    if ((!key && key === null) || (!value && value === null)) {
+        return new Promise((resolve, reject) => {
+            try {
+                resolve(false)
+            } catch {
+                reject(false)
+            }
+        })
+    }
+
+    const setDataPromise = new Promise((resolve, reject) => {
+        try {
+            if (mode && mode === "local") {
+                localStorage.set("" + key, value).then(function () {
+                    // logDev(key,' is set succesfully to ',value);
+                    resolve(true)
+                })
+            } else {
+                storage.set("" + key, value).then(function () {
+                    // logDev(key,' is set succesfully to ',value);
+                    resolve(true)
+                })
+            }
+        } catch (err) {
+            logDev("Error setting data: " + err)
+            reject(false)
+        }
+    })
+
+    return setDataPromise
+}
+</file>
+
+<file path=".gitignore">
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# local env files
+.env*.local
+
+out/
+build/
+dist/
+
+# plasmo
+.plasmo
+
+# typescript
+.tsbuildinfo
+
+# env
+.env
+
+# yarn.lock
+yarn.lock
+
+# package-lock.json
+package-lock.json
+repomix-output.xml
+</file>
+
+<file path="privacy-policy.md">
+# This extension scrapes subtitles from the shows or movies that a user is watching on Netflix + Hulu.
+
+# It also stores a Gemini API key provided by the user.
+
+# This API Key is further used to translate subtitles intercepted from Netflix + Hulu.
+
+# This extension should only be used with the user's explicit consent.
+</file>
+
+<file path="background/messages/catch_srt_site_subtitles.ts">
+import SRTParser from "srt-parser-2"
+
+import type { PlasmoMessaging } from "@plasmohq/messaging"
+
+import type { CatchSiteSubtitlesResponse } from "~background/types/CatchSiteSubtitlesResponse"
+import type { CatchVTTSiteSubtitlesRequest } from "~background/types/CatchVTTSiteSubtitlesRequest"
+import logDev from "~utils/functions/logDev"
+
+const handler: PlasmoMessaging.MessageHandler<
+    CatchVTTSiteSubtitlesRequest,
+    CatchSiteSubtitlesResponse
+> = async (req, res) => {
+    const { message } = req.body
+    logDev("MSG RECEIVED", req.body.message, req.body)
+
+    if (typeof message?.response !== "string") {
+        logDev(
+            "Invalid response format. Expected string, got:",
+            typeof message?.response
+        )
+        return res.send({})
+    }
+
+    if (!message.response.trim()) {
+        logDev("Received an empty SRT string. No subtitles found.")
+        return res.send({})
+    }
+
+    // Create a new SRT parser instance
+    const parser = new SRTParser()
+    const subtitles = parser.fromSrt(message.response)
+
+    const allSentencesSet = new Set<string>()
+
+    logDev("Extracted subtitle data:", subtitles)
+
+    subtitles.forEach((subtitle) => {
+        const text = subtitle.text?.trim()
+        if (text) {
+            // Replace new lines with <br/> and combine the full sentence
+            const combinedText = text.replace(/\n/g, "<br/>")
+            allSentencesSet.add(combinedText)
+        }
+    })
+
+    logDev("All unique sentences:", allSentencesSet)
+    const allSentencesArray: string[] = Array.from(allSentencesSet)
+    res.send({ site_sentences: allSentencesArray })
+}
+
+export default handler
+</file>
+
+<file path="background/types/CatchSiteSubtitlesResponse.ts">
+export type CatchSiteSubtitlesResponse =
+    | {
+          site_sentences: Array<string>
+          error?: never
+      }
+    | {
+          error: string
+          site_sentences?: never
+      }
+    | {
+          error?: never
+          site_sentences?: never
+      }
+</file>
+
+<file path="background/utils/functions/processGeminiResponse.ts">
+// example bad json
+// "Get it, put it on,\nlet's meet back here in one hour.": "Tómalo, pontelo,\nnos encontramos aquí en una hora.", "I'll text you the details.": "Te enviaré un mensaje de texto con los detalles.", "Whoa, whoa, wait.\nWhere are we going?": "Whoa, whoa, espera.\n¿A dónde vamos?", "-DC.\n-DC?": "-DC.\n-¿DC?", "Yeah. My jet's fueled up\nand on the runway.": "Sí. Mi avión está abastecido\ny en la pista.", "I think I can get you all of the data\nyou could ever need.": "Creo que puedo obtener todos los datos\nque puedas necesitar.", "[retching and coughing]": "[arcadas y tos]", "He said his stomach hurt\nand then he started throwing up.": "Dijo que le dolía el estómago\ny luego comenzó a vomitar.", "[groans] Dying, hurts like dying.": "[gime] Morir, duele como morir.", "-Need me?\n-Heart rate is 176.": "-¿Me necesitas?\n-La frecuencia cardíaca es de ciento setenta y seis.", "He's in AFib with RVR.": "Está en fibrilación auricular con respuesta ventricular rápida.", "All right, let's get 20 of diltiazem.": "Está bien, vamos a obtener veinte de diltiazem.", "-[grunts]\n-Let's get a liter of normal saline": "-[gruñe]\n-Vamos a obtener un litro de solución salina normal", "and give four of ondansetron.": "y administremos cuatro de ondansetrón.", "[Jonesy groaning]": "[Jonesy gimiendo]", "[panting]": "[jadeando]", "-[Irving] Deep breaths.\n-[exhales]": "-[Irving] Respira hondo.\n-[exhala]", "[machine beeping steadily]": "[la máquina pita de forma constante]", "-That's better.\n-Okay, let's get him to CT,": "-Eso está mejor.\n-Está bien, vamos a llevarlo a la tomografía computarizada,", "-see what's going on.\n-I don't know what happened,": "-para ver qué pasa.\n-No sé qué pasó,", "We were sitting here the whole time.\nExcept for when I went to the…": "Estuvimos sentados aquí todo el tiempo.\nExcepto cuando fui a la…", "Open your mouth.": "Abre la boca.", "[sniffs]": "[huele]", "[gasps] You ate a death cookie.": "[jadeando] Comiste una galleta de la muerte.", "Jonesy knows he's allergic to gluten.": "Jonesy sabe que es alérgico al gluten.", "Yeah, he also knows that eating it\nhelps him stay on his stupid horse.": "Sí, también sabe que comerlo\nle ayuda a mantenerse en su estúpido caballo."]
+// }
+
+export default function processGeminiResponse(
+    json: string
+): Record<string, string> {
+    if (!json) return {}
+    // if the last character is ], replace it with } this is a common gemini mistake
+    // if the first character is [, replace it with { this is a less common gemini mistake
+    // Sometimes the json can end in multiple ]s, so we need to kill all of them except one.
+    return fixJSON(json)
+}
+
+function fixJSON(
+    jsonString: string,
+    retries = 0
+): Record<string, string> | null {
+    if (retries > 10) {
+        throw new Error("Too many retries parsing JSON")
+    }
+    try {
+        // Remove Markdown-style backticks and "json" if present
+        jsonString = jsonString.replace(/```json|```/g, "").trim()
+
+        // Attempt to parse the JSON
+        const parsed = JSON.parse(jsonString)
+        return parsed // If successful, return the parsed object
+    } catch (error) {
+        // Trim the string to remove extra spaces or newlines
+        jsonString = jsonString.trim()
+
+        // Try to fix common JSON errors
+        if (jsonString[0] !== "{") {
+            jsonString = "{" + jsonString // Add a missing opening brace
+        }
+        if (jsonString[jsonString.length - 1] !== "}") {
+            jsonString += "}" // Add a missing closing brace
+        }
+
+        // Remove trailing commas
+        jsonString = jsonString.replace(/,(\s*[}\]])/g, "$1")
+
+        // Handle escaped characters that might cause issues
+        jsonString = jsonString.replace(/\\'/g, "'")
+        jsonString = jsonString.replace(/\\"/g, '"')
+
+        // Recursively retry fixing the JSON
+        return fixJSON(jsonString, retries + 1)
+    }
+}
+</file>
+
+<file path="contents/batchTranslateSubtitles.ts">
+import { sendToBackground } from "@plasmohq/messaging"
+
+import type {
+    GeminiSingleRequestBody,
+    GeminiSingleRequestResponse
+} from "~background/types"
+import type { GeminiGetLocaleRequest } from "~background/types/GeminiGetLocaleRequest"
+import type { GeminiGetLocaleResponse } from "~background/types/GeminiGetLocaleResponse"
+import { BATCH_SIZE, MAX_TRANSLATE_RETRIES } from "~utils/constants"
+import { setAllCachedTranslations } from "~utils/functions/cachedTranslations"
+import delay from "~utils/functions/delay"
+import getAlreadyTranslatedSentences from "~utils/functions/getAlreadyTranslatedSentences"
+import {
+    getBatchWaitTime,
+    getMiniBatchWaitTime
+} from "~utils/functions/getBatchWaitTimes"
+import getUntranslatedSentences from "~utils/functions/getUntranslatedSentences"
+import logDev from "~utils/functions/logDev"
+import updateUntranslatedSentences from "~utils/functions/updateUntranslatedSentences"
+
+type BatchPromise = {
+    newSentences: Record<string, string>
+    checkQuotaExceeded?: boolean
+}
+const batchPromise = (
+    phrases: string[],
+    locale: string,
+    showId: string,
+    targetLanguage: string,
+    videoSentences: string[]
+) =>
+    new Promise<BatchPromise>((resolve) => {
+        sendToBackground({
+            name: "gemini_translate",
+            body: {
+                phrases: phrases,
+                sentencesLocale: locale,
+                targetLanguage: targetLanguage
+            } as GeminiSingleRequestBody
+        }).then(async (response: GeminiSingleRequestResponse) => {
+            try {
+                if (response?.error) {
+                    throw response.error
+                }
+                // Initialize to include members of videoSentences that are in NETFLIX_TO_ANKI_TRANSLATIONS
+                const collectedSentences = await getAlreadyTranslatedSentences(
+                    showId,
+                    targetLanguage,
+                    videoSentences
+                )
+                const previousCollectedSentencesCount =
+                    Object.keys(collectedSentences).length
+
+                if (
+                    response.translatedPhrases &&
+                    Object.keys(response.translatedPhrases).length > 0
+                ) {
+                    for (const key in response.translatedPhrases) {
+                        // key should be native language, value should be target language
+                        collectedSentences[key?.trim()] =
+                            response.translatedPhrases[key]?.trim()
+                    }
+                } else {
+                    throw new Error(
+                        "No translated phrases in response from Gemini."
+                    )
+                }
+                await updateUntranslatedSentences(
+                    showId,
+                    targetLanguage,
+                    Object.keys(collectedSentences)
+                )
+                logDev(
+                    `LANG [${targetLanguage}] SHOW [${showId}]`,
+                    "ASYNC FORK # of sentences translated this time: ",
+                    Object.keys(response.translatedPhrases).length
+                )
+                if (
+                    Object.keys(collectedSentences).length >=
+                    previousCollectedSentencesCount
+                ) {
+                    setAllCachedTranslations(
+                        showId,
+                        targetLanguage,
+                        collectedSentences
+                    )
+                    resolve({ newSentences: collectedSentences })
+                } else {
+                    throw new Error("No new sentences translated.")
+                }
+            } catch (e) {
+                resolve({
+                    newSentences: {},
+                    checkQuotaExceeded: response?.error?.status === 429
+                })
+            }
+        })
+    })
+
+export default async function batchTranslateSubtitles(
+    showId: string,
+    targetLanguage: string,
+    videoSentences: string[],
+    retries: number
+) {
+    if (retries === 0) {
+        // this is being initialized. check if we are already translating for this combination of showId and targetLanguage.
+        if (window.untranslatedSentencesCache?.[showId]?.[targetLanguage]) {
+            // already translating
+            logDev(
+                `LANG [${targetLanguage}] SHOW [${showId}]`,
+                `Already translating for this ${showId} and ${targetLanguage}`
+            )
+            return
+        } else {
+            logDev(
+                `LANG [${targetLanguage}] SHOW [${showId}]`,
+                "Begin translating for ",
+                showId,
+                targetLanguage,
+                "# videoSentences: ",
+                videoSentences.length
+            )
+            await updateUntranslatedSentences(
+                showId,
+                targetLanguage,
+                videoSentences
+            )
+        }
+    }
+    retries++
+
+    const alreadyTranslatedSentences = await getAlreadyTranslatedSentences(
+        showId,
+        targetLanguage,
+        videoSentences
+    )
+
+    const untranslatedSentences = getUntranslatedSentences(
+        showId,
+        targetLanguage
+    )
+
+    logDev(
+        `LANG [${targetLanguage}] SHOW [${showId}]`,
+        "Before translating: #",
+        Object.keys(alreadyTranslatedSentences).length,
+        "already translated sentences",
+        "and #",
+        untranslatedSentences.length,
+        "untranslated sentences",
+        "On retry #",
+        retries,
+        "And full cache object: ",
+        window.untranslatedSentencesCache
+    )
+    // don't do looping if nothing to translate or too many retries
+    if (retries >= MAX_TRANSLATE_RETRIES || !untranslatedSentences) {
+        setTimeout(
+            () =>
+                batchTranslateSubtitles(
+                    showId,
+                    targetLanguage,
+                    videoSentences,
+                    retries
+                ),
+            getBatchWaitTime(targetLanguage, retries) * 2
+        )
+        return // stop looping
+    }
+
+    const USE_BATCH_SIZE = Math.ceil(
+        (BATCH_SIZE > untranslatedSentences.length
+            ? untranslatedSentences.length
+            : BATCH_SIZE) / retries
+    ) // diminishing batch size
+
+    // Just get the locale
+    const dummyArrayForLocale =
+        untranslatedSentences.length > BATCH_SIZE / 2
+            ? untranslatedSentences.slice(0, BATCH_SIZE / 2)
+            : Object.keys(alreadyTranslatedSentences).slice(0, BATCH_SIZE / 2)
+    const sentencesLocale: GeminiGetLocaleResponse = await sendToBackground({
+        name: "gemini_get_locale",
+        body: {
+            targetLanguage: targetLanguage,
+            sentences: dummyArrayForLocale
+        } as GeminiGetLocaleRequest
+    })
+    if (!sentencesLocale?.locale || sentencesLocale?.error) {
+        console.error("Error getting locale: ", sentencesLocale?.error)
+        setTimeout(
+            () =>
+                batchTranslateSubtitles(
+                    showId,
+                    targetLanguage,
+                    videoSentences,
+                    retries
+                ),
+            getBatchWaitTime(targetLanguage, retries) * 2
+        )
+        return
+    }
+
+    // Split into BATCH_SIZE sentences from the untranslatedSentences
+    const allPromises = []
+
+    logDev(
+        `LANG [${targetLanguage}] SHOW [${showId}]`,
+        "Allocating batches of size ",
+        USE_BATCH_SIZE,
+        "and there are ",
+        untranslatedSentences.length,
+        "untranslated sentences"
+    )
+    for (let i = 0; i < untranslatedSentences.length; i += USE_BATCH_SIZE) {
+        await delay(
+            getMiniBatchWaitTime(targetLanguage, retries) * ((retries + 1) / 2)
+        )
+        allPromises.push(
+            batchPromise(
+                untranslatedSentences.slice(i, i + USE_BATCH_SIZE),
+                sentencesLocale.locale,
+                showId,
+                targetLanguage,
+                videoSentences
+            )
+        )
+    }
+
+    let hadCheckQuotaExceeded = false
+    await Promise.all(allPromises).then((results: BatchPromise[]) => {
+        getAlreadyTranslatedSentences(showId, targetLanguage, videoSentences)
+            .then((allTranslations: Record<string, string>) => {
+                let newSentences = allTranslations
+
+                // if one of the results had checkQuotaExceeded, set hadCheckQuotaExceeded to true
+                hadCheckQuotaExceeded = results.some(
+                    (res) => res.checkQuotaExceeded
+                )
+                for (const result of results) {
+                    if (result.newSentences) {
+                        newSentences = {
+                            ...newSentences,
+                            ...result.newSentences
+                        }
+                    }
+                }
+                // update cached translations
+                setAllCachedTranslations(showId, targetLanguage, newSentences)
+                logDev(
+                    `LANG [${targetLanguage}] SHOW [${showId}]`,
+                    "FINAL # of sentences translated: ",
+                    Object.keys(newSentences).length,
+                    "# sentences remaining: ",
+                    untranslatedSentences.length,
+                    "of total sentences ",
+                    videoSentences.length
+                )
+            })
+            .finally(() => {
+                setTimeout(
+                    () =>
+                        batchTranslateSubtitles(
+                            showId,
+                            targetLanguage,
+                            videoSentences,
+                            retries
+                        ),
+                    getBatchWaitTime(targetLanguage, retries) *
+                        (hadCheckQuotaExceeded ? 2 : 1)
+                )
+            })
+    })
+}
+</file>
+
+<file path="styles/globals.scss">
+// Import Bootstrap's default variables first
+@import '~bootstrap/scss/functions';
+@import '~bootstrap/scss/variables';
+
+// Define your custom colors
+$primary: #81bfb9;
+$secondary: #898989;
+$tertiary: #104F55;
+$grey-500: #525252;
+$grey-400: #737373;
+$grey-300: #D4D4D4;
+
+// Define the new theme colors
+$custom-theme-colors: (
+  "grey-300": $grey-300,
+  "grey-400": $grey-400,
+  "grey-500": $grey-500,
+  "primary": $primary,
+  "secondary": $secondary
+);
+
+// Merge the default theme colors with your custom ones
+$theme-colors: map-merge($theme-colors, $custom-theme-colors);
+
+.btn-tertiary {
+  background-color: $tertiary !important;
+  color: white !important;
+  border-color: $tertiary !important;
+}
+.btn-secondary:hover {
+  background-color: darken($tertiary, 10%) !important;
+}
+
+img {
+  object-fit: contain
+}
+
+// Now import Bootstrap to apply the changes
+@import '~bootstrap/scss/bootstrap';
+</file>
+
+<file path="styles/settings.module.css">
+.flexRow {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.flexRow > label {
+    flex: 3;
+}
+
+.flexRow > input {
+    flex: 6;
+}
+
+.flexCol {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.gap16 {
+    gap: 16px;
+}
+
+.gap4 {
+    gap: 4px;
+}
+
+button {
+    height: 40px;
+    width: 100%;
+}
+</file>
+
+<file path="tabs/sentence-browser.tsx">
+import { useEffect, useState } from "react"
+import { Container, Form, Table } from "react-bootstrap"
+
+import { getShowCachedTranslations } from "~utils/functions/cachedTranslations"
+
+import "~styles/globals.scss"
+
+type Sentence = {
+    original: string
+    translated: string
+}
+
+export default function SentenceBrowser() {
+    const [showId, setShowId] = useState<string | null>(null)
+    const [targetLanguage, setTargetLanguage] = useState<string | null>(null)
+    const [sentences, setSentences] = useState<Sentence[]>([])
+    const [searchTerm, setSearchTerm] = useState<string>("")
+    const [filteredSentences, setFilteredSentences] = useState<Sentence[]>([])
+
+    useEffect(() => {
+        // Extract parameters from the URL
+        const params = new URLSearchParams(window.location.search)
+        setShowId(params.get("showId"))
+        setTargetLanguage(params.get("targetLanguage"))
+    }, [])
+
+    useEffect(() => {
+        const fetchSentences = async () => {
+            if (!showId || !targetLanguage) {
+                console.error("Missing showId or targetLanguage in URL.")
+                return
+            }
+
+            // Fetch cached translations for the current show and target language
+            const cachedTranslations = await getShowCachedTranslations(
+                showId,
+                targetLanguage
+            )
+            const allSentences: Sentence[] = []
+
+            if (cachedTranslations) {
+                Object.entries(cachedTranslations).forEach(
+                    ([original, translated]) => {
+                        allSentences.push({ original, translated })
+                    }
+                )
+            }
+
+            setSentences(allSentences)
+            setFilteredSentences(allSentences)
+        }
+
+        fetchSentences()
+    }, [showId, targetLanguage])
+
+    useEffect(() => {
+        const filtered = sentences.filter(
+            (sentence) =>
+                sentence.original
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase()) ||
+                sentence.translated
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase())
+        )
+        setFilteredSentences(filtered)
+    }, [searchTerm, sentences])
+
+    return (
+        <Container className="mt-4">
+            <h2>Sentence Browser</h2>
+            <Form.Group className="mb-3" controlId="search">
+                <Form.Label>Search Sentences</Form.Label>
+                <Form.Control
+                    type="text"
+                    placeholder="Search by original or translated text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+            </Form.Group>
+            <Table striped bordered hover>
+                <thead>
+                    <tr>
+                        <th>Original Sentence</th>
+                        <th>Translated Sentence</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {filteredSentences.map((sentence, index) => (
+                        <tr key={index}>
+                            <td>{sentence.original}</td>
+                            <td>{sentence.translated}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </Table>
+        </Container>
+    )
+}
+</file>
+
+<file path="utils/functions/getAlreadyTranslatedSentences.ts">
+import { getShowCachedTranslations } from "~utils/functions/cachedTranslations"
+
+export default async function getAlreadyTranslatedSentences(
+    showId: string,
+    targetLanguage: string,
+    videoSentences: string[]
+): Promise<Record<string, string>> {
+    // Figure out what has already been translated.
+    const NETFLIX_TO_ANKI_TRANSLATIONS = await getShowCachedTranslations(
+        showId,
+        targetLanguage
+    )
+    const allTranslatedKeys =
+        NETFLIX_TO_ANKI_TRANSLATIONS &&
+        typeof NETFLIX_TO_ANKI_TRANSLATIONS === "object" &&
+        Object.keys(NETFLIX_TO_ANKI_TRANSLATIONS).length > 1
+            ? Object.keys(NETFLIX_TO_ANKI_TRANSLATIONS)
+            : []
+    const translatedFromThisShow = {}
+    for (const sentence of allTranslatedKeys) {
+        if (
+            videoSentences.includes(sentence) ||
+            videoSentences.includes(sentence?.trim())
+        ) {
+            translatedFromThisShow[sentence] =
+                NETFLIX_TO_ANKI_TRANSLATIONS[sentence]
+        }
+    }
+
+    return translatedFromThisShow
+}
+</file>
+
+<file path="utils/functions/pollStatus.ts">
+import { POLLING_STATUS_INTERVAL } from "~utils/constants"
+import getAlreadyTranslatedSentences from "~utils/functions/getAlreadyTranslatedSentences"
+import { setData } from "~utils/localData"
+
+export default function pollStatus() {
+    setTimeout(async () => {
+        const alreadyTranslatedSentences = await getAlreadyTranslatedSentences(
+            window.currentShowId,
+            window.polledSettings.TARGET_LANGUAGE,
+            window.cachedSiteSentences
+        )
+        await setData("TRANSLATION_STATUS", {
+            TRANSLATED_CURRENT: Object.keys(alreadyTranslatedSentences).length,
+            TOTAL_SENTENCES: window.cachedSiteSentences.length
+        })
+        pollStatus()
+    }, POLLING_STATUS_INTERVAL)
+}
+</file>
+
+<file path="utils/functions/updateUntranslatedSentences.ts">
+import getAlreadyTranslatedSentences from "~utils/functions/getAlreadyTranslatedSentences"
+import getUntranslatedSentences from "~utils/functions/getUntranslatedSentences"
+
+export default async function updateUntranslatedSentences(
+    showId: string,
+    targetLanguage: string,
+    videoSentences: string[]
+) {
+    const alreadyTranslatedSentences = await getAlreadyTranslatedSentences(
+        showId,
+        targetLanguage,
+        videoSentences
+    )
+    const savedUntranslatedSentences = getUntranslatedSentences(
+        showId,
+        targetLanguage
+    )
+    const snapshotSet = new Set<string>(
+        savedUntranslatedSentences.length > 0
+            ? savedUntranslatedSentences
+            : videoSentences
+    )
+
+    window.untranslatedSentencesCache = {
+        ...window.untranslatedSentencesCache,
+        [showId]: {
+            ...window.untranslatedSentencesCache?.[showId],
+            [targetLanguage]: Array.from(
+                snapshotSet.difference(
+                    new Set(Object.keys(alreadyTranslatedSentences))
+                )
+            )
+        }
+    }
+}
+</file>
+
+<file path="popup.tsx">
+import { useEffect, useState } from "react"
+
+import DisplayTranslationStatus from "~components/DisplayTranslationStatus"
+import DownloadAnkiDeck from "~components/DownloadAnkiDeck"
+import ResetAnkiDeck from "~components/ResetAnkiDeck"
+import styles from "~styles/popup.module.css"
+
+import "~styles/globals.scss"
+
+import { Button } from "~node_modules/react-bootstrap/esm"
+import getCurrentYear from "~utils/functions/getCurrentYear"
+import getNeedToStudyLength from "~utils/functions/getNeedToStudyLength"
+
+function IndexPopup() {
+    const [numberToStudy, setNumberToStudy] = useState<number>()
+    const [showId, setShowId] = useState<string | undefined>()
+    const [targetLanguage, setTargetLanguage] = useState<string | undefined>()
+
+    const updateNumberToStudy = () => {
+        getNeedToStudyLength().then((length) => {
+            setNumberToStudy(length)
+        })
+    }
+
+    useEffect(() => {
+        updateNumberToStudy()
+        const updateWindowVariables = () => {
+            chrome.runtime.sendMessage(
+                { type: "GET_WINDOW_VARIABLES" },
+                (response) => {
+                    if (response) {
+                        setShowId(response.currentShowId)
+                        setTargetLanguage(
+                            response.polledSettings?.TARGET_LANGUAGE
+                        )
+                    }
+                }
+            )
+        }
+
+        // on interval, update window variables every 10 seconds
+        const interval = setInterval(updateWindowVariables, 10000)
+        // on mount, update window variables
+        updateWindowVariables()
+        // on unmount, clear interval
+        return () => {
+            clearInterval(interval)
+        }
+    }, [])
+
+    const manifestData = chrome.runtime.getManifest()
+
+    return (
+        <div className={styles.container}>
+            <div className={`d-flex gap-2 flex-column`}>
+                <DownloadAnkiDeck
+                    numberToStudy={numberToStudy}
+                    useOptimized={false}
+                />
+                <DownloadAnkiDeck
+                    numberToStudy={numberToStudy}
+                    useOptimized={true}
+                />
+            </div>
+            {showId && targetLanguage ? (
+                <DisplayTranslationStatus
+                    showId={showId}
+                    targetLanguage={targetLanguage}
+                />
+            ) : (
+                <p>Loading translation status...</p>
+            )}
+            <div className={`${styles.flexRow} ${styles.spaceBetween}`}>
+                <Button
+                    variant="outline-secondary"
+                    className={styles.settingsButton}
+                    style={{ flex: 1, height: "100%", padding: "0" }}
+                    onClick={() => {
+                        chrome.tabs.create({
+                            url: `chrome-extension://${chrome.runtime.id}/tabs/onboarding.html`
+                        })
+                    }}>
+                    <span style={{ fontSize: ".7em" }}>⚙</span>
+                </Button>
+
+                <ResetAnkiDeck
+                    onReset={updateNumberToStudy}
+                    disabled={!numberToStudy}
+                    style={{ flex: 3 }}
+                />
+            </div>
+            <div
+                style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    marginTop: "1em"
+                }}>
+                <div>{`NetflixToAnki ${getCurrentYear()}`}</div>
+                <div>v{manifestData.version}</div>
+            </div>
+        </div>
+    )
+}
+
+export default IndexPopup
+</file>
+
+<file path="README.md">
+# netflix-to-anki
+Chrome extension allowing users to translate Netflix + Hulu subtitles by clicking, and these clicks can be exported to Anki decks.
+
+It also supports the automatic translation while watching, if applicable.
+
+# Installation
+
+Get the chrome extension here:
+[https://chromewebstore.google.com/detail/netflix-to-anki/nclpenomcdmjiibjgjbibndlckdkmeda?](https://chromewebstore.google.com/detail/netflix-to-anki/nclpenomcdmjiibjgjbibndlckdkmeda?)
+
+## Supported Languages
+
+Note: Any language you desire may work, since we directly use your "Learning Language" text input. This is not a comprehensive list of languages that can work.
+
+Currently tested languages include (but are not limited to):
+- English
+- Spanish
+- French
+- German
+- Dutch
+- Pig Latin
+- Latin
+- Japanese
+- Chinese
+
+## "pay what you want"
+Hi there!
+
+If you've found my project helpful or inspiring, consider showing your support by buying me a coffee. Your contributions help keep the project running and allow me to continue developing and improving it. Every little bit helps and is greatly appreciated!
+
+Thank you for your support!
+[Buy Me A Coffee](https://buymeacoffee.com/demonlexe)
+
+## DEVELOPING
+
+Install dependencies:
+```bash
+npm i
+```
+Run the development server:
+```bash
+pnpm dev
+# or
+npm run dev
+```
+
+Open your browser and load the appropriate development build. For example, if you are developing for the chrome browser, using manifest v3, use: `build/chrome-mv3-dev`.
+
+You can start editing the popup by modifying `popup.tsx`. It should auto-update as you make changes. To add an options page, simply add a `options.tsx` file to the root of the project, with a react component default exported. Likewise to add a content page, add a `content.ts` file to the root of the project, importing some module and do some logic, then reload the extension on your browser.
+
+For further guidance, [visit our Documentation](https://docs.plasmo.com/)
+
+## Making production build
+
+Run the following:
+
+```bash
+pnpm build
+# or
+npm run build
+```
+
+This should create a production bundle for your extension, ready to be zipped and published to the stores.
+
+# Installation
+
+Get the chrome extension here:
+[https://chromewebstore.google.com/detail/netflix-to-anki/nclpenomcdmjiibjgjbibndlckdkmeda?](https://chromewebstore.google.com/detail/netflix-to-anki/nclpenomcdmjiibjgjbibndlckdkmeda?)
+</file>
+
+<file path="background/messages/gemini_translate.ts">
+import type { PlasmoMessaging } from "@plasmohq/messaging"
+
+import type {
+    GeminiSingleRequestBody,
+    GeminiSingleRequestResponse
+} from "~background/types"
+import getCurrentLanguageFromModel from "~background/utils/functions/getCurrentLanguageFromModel"
+import initModel, {
+    type HandlerState
+} from "~background/utils/functions/initModel"
+import processGeminiResponse from "~background/utils/functions/processGeminiResponse"
+import logDev from "~utils/functions/logDev"
+import { getData } from "~utils/localData"
+
+const handlerState: HandlerState = {
+    usingApiKey: null,
+    model: null
+}
+
+const TranslationRequirements = (language: string) =>
+    [
+        `The main objective is to translate the following phrases to ${language}.`,
+        "If there are times or numbers, please write them out.",
+        "Do not include ANY formatting markdown such as '```json', but please make sure the response is valid json.",
+        "Most importantly, do not include any additional information or text in your response.",
+        "EXPECTED INPUT: Multiple phrases, numbered for simplicity. For example: { '1.': 'phrase 1', '2.': 'phrase 2' }",
+        "EXPECTED OUTPUT: A mapping of the phrases to their translations. For example: { `phrase 1`: `translated phrase 1`, `phrase 2`: `translated phrase 2` }",
+        "Answer with only a valid JSON object in plaintext with the translated phrases mapped to the exact original phrases. ",
+        "Make sure all input are translated to the target language. That is, if 50 phrases are given, all 50 should be translated separately.",
+        "Do not combine any phrases. They are intentionally separated.",
+        "Make sure to also keep the break tags in the translation in the original format. For example, <br/> should remain as <br/>."
+    ].map((line, index) => {
+        return `${index + 1}. ${line}`
+    })
+
+const handler: PlasmoMessaging.MessageHandler<
+    GeminiSingleRequestBody,
+    GeminiSingleRequestResponse
+> = async (req, res) => {
+    const [API_KEY, NATIVE_LANGUAGE] = await Promise.all([
+        getData("API_KEY"),
+        getData("NATIVE_LANGUAGE")
+    ])
+
+    try {
+        if (!API_KEY || !NATIVE_LANGUAGE)
+            throw new Error("API Key or Native Language not found.")
+        await initModel(handlerState, API_KEY)
+
+        logDev("Request received: ", req.body)
+        const { phrases } = req.body
+
+        if (!phrases || phrases.length <= 0) {
+            res.send({
+                error: { message: "Invalid request, no sentences to translate" }
+            })
+            return
+        }
+
+        const sentencesLocale = (
+            req.body.sentencesLocale ??
+            (await getCurrentLanguageFromModel(
+                handlerState.model,
+                phrases,
+                req.body.targetLanguage
+            ))
+        ).toLowerCase()
+
+        const TRANSLATE_TO_LANGUAGE =
+            sentencesLocale.match(req.body.targetLanguage)?.length > 0
+                ? NATIVE_LANGUAGE
+                : req.body.targetLanguage
+        logDev(
+            "TRANSLATE_TO_LANGUAGE: ",
+            sentencesLocale,
+            TRANSLATE_TO_LANGUAGE,
+            req.body
+        )
+
+        const prompt = TranslationRequirements(TRANSLATE_TO_LANGUAGE).join("\n")
+
+        const result = await handlerState.model.generateContent([
+            prompt,
+            JSON.stringify(phrases)
+        ])
+        const processed = processGeminiResponse(result.response?.text())
+        if (!processed || Object.keys(processed).length <= 0) {
+            res.send({
+                error: {
+                    message: "No translations found."
+                }
+            })
+        }
+        logDev("Processed Sentences: ", processed)
+        const response: GeminiSingleRequestResponse = {
+            translatedPhrases: processed
+        }
+        res.send(response)
+    } catch (e) {
+        console.error("INTERNAL ERROR: ", e)
+        res.send({
+            error: {
+                message: e?.message,
+                status: e?.status
+            }
+        })
+        return
+    }
+}
+
+export default handler
+</file>
+
+<file path="background/types/CatchSiteSubtitlesRequest.ts">
+export type CatchSiteSubtitlesRequest = {
+    message: {
+        url: string
+        response: any
+    }
+    usingSite: string
+}
+</file>
+
+<file path="components/DisplayTranslationStatus.tsx">
+import { useEffect, useState } from "react"
+
+import styles from "~styles/display-translation-status.module.css"
+import { POLLING_STATUS_INTERVAL } from "~utils/constants"
+import { getData } from "~utils/localData"
+
+type DisplayTranslationStatusProps = {
+    showId: string
+    targetLanguage: string
+}
+export default function DisplayTranslationStatus(
+    props: DisplayTranslationStatusProps
+) {
+    const { showId, targetLanguage } = props
+    const [allSentencesCt, setAllSentencesCt] = useState<number>()
+    const [translatedCt, setTranslatedCt] = useState<number>()
+
+    const getTranslationStatus = async () => {
+        const status = await getData("TRANSLATION_STATUS")
+        setTranslatedCt(status?.TRANSLATED_CURRENT)
+        setAllSentencesCt(status?.TOTAL_SENTENCES)
+        setTimeout(() => {
+            getTranslationStatus()
+        }, POLLING_STATUS_INTERVAL)
+    }
+
+    useEffect(() => {
+        getTranslationStatus()
+    }, [])
+
+    const openSentenceBrowser = () => {
+        chrome.tabs.create({
+            url: `chrome-extension://${chrome.runtime.id}/tabs/sentence-browser.html?showId=${showId}&targetLanguage=${targetLanguage}`
+        })
+    }
+
+    return (
+        <div className={styles.container}>
+            <p style={{ flex: 2, marginBottom: 0 }}>Translation Status:</p>
+            {allSentencesCt ? (
+                <a
+                    onClick={(e) => {
+                        e.preventDefault()
+                        openSentenceBrowser()
+                    }}
+                    href="#"
+                    style={{
+                        color: "green",
+                        flex: 1,
+                        marginBottom: "0"
+                    }}>{`${translatedCt}/${allSentencesCt}`}</a>
+            ) : (
+                <p style={{ flex: 1, marginBottom: 0 }}>N/A</p>
+            )}
+        </div>
+    )
+}
+</file>
+
+<file path="tabs/onboarding.tsx">
+import BooleanSettings from "~components/BooleanSettings"
+import Header from "~components/Header"
+import Settings from "~components/Settings"
+import TranslateWhenSettings from "~components/TranslateWhenSettings"
+import styles from "~styles/onboarding.module.css"
+
+import "~styles/globals.scss"
+
+import Divider from "~components/Divider"
+
+function Onboarding() {
+    return (
+        <div className={styles.container}>
+            <div className={styles.content}>
+                <Header />
+                <Divider />
+                <h3>Setup</h3>
+                <Settings />
+                <Divider />
+                <h3>Auto-saved Settings</h3>
+                <BooleanSettings />
+                <TranslateWhenSettings />
+                <Divider />
+            </div>
+        </div>
+    )
+}
+
+export default Onboarding
+</file>
+
+<file path="utils/functions/extractTextFromHtml.ts">
+import { JSDOM } from "jsdom"
+
+export default function extractTextFromHTML(htmlString: string) {
+    if (!htmlString || htmlString.length === 0) return ""
+
+    // Create a JSDOM instance from the HTML string
+    const { document } = new JSDOM(htmlString).window
+
+    const childElements = document.body.children
+    const spanElements = document.getElementsByTagName("span")
+    let result = ""
+    if (!spanElements || spanElements.length === 0) {
+        // If there are no <span> elements, return the text content of the document
+        return htmlString
+    }
+
+    // Iterate through the <span> elements and extract text content
+    Array.from(childElements).forEach(
+        (elem: HTMLSpanElement | HTMLBRElement) => {
+            // If there is a <br> element, replace it with <br/> in the result string
+            if (elem.tagName === "BR") {
+                result += "<br/>"
+            } else {
+                // Append the text content of the <span>
+                result += elem.textContent
+            }
+        }
+    )
+
+    return result?.trim()
+}
+</file>
+
+<file path="background/messages/catch_vtt_site_subtitles.ts">
+import type { PlasmoMessaging } from "@plasmohq/messaging"
+
+import type { CatchSiteSubtitlesResponse } from "~background/types/CatchSiteSubtitlesResponse"
+import type { CatchVTTSiteSubtitlesRequest } from "~background/types/CatchVTTSiteSubtitlesRequest"
+import parseVTT from "~background/utils/functions/parseVTT"
+import logDev from "~utils/functions/logDev"
+
+const handler: PlasmoMessaging.MessageHandler<
+    CatchVTTSiteSubtitlesRequest,
+    CatchSiteSubtitlesResponse
+> = async (req, res) => {
+    const { message } = req.body
+    logDev("MSG RECEIVED", req.body.message, req.body)
+
+    if (typeof message?.response !== "string") {
+        logDev(
+            "Invalid response format. Expected string, got:",
+            typeof message?.response
+        )
+        return res.send({})
+    }
+
+    if (!message.response.trim()) {
+        logDev("Received an empty VTT string. No subtitles found.")
+        return res.send({})
+    }
+
+    const grouping = parseVTT(message.response)
+    const allSentencesSet = new Set<string>()
+
+    logDev("Extracted subtitle grouping:", grouping)
+
+    for (const key in grouping) {
+        grouping[key].forEach((sentence: string) => {
+            allSentencesSet.add(sentence?.trim())
+        })
+    }
+
+    logDev("All unique sentences:", allSentencesSet)
+    const allSentencesArray: string[] = Array.from(allSentencesSet)
+    res.send({ site_sentences: allSentencesArray })
+}
+
+export default handler
+</file>
+
+<file path="components/SubmitButton.tsx">
+import { useState } from "react"
+
+import { Button } from "~node_modules/react-bootstrap/esm"
+import styles from "~styles/shared.module.css"
+
+type SubmitButtonProps = {
+    onSubmit: () => Promise<string>
+}
+
+enum SubmitButtonStatus {
+    INITIAL = "Apply",
+    SUCCESS = "SUCCESS!",
+    UPDATE = "Update",
+    LOADING = "Loading...",
+    FAILED = "FAILED"
+}
+
+export default function SubmitButton(props: SubmitButtonProps) {
+    const { onSubmit } = props
+    const [status, setStatus] = useState<SubmitButtonStatus>(
+        SubmitButtonStatus.INITIAL
+    )
+    const [error, setError] = useState<string | null>(null)
+
+    return (
+        <Button
+            onClick={async () => {
+                setStatus(SubmitButtonStatus.LOADING)
+                const err = await onSubmit()
+                if (!err) {
+                    setStatus(SubmitButtonStatus.SUCCESS)
+                    setTimeout(() => {
+                        setStatus(SubmitButtonStatus.UPDATE)
+                    }, 2000)
+                } else {
+                    setError(err)
+                    setStatus(SubmitButtonStatus.FAILED)
+                    setTimeout(() => {
+                        setStatus((prevStatus) => {
+                            if (prevStatus === SubmitButtonStatus.FAILED) {
+                                return SubmitButtonStatus.INITIAL
+                            }
+                            return prevStatus
+                        })
+                        setError((prevErr) => {
+                            if (prevErr === err) {
+                                return null
+                            }
+                            return prevErr
+                        })
+                    }, 10000)
+                }
+            }}>
+            {status === SubmitButtonStatus.FAILED ? (
+                <span
+                    style={{
+                        color: "red"
+                    }}>
+                    {status}: {error}
+                </span>
+            ) : (
+                <span>{status}</span>
+            )}
+        </Button>
+    )
+}
+</file>
+
+<file path="components/TranslateWhenSettings.tsx">
+import { useEffect, useState } from "react"
+import { Col, Container, Form, Row } from "react-bootstrap"
+
+import PressAnyKey from "~components/PressAnyKey"
+import { READABLE_DROPDOWN_SETTINGS } from "~utils/constants"
+import logDev from "~utils/functions/logDev"
+import { getData, setData, type UserSettings } from "~utils/localData"
+
+export default function TranslateWhenSettings<T>() {
+    const [currentSelected, setCurrentSelected] =
+        useState<UserSettings["TRANSLATE_WHEN"]>("on_pause")
+    const [customTranslateKey, setCustomTranslateKey] = useState<string>("")
+    logDev("Re-render: ", customTranslateKey)
+
+    useEffect(() => {
+        getData("TRANSLATE_WHEN").then((data) => {
+            if (data) setCurrentSelected(data)
+        })
+        getData("CUSTOM_TRANSLATE_KEY").then((data) => {
+            if (data) setCustomTranslateKey(data)
+        })
+    }, [])
+
+    useEffect(() => {
+        setData("TRANSLATE_WHEN", currentSelected)
+    }, [currentSelected])
+
+    useEffect(() => {
+        setData("CUSTOM_TRANSLATE_KEY", customTranslateKey)
+    }, [customTranslateKey])
+
+    return (
+        <Container>
+            <Form.Group controlId="translateWhen" className="mb-3">
+                <Row className="align-items-center">
+                    <Col xs="auto">
+                        <Form.Label className="mb-0">
+                            {READABLE_DROPDOWN_SETTINGS.TRANSLATE_WHEN.title}
+                        </Form.Label>
+                    </Col>
+                    <Col>
+                        <Form.Select
+                            value={currentSelected}
+                            onChange={(e) =>
+                                setCurrentSelected(
+                                    e.target
+                                        .value as UserSettings["TRANSLATE_WHEN"]
+                                )
+                            }>
+                            {Object.entries(
+                                READABLE_DROPDOWN_SETTINGS.TRANSLATE_WHEN
+                                    .options
+                            ).map(
+                                ([key, value]: [
+                                    UserSettings["TRANSLATE_WHEN"],
+                                    string
+                                ]) => (
+                                    <option key={key} value={key}>
+                                        {value}
+                                    </option>
+                                )
+                            )}
+                        </Form.Select>
+                    </Col>
+                </Row>
+            </Form.Group>
+            {currentSelected === "custom_key" && (
+                <Form.Group controlId="customTranslateKey" className="mb-3">
+                    <PressAnyKey
+                        keyRecorded={customTranslateKey}
+                        setKeyRecorded={setCustomTranslateKey}
+                    />
+                </Form.Group>
+            )}
+        </Container>
+    )
+}
+</file>
+
+<file path="utils/functions/extractIdFromUrl.ts">
+import logDev from "./logDev"
+
+export default function extractIdFromUrl(url: string) {
+    // Define regex patterns for different streaming services
+    const patterns: Record<string, RegExp> = {
+        netflix: /\/watch\/([a-zA-Z0-9-]+)\?/,
+        hulu: /\/watch\/([a-zA-Z0-9-]+)/,
+        max: /\/video\/watch\/([a-zA-Z0-9-]+)\//,
+        tubiTvShows: /\/tv-shows\/([a-zA-Z0-9-]+)\//,
+        tubiMovies: /\/movies\/([a-zA-Z0-9-]+)\//
+    }
+
+    // Determine which pattern to use based on the site
+    let match
+    if (window.usingSite === "netflix" || window.usingSite === "hulu") {
+        match = url.match(patterns[window.usingSite])
+    } else if (window.usingSite === "hbomax") {
+        match = url.match(patterns.max)
+    } else if (window.usingSite === "tubi") {
+        match =
+            url.match(patterns.tubiTvShows) || url.match(patterns.tubiMovies)
+    }
+
+    if (match && match[1]) {
+        if (match[1] !== window.currentShowId) {
+            logDev("I have set the current show id to", match[1])
+        }
+        return match[1]
+    }
+
+    return null // Return null if no match is found
+}
+</file>
+
+<file path="utils/functions/pollSettings.ts">
+import batchTranslateSubtitles from "~contents/batchTranslateSubtitles"
+import {
+    POLLING_TRANSLATIONS_CACHE_INTERVAL,
+    USER_SETTINGS_DEFAULTS
+} from "~utils/constants"
+import extractIdFromUrl from "~utils/functions/extractIdFromUrl"
+import { getData, type UserSettings } from "~utils/localData"
+
+import getUntranslatedSentences from "./getUntranslatedSentences"
+import logDev from "./logDev"
+
+// refetch settings every 8 seconds
+export default async function pollSettings() {
+    const targetLanguage = await getData("TARGET_LANGUAGE")
+    Object.keys(USER_SETTINGS_DEFAULTS).forEach(async (key) => {
+        const showId = extractIdFromUrl(window.location.href)
+        const newValue = await getData(key as keyof UserSettings)
+        const currentUntranslatedSentences = targetLanguage
+            ? getUntranslatedSentences(showId, targetLanguage)
+            : []
+        if (
+            newValue !== undefined &&
+            window.polledSettings[key] !== newValue &&
+            key === "TARGET_LANGUAGE" &&
+            currentUntranslatedSentences.length <= 0
+        ) {
+            logDev(
+                "TARGET_LANGUAGE Settings changed: ",
+                window.polledSettings[key],
+                " became ",
+                newValue,
+                " and window.cachedSiteSentences.length is ",
+                window.cachedSiteSentences.length,
+                " and window.cachedNextEpisodeSiteSentences.length is ",
+                window.cachedNextEpisodeSiteSentences.length
+            )
+            if (window.cachedSiteSentences.length > 0) {
+                batchTranslateSubtitles(
+                    showId,
+                    "" + newValue,
+                    window.cachedSiteSentences,
+                    0
+                )
+            }
+            if (window.cachedNextEpisodeSiteSentences.length > 0) {
+                batchTranslateSubtitles(
+                    "" + (Number(showId.trim()) + 1),
+                    "" + newValue,
+                    window.cachedNextEpisodeSiteSentences,
+                    0
+                )
+            }
+        }
+        window.polledSettings[key] = newValue
+    })
+    setTimeout(pollSettings, POLLING_TRANSLATIONS_CACHE_INTERVAL)
+}
+</file>
+
+<file path="utils/handlers/handleUrlChange.ts">
+import extractIdFromUrl from "~utils/functions/extractIdFromUrl"
+import logDev from "~utils/functions/logDev"
+
+export default function handleUrlChange() {
+    const newShowId = extractIdFromUrl(window.location.href)
+    if (newShowId !== window.currentShowId) {
+        logDev("URL CHANGED! newShowId:", newShowId)
+        if (
+            Number(window.currentShowId?.trim() ?? 0) - 1 ===
+            Number(newShowId?.trim() ?? 0)
+        ) {
+            // we went back to the previous episode
+            window.cachedNextEpisodeSiteSentences = []
+            window.cachedSiteSentences = []
+            logDev("RETREATED TO PREVIOUS EPISODE")
+        } else {
+            window.cachedSiteSentences =
+                window.cachedNextEpisodeSiteSentences ?? []
+            window.cachedNextEpisodeSiteSentences = []
+            logDev("MOVED TO NEXT EPISODE OR OTHER SHOW")
+        }
+    }
+    window.currentShowId = newShowId
+}
+</file>
+
+<file path="utils/handlers/onClick.ts">
+import $ from "jquery"
+
+import { sendToBackground } from "@plasmohq/messaging"
+
+import type {
+    GeminiSingleRequestBody,
+    GeminiSingleRequestResponse
+} from "~background/types"
+import { SITE_WATCHERS } from "~utils/constants"
+import extractTextFromHTML from "~utils/functions/extractTextFromHtml"
+import getLiveElement from "~utils/functions/getLiveElement"
+import logDev from "~utils/functions/logDev"
+import translatePhraseLocal from "~utils/functions/translatePhraseLocal"
+import updateNeedToStudy from "~utils/functions/updateNeedToStudy"
+import updateTranslations from "~utils/functions/updateTranslations"
+
+// Translate all the text currently on the screen and update the cache.
+export default async function onClick() {
+    const { captionElement, captionParentElement } =
+        SITE_WATCHERS[window.usingSite]
+    const allTexts: { container: JQuery<HTMLElement>; text: string }[] = []
+    $(`${captionParentElement} ${captionElement}`).each((_, el) => {
+        const liveElement = getLiveElement("", $(el))
+        const textOfElement = extractTextFromHTML($(liveElement).html())
+        allTexts.push({ container: $(el), text: textOfElement })
+    })
+
+    logDev("All texts!: ", allTexts)
+    // if there is no need to do the grouped translation, return early
+    if (allTexts.length === 0) return
+
+    const localTranslateResults: { text: string; isYellow: boolean }[] = []
+    for (const curr of allTexts) {
+        const tryTranslateLocal = await translatePhraseLocal(
+            curr.text,
+            curr.container
+        )
+        localTranslateResults.push(tryTranslateLocal)
+    }
+
+    const allTextsAsString = allTexts
+        .map((obj) => obj.text)
+        .join(" ")
+        .replace(/\s+/g, " ") // remove extra spaces
+    if (localTranslateResults.some((elem) => elem.text === null)) {
+        const openResult: GeminiSingleRequestResponse = await sendToBackground({
+            name: "gemini_translate",
+            body: {
+                phrases: allTexts.map((elem) => elem.text),
+                targetLanguage: window.polledSettings.TARGET_LANGUAGE
+            } as GeminiSingleRequestBody
+        })
+        logDev("On-Click Untranslated API Result: ", openResult)
+        if (openResult.error) {
+            console.error("Error while translating: ", openResult.error)
+            return
+        }
+        const translatedTexts: string[] = []
+        allTexts.forEach((curr) => {
+            updateTranslations(
+                curr.text,
+                openResult.translatedPhrases[curr.text]
+            )
+            translatedTexts.push(openResult.translatedPhrases[curr.text])
+        })
+
+        const translatedTextsAsString = translatedTexts
+            .join(" ")
+            .replace(/\s+/g, " ") // remove extra spaces
+        updateNeedToStudy(allTextsAsString, translatedTextsAsString)
+    } else {
+        const localTranslatedTextsAsString = localTranslateResults
+            .map((elem) => elem.text)
+            .join(" ")
+            .replace(/\s+/g, " ") // remove extra spaces
+        updateNeedToStudy(allTextsAsString, localTranslatedTextsAsString)
+        // true plays the video
+        // false keeps default behavior of on-click
+    }
+}
+</file>
+
+<file path="background/messages/catch_site_subtitles.ts">
+import { parse } from "xamel"
+
+import type { PlasmoMessaging } from "@plasmohq/messaging"
+
+import { type CatchSiteSubtitlesRequest } from "~background/types/CatchSiteSubtitlesRequest"
+import type { CatchSiteSubtitlesResponse } from "~background/types/CatchSiteSubtitlesResponse"
+import logDev from "~utils/functions/logDev"
+
+type Tag = {
+    children: (Tag | string)[]
+    name: string
+}
+
+function getXMLTextContentFromTag(tag: Tag): string {
+    const theseStrings: string[] = []
+
+    // loop children of tag
+    for (let i = 0; i < tag.children.length; i++) {
+        const child = tag.children[i]
+        if (typeof child === "string") {
+            theseStrings.push(child)
+        } else if (child.name === "br") {
+            theseStrings.push("<br/>")
+        } else {
+            theseStrings.push(getXMLTextContentFromTag(child))
+        }
+    }
+
+    let toReturn = ""
+    for (const string of theseStrings) {
+        if (string) {
+            toReturn += string
+        }
+    }
+    return toReturn
+}
+
+const handler: PlasmoMessaging.MessageHandler<
+    CatchSiteSubtitlesRequest,
+    CatchSiteSubtitlesResponse
+> = async (req, res) => {
+    const { message, usingSite } = req.body
+    if (message.response?.length > 0) {
+        logDev("Caught site subtitles: ", message)
+        parse(message.response, (err, xml) => {
+            if (!err) {
+                if (err) {
+                    console.error("Error parsing XML: ", err)
+                    return res.send({ error: "Error parsing XML" })
+                }
+                const arrayOfRows: { children: Tag[] } =
+                    usingSite === "netflix"
+                        ? xml.$("tt/body").eq(0).$("div").eq(0)
+                        : xml.$("tt/body").eq(0)
+                const allText = arrayOfRows.children
+                logDev("Children: ", allText)
+                const allSentencesSet = new Set<string>()
+                allText.forEach((text: Tag) => {
+                    const textContent = getXMLTextContentFromTag(text)
+                    allSentencesSet.add(textContent?.trim())
+                })
+                const allSentencesArray: string[] = Array.from(allSentencesSet)
+                logDev("All sentences: ", allSentencesArray)
+                res.send({ site_sentences: allSentencesArray })
+            }
+        })
+    } else {
+        return res.send({}) // return empty object if the URL does not have subtitles
+    }
+}
+
+export default handler
+</file>
+
+<file path="contents/catchSiteSubtitles.ts">
+import { sendToBackground } from "@plasmohq/messaging"
+
+import type { CatchSiteSubtitlesRequest } from "~background/types/CatchSiteSubtitlesRequest"
+import type { CatchSiteSubtitlesResponse } from "~background/types/CatchSiteSubtitlesResponse"
+import { decodeUtfBuffer } from "~background/utils/functions/decodeUtfBuffer"
+import batchTranslateSubtitles from "~contents/batchTranslateSubtitles"
+import extractIdFromUrl from "~utils/functions/extractIdFromUrl"
+import logDev from "~utils/functions/logDev"
+import { getData } from "~utils/localData"
+
+// This function catches the subtitles from the site and sends them to the background script
+export default function catchSiteSubtitles() {
+    window.addEventListener("message", async (event) => {
+        const isHuluSubtitles =
+            event.data.type === "NETWORK_REQUEST" &&
+            event.data.url.match(/.ttml$/) &&
+            window.usingSite === "hulu"
+        const isNetflixSubtitles =
+            event.data.type === "NETWORK_REQUEST" &&
+            event.data.url.includes("?o") &&
+            event.data.url.includes("nflxvideo.net") &&
+            window.usingSite === "netflix"
+        const isMaxSubtitles =
+            event.data.type === "NETWORK_REQUEST" &&
+            event.data.url.match(/.vtt$/) &&
+            window.usingSite === "hbomax"
+        const isTubiSubtitles =
+            event.data.type === "NETWORK_REQUEST" &&
+            event.data.url.match(/.srt$/) &&
+            window.usingSite === "tubi"
+
+        if (event.source !== window) return
+
+        if (!isTubiSubtitles && !window?.location?.href?.includes("/watch")) {
+            // don't care about subtitles on main site page
+            return
+        }
+
+        if (
+            !isNetflixSubtitles &&
+            !isHuluSubtitles &&
+            !isMaxSubtitles &&
+            !isTubiSubtitles
+        ) {
+            return
+        }
+
+        let backgroundMsgToSend = null
+        if (isMaxSubtitles) {
+            backgroundMsgToSend = {
+                response: await decodeUtfBuffer(event.data.response),
+                url: event.data.url
+            }
+        } else {
+            backgroundMsgToSend = {
+                response: event.data.response,
+                url: event.data.url
+            }
+        }
+        const response: CatchSiteSubtitlesResponse = await sendToBackground({
+            name: isMaxSubtitles
+                ? "catch_vtt_site_subtitles"
+                : isTubiSubtitles
+                  ? "catch_srt_site_subtitles"
+                  : "catch_site_subtitles",
+            body: {
+                message: backgroundMsgToSend,
+                usingSite: window.usingSite
+            } as CatchSiteSubtitlesRequest
+        })
+        if (response.error) {
+            console.error(
+                `Error getting the Site subtitles for Site ${window.usingSite}: `,
+                response.error
+            )
+        } else if (response.site_sentences) {
+            const showId = extractIdFromUrl(window.location.href)
+            const targetLanguage = await getData("TARGET_LANGUAGE")
+            if (!targetLanguage) return // missing setting
+
+            // Already translating for this show and language, which means we have already caught the subtitles for this episode.
+            // Thus, store result for the next episode!
+            if (
+                window.cachedSiteSentences.length > 0 &&
+                showId === window.currentShowId
+            ) {
+                window.cachedNextEpisodeSiteSentences = response.site_sentences
+                window.cachedSiteSentences = []
+            } else {
+                window.cachedNextEpisodeSiteSentences = []
+                window.cachedSiteSentences = response.site_sentences
+            }
+
+            batchTranslateSubtitles(
+                window.untranslatedSentencesCache?.[showId]?.[targetLanguage] &&
+                    showId === window.currentShowId
+                    ? "" + (Number(showId.trim()) + 1)
+                    : showId,
+                targetLanguage,
+                response.site_sentences,
+                0
+            )
+        }
+    })
+}
+</file>
+
+<file path="utils/watchers/watchTimedText.ts">
+import $ from "jquery"
+
+import { isYellow, observeSection } from "~utils"
+import { SITE_WATCHERS } from "~utils/constants"
+import changeText from "~utils/functions/changeText"
+import checkForExistingLocalTranslation from "~utils/functions/checkForExistingLocalTranslation"
+import checkForExistingTranslation from "~utils/functions/checkForExistingTranslation"
+import checkIfSentenceIgnored from "~utils/functions/checkIfSentenceIgnored"
+import extractTextFromHTML from "~utils/functions/extractTextFromHtml"
+import getLiveElement from "~utils/functions/getLiveElement"
+import onCustomKey from "~utils/functions/onCustomKey"
+import onVideoPaused from "~utils/functions/onVideoPaused"
+import pollSettings from "~utils/functions/pollSettings"
+import pollStatus from "~utils/functions/pollStatus"
+
+export default async function watchTimedText(timedText: HTMLElement) {
+    if (window.watchingTimedText === timedText) {
+        return //already watching this block.
+    }
+    window.watchingTimedText = timedText
+    pollSettings()
+    pollStatus()
+    onVideoPaused($("video"))
+    onCustomKey()
+
+    const doOnMutation = async (mutation: MutationRecord) => {
+        const { lookFor, captionElement } = SITE_WATCHERS[window.usingSite]
+
+        if (mutation?.addedNodes?.length > 0) {
+            // loop all added nodes and log if they are clicked.
+            const nodesToModify = []
+
+            if (window.usingSite === "tubi") {
+                // just push the parent of the added node
+                nodesToModify.push($(captionElement))
+            }
+
+            for (const node of mutation.addedNodes) {
+                if (window.usingSite === "hbomax") {
+                    let elems =
+                        $(node).find(lookFor).length > 0
+                            ? $(node).find(lookFor)
+                            : $(node)
+                    if (elems.length > 0) {
+                        for (const elem of elems) {
+                            let liveElem = getLiveElement("", elem)
+                            nodesToModify.push(liveElem)
+                        }
+                    }
+                } else {
+                    const parentElem =
+                        $(node).find(lookFor).first().length > 0
+                            ? $(node).find(lookFor).first()
+                            : $(node)
+                    nodesToModify.push(parentElem)
+                }
+            }
+
+            for (const parentElem of nodesToModify) {
+                if (!parentElem || !parentElem[0]) continue
+                const currentText = extractTextFromHTML(parentElem[0].innerHTML)
+                const existingTranslation =
+                    await checkForExistingTranslation(currentText)
+                const existingLocalTrans =
+                    checkForExistingLocalTranslation(currentText)
+                if (checkIfSentenceIgnored(currentText)) {
+                    // do not touch this sentence.
+                    continue
+                }
+                if (existingLocalTrans && !isYellow(parentElem)) {
+                    changeText(parentElem, existingLocalTrans)
+                } else if (
+                    window.polledSettings.TRANSLATE_WHEN === "always" &&
+                    existingTranslation &&
+                    !isYellow(parentElem)
+                ) {
+                    changeText(parentElem, existingTranslation)
+                }
+            }
+            $(timedText).css("pointer-events", "auto")
+        }
+    }
+    observeSection(timedText, doOnMutation)
+}
+</file>
+
+<file path="utils/functions/changeText.ts">
+import $ from "jquery"
+
+export default function changeText(
+    elem: JQuery<any>,
+    newText: string,
+    color: string = "yellow"
+) {
+    doChangeText(elem, newText, color)
+}
+
+const doChangeText = (
+    span: JQuery<HTMLElement>,
+    newText: string,
+    color: string
+) => {
+    if (!span || !span[0]) return
+    const shouldWrapSpan = window.usingSite === "tubi"
+    newText = newText.trim()
+    if (!newText) return
+
+    // if the "span" already has a color, don't wrap it in a span
+    if (shouldWrapSpan && !$(span).attr("colormodified")) {
+        newText = `<span style="color:${color}" colormodified=true>${newText}</span>`
+    } else {
+        $(span).css("color", color)
+    }
+    $(span).html(newText)
+
+    // style with font-size:27px;line-height:normal;font-weight:normal;color:#ffffff;text-shadow:#000000 0px 0px 7px;font-family:Netflix Sans,Helvetica Nueue,Helvetica,Arial,sans-serif;font-weight:bolder
+    if (window.usingSite === "netflix") {
+        $(span).css({
+            "font-size": "3rem",
+            "white-space": "normal",
+            "line-height": "normal",
+            "text-shadow": "#000000 0px 0px 7px",
+            "font-family":
+                "Netflix Sans,Helvetica Nueue,Helvetica,Arial,sans-serif",
+            "font-weight": "bolder"
+        })
+    }
+}
+</file>
+
+<file path="utils/functions/getLiveElement.ts">
+import $ from "jquery"
+
+import { SITE_WATCHERS } from "~utils/constants"
+
+export default function getLiveElement(
+    currentText: string = "",
+    textContainer?: JQuery<HTMLElement>
+) {
+    const { captionElement, lookFor, captionParentElement } =
+        SITE_WATCHERS[window.usingSite]
+    const usingParent =
+        $(textContainer).length > 0
+            ? $(textContainer)
+            : $(`${captionParentElement} ${captionElement}`).length > 0
+              ? $(`${captionParentElement} ${captionElement}`)
+              : $(captionElement)
+    let using =
+        usingParent.find(lookFor).length > 0
+            ? $(usingParent).find(lookFor)
+            : $(usingParent)
+    // if the textContainer has no children, just return the textContainer
+    if (using.length === 0 && textContainer) return textContainer
+
+    let firstMatch = null
+    using.each((_, el) => {
+        // if there is any sort of break tag, split it up and check each part.
+        if ($(el).html()?.trim()?.includes("<br")) {
+            const splitText = currentText.split(/(<br\s*\/>)/g)
+            for (const part of splitText) {
+                if ($(el).html()?.trim()?.match(part)) {
+                    firstMatch = $(el)
+                    break
+                }
+            }
+        } else if ($(el).html()?.trim()?.match(currentText)) {
+            firstMatch = $(el)
+        }
+        if (firstMatch) {
+            return false
+        }
+    })
+    return firstMatch
+}
+</file>
+
+<file path="utils/constants.ts">
+import type {
+    BooleanKeys,
+    BooleanUserSettings,
+    UserSettings
+} from "~utils/localData"
+
+export const BATCH_SIZE = 80
+
+export const BOOLEAN_USER_SETTINGS_DEFAULTS: BooleanUserSettings = {
+    HULU_ENABLED: true,
+    NETFLIX_ENABLED: true,
+    HBOMAX_ENABLED: true,
+    TUBI_ENABLED: true
+}
+
+export const USER_SETTINGS_DEFAULTS: UserSettings = {
+    TARGET_LANGUAGE: "",
+    API_KEY: "",
+    TRANSLATE_WHEN: "on_pause",
+    CUSTOM_TRANSLATE_KEY: "",
+    HULU_ENABLED: true,
+    NETFLIX_ENABLED: true,
+    HBOMAX_ENABLED: true,
+    TUBI_ENABLED: true
+}
+
+export const READABLE_BOOLEAN_SETTINGS: Record<
+    BooleanKeys<UserSettings>,
+    { title: string }
+> = {
+    HULU_ENABLED: { title: "Hulu Enabled" },
+    NETFLIX_ENABLED: { title: "Netflix Enabled" },
+    HBOMAX_ENABLED: { title: "HBO Max Enabled" },
+    TUBI_ENABLED: { title: "Tubi Enabled" }
+}
+
+export const READABLE_DROPDOWN_SETTINGS: Record<
+    keyof Pick<UserSettings, "TRANSLATE_WHEN">,
+    { title: string; options: Record<UserSettings["TRANSLATE_WHEN"], string> }
+> = {
+    TRANSLATE_WHEN: {
+        title: "Translate When",
+        options: {
+            always: "video playing",
+            on_pause: "video paused",
+            custom_key: "custom key"
+        }
+    }
+}
+
+export const POLLING_STATUS_INTERVAL = 2500
+export const POLLING_TRANSLATIONS_CACHE_INTERVAL = 5000
+// every x seconds
+export const BATCH_TRANSLATE_RETRY_INTERVAL = 10000
+// every x seconds
+export const BATCH_TRANSLATE_DELAY_TIME = 2000
+// Stop translating after x retries
+export const MAX_TRANSLATE_RETRIES = 8
+
+export const SITE_WATCHERS = {
+    netflix: {
+        mountPoint: "#appMountPoint",
+        captionElement: ".player-timedtext-text-container",
+        captionParentElement: ".player-timedtext",
+        lookFor: "span"
+    },
+    hulu: {
+        mountPoint: "#__player__",
+        captionElement: ".CaptionBox",
+        captionParentElement: ".ClosedCaption__outband",
+        lookFor: "p"
+    },
+    hbomax: {
+        mountPoint: "#app-root",
+        captionElement: `div > div:not(".eraxes") > div > div`,
+        captionParentElement: `div[data-testid='caption_renderer_overlay']`,
+        lookFor: "div"
+    },
+    tubi: {
+        mountPoint: "#app",
+        captionElement: `div[data-id="captionsComponent"]`,
+        captionParentElement: `div[data-id="hls"]`,
+        lookFor: ""
+    },
+    unknown: {
+        mountPoint: "",
+        captionElement: "",
+        captionParentElement: "",
+        lookFor: ""
+    }
+}
+</file>
+
+<file path="components/Settings.tsx">
+import { useCallback, useEffect, useState } from "react"
+
+import { sendToBackground } from "@plasmohq/messaging"
+
+import Required from "~components/Required"
+import styles from "~styles/settings.module.css"
+import logDev from "~utils/functions/logDev"
+import { getData, setData } from "~utils/localData"
+
+import SubmitButton from "./SubmitButton"
+
+const Settings = () => {
+    const [apiKey, setApiKey] = useState("")
+    const [language, setLanguage] = useState("")
+
+    useEffect(() => {
+        // Set Data
+        setData("NATIVE_LANGUAGE", navigator.language)
+
+        // Get Data
+        getData("API_KEY").then((apiKey) => setApiKey(apiKey ?? ""))
+        getData("TARGET_LANGUAGE").then((lang) => setLanguage(lang ?? ""))
+    }, [])
+
+    const onSubmit = useCallback(async () => {
+        if (!apiKey) {
+            return "API Key is a required field."
+        } else if (!language) {
+            return "Target language is a required field."
+        }
+        await setData("TARGET_LANGUAGE", language)
+        if ((await getData("TARGET_LANGUAGE")) !== language) {
+            return "Couldn't update target language"
+        }
+
+        const testResult = await sendToBackground({
+            name: "test_gemini_key",
+            body: { key: apiKey }
+        })
+
+        logDev("Test result", testResult)
+        if (testResult && !testResult.error) {
+            await setData("API_KEY", apiKey)
+            return null
+        } else {
+            return "Invalid API Key"
+        }
+    }, [apiKey, language])
+
+    return (
+        <div className={`${styles.flexCol} ${styles.gap16}`}>
+            <form className={`${styles.flexCol} ${styles.gap16}`}>
+                <div className={styles.flexRow}>
+                    <label htmlFor="api-key-input">
+                        Gemini API Key <Required />
+                    </label>
+                    <input
+                        id="api-key-input"
+                        onChange={(e) => setApiKey(e.target.value)}
+                        value={apiKey}
+                        required
+                        placeholder="e.g. AIzaSyD8Qj4hu3nklkjn23..."
+                    />
+                </div>
+                <div className={styles.flexRow}>
+                    <label htmlFor="target-lang-input">
+                        I'm Learning To Speak <Required />
+                    </label>
+                    <input
+                        id="target-lang-input"
+                        onChange={(e) => setLanguage(e.target.value)}
+                        value={language}
+                        required
+                        placeholder="e.g. French"
+                    />
+                </div>
+            </form>
+            <div className={`${styles.w100} ${styles.flexCol} ${styles.gap4}`}>
+                <SubmitButton onSubmit={onSubmit} />
+                <p>
+                    Don't have an API Key? Generate one at{" "}
+                    <a
+                        href="https://ai.google.dev/gemini-api/docs/api-key"
+                        target="_blank"
+                        rel="noreferrer">
+                        Gemini API
+                    </a>
+                </p>
+            </div>
+        </div>
+    )
+}
+
+export default Settings
+</file>
+
+<file path="contents/index.ts">
+import $ from "jquery"
+import type { PlasmoCSConfig } from "plasmo"
+
+import catchSiteSubtitles from "~contents/catchSiteSubtitles"
+import { observeSection } from "~utils"
+import { SITE_WATCHERS, USER_SETTINGS_DEFAULTS } from "~utils/constants"
+import { pollCachedTranslations } from "~utils/functions/cachedTranslations"
+import extractIdFromUrl from "~utils/functions/extractIdFromUrl"
+import initData from "~utils/functions/initData"
+import handleUrlChange from "~utils/handlers/handleUrlChange"
+import { waitForElement } from "~utils/index"
+import {
+    getData,
+    type TranslationsCache,
+    type UntranslatedCache,
+    type UserSettings
+} from "~utils/localData"
+import watchTimedText from "~utils/watchers/watchTimedText"
+
+export const config: PlasmoCSConfig = {
+    matches: [
+        "https://www.netflix.com/*",
+        "https://www.hulu.com/*",
+        "https://play.max.com/*",
+        "https://tubitv.com/*"
+    ]
+}
+
+initData()
+
+declare global {
+    interface Window {
+        localTranslations: Record<string, string>
+        reverseTranslations: Record<string, string>
+        doNotTouchSentences: Record<string, boolean>
+        polledSettings: UserSettings
+        cachedSiteSentences: string[]
+        cachedNextEpisodeSiteSentences: string[]
+        untranslatedSentencesCache: UntranslatedCache
+        translatedSentencesCache: TranslationsCache
+        watchingTimedText: HTMLElement
+        currentShowId: string
+        usingSite: "netflix" | "hulu" | "hbomax" | "tubi" | "unknown"
+    }
+}
+
+window.localTranslations = {}
+window.reverseTranslations = {}
+window.doNotTouchSentences = {}
+window.untranslatedSentencesCache = {}
+window.translatedSentencesCache = {}
+window.cachedSiteSentences = []
+window.cachedNextEpisodeSiteSentences = []
+window.polledSettings = {
+    ...USER_SETTINGS_DEFAULTS,
+    TARGET_LANGUAGE: undefined
+}
+window.currentShowId = extractIdFromUrl(window.location.href)
+window.usingSite = window.location.href.includes("netflix")
+    ? "netflix"
+    : window.location.href.includes("hulu")
+      ? "hulu"
+      : window.location.href.includes("max")
+        ? "hbomax"
+        : window.location.href.includes("tubi")
+          ? "tubi"
+          : "unknown"
+
+const script = document.createElement("script")
+script.setAttribute("type", "text/javascript")
+script.setAttribute("src", chrome.runtime.getURL("inject.js"))
+
+document.documentElement.appendChild(script)
+
+catchSiteSubtitles()
+pollCachedTranslations()
+
+window.addEventListener("load", async () => {
+    const { mountPoint, captionElement, captionParentElement } =
+        SITE_WATCHERS[window.usingSite]
+    const [HULU_ENABLED, NETFLIX_ENABLED, HBOMAX_ENABLED, TUBI_ENABLED] =
+        await Promise.all([
+            getData("HULU_ENABLED"),
+            getData("NETFLIX_ENABLED"),
+            getData("HBOMAX_ENABLED"),
+            getData("TUBI_ENABLED")
+        ])
+    if (window.usingSite === "hulu" && HULU_ENABLED == false) {
+        return
+    } else if (window.usingSite === "netflix" && NETFLIX_ENABLED == false) {
+        return
+    } else if (window.usingSite === "hbomax" && HBOMAX_ENABLED == false) {
+        return
+    } else if (window.usingSite === "tubi" && TUBI_ENABLED == false) {
+        return
+    }
+
+    waitForElement(mountPoint).then(async (mountedElem) => {
+        const doOnMountMutate = (mutation: MutationRecord) => {
+            handleUrlChange()
+            if (mutation.addedNodes.length > 0) {
+                mutation.addedNodes.forEach(async (node) => {
+                    if ($(node).is(captionElement)) {
+                        if (!window.location.href.includes("watch")) {
+                            // don't care about home page
+                            return
+                        }
+                        const timedText =
+                            await waitForElement(captionParentElement)
+                        watchTimedText(timedText)
+                    }
+                })
+            }
+        }
+        observeSection(mountedElem, doOnMountMutate)
+        const firstTimedText = await waitForElement(captionParentElement)
+        watchTimedText(firstTimedText)
+    })
+})
+
+window.addEventListener("popstate", () => {
+    handleUrlChange()
+})
+
+// Listen for pushState and replaceState changes
+const originalPushState = history.pushState
+const originalReplaceState = history.replaceState
+
+history.pushState = function (...args) {
+    originalPushState.apply(this, args)
+    handleUrlChange()
+}
+
+history.replaceState = function (...args) {
+    originalReplaceState.apply(this, args)
+    handleUrlChange()
+}
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.type === "GET_WINDOW_VARIABLES") {
+        sendResponse({
+            currentShowId: window.currentShowId,
+            polledSettings: window.polledSettings
+        })
+    }
+})
+</file>
+
+<file path="package.json">
+{
+    "name": "netflix-to-anki",
+    "displayName": "Netflix To Anki",
+    "version": "0.1.1",
+    "description": "Chrome extension allowing users to translate Netflix subtitles by clicking, and these clicks can be exported to Anki decks.",
+    "author": "alexiskaufman@gmail.com",
+    "scripts": {
+        "dev": "plasmo dev",
+        "build": "plasmo build",
+        "package": "plasmo package",
+        "format": "prettier --loglevel warn --write \"./**/*.{tsx,ts,jsx,js}\""
+    },
+    "dependencies": {
+        "@google/generative-ai": "^0.15.0",
+        "@plasmohq/messaging": "^0.6.2",
+        "@plasmohq/storage": "^1.11.0",
+        "bootstrap": "^5.3.3",
+        "bootstrap-icons": "^1.11.3",
+        "dom-parser": "^1.1.5",
+        "jquery": "^3.7.1",
+        "jsdom": "^26.0.0",
+        "plasmo": "0.88.0",
+        "react": "18.2.0",
+        "react-bootstrap": "^2.10.9",
+        "react-dom": "18.2.0",
+        "sass": "^1.85.0",
+        "srt-parser-2": "^1.2.3",
+        "xamel": "^0.3.1",
+        "xml2js": "^0.6.2"
+    },
+    "devDependencies": {
+        "@ianvs/prettier-plugin-sort-imports": "4.1.1",
+        "@types/chrome": "0.0.258",
+        "@types/node": "20.11.5",
+        "@types/react": "18.2.48",
+        "@types/react-dom": "18.2.18",
+        "prettier": "3.2.4",
+        "typescript": "5.3.3"
+    },
+    "optionalDependencies": {
+        "@parcel/watcher-darwin-x64": "2.4.2-alpha.0"
+    },
+    "permissions": [
+        "background",
+        "unlimitedStorage"
+    ],
+    "manifest": {
+        "host_permissions": [
+            "https://www.netflix.com/*",
+            "https://www.hulu.com/*"
+        ],
+        "permissions": [
+            "background",
+            "unlimitedStorage"
+        ],
+        "web_accessible_resources": [
+            {
+                "resources": [
+                    "~inject.js"
+                ],
+                "matches": [
+                    "<all_urls>"
+                ]
+            }
+        ]
+    }
+}
+</file>
+
+</files>
